@@ -1,0 +1,58 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createApiClient, ApiError } from "@/lib/api/client";
+import { getPlanByPriceId, type PlanName } from "@/lib/stripe/config";
+import type { SubscriptionData } from "@/lib/api/types";
+
+const apiClient = createApiClient();
+
+export function useSubscription() {
+  const { userId, isLoaded } = useAuth();
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchSubscription = useCallback(async () => {
+    if (!userId) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setError(null);
+      const response = await apiClient.getSubscription();
+      setSubscription(response.subscription);
+    } catch (err) {
+      if (err instanceof ApiError && err.statusCode === 401) {
+        setSubscription(null);
+      } else {
+        setError(err instanceof Error ? err.message : "Failed to fetch subscription");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+
+    fetchSubscription();
+  }, [isLoaded, fetchSubscription]);
+
+  const plan: PlanName = subscription
+    ? (getPlanByPriceId(subscription.stripePriceId) ?? "free")
+    : "free";
+
+  return {
+    subscription,
+    isLoading,
+    error,
+    refetch: fetchSubscription,
+    isPro: subscription?.status === "active" && plan !== "free",
+    plan,
+  };
+}
