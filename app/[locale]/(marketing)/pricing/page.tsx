@@ -1,7 +1,18 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
+import { usePortal } from "@/hooks/use-portal";
 
 const plans = [
   {
@@ -18,6 +29,7 @@ const plans = [
     cta: "Get Started",
     href: "/sign-up",
     popular: false,
+    usePortal: false,
   },
   {
     name: "Pro",
@@ -32,9 +44,10 @@ const plans = [
       "Custom integrations",
       "API access",
     ],
-    cta: "Start Free Trial",
-    href: "/sign-up?plan=pro",
+    cta: "Subscribe",
+    href: null,
     popular: true,
+    usePortal: true,
   },
   {
     name: "Enterprise",
@@ -49,13 +62,32 @@ const plans = [
       "SSO/SAML",
       "Custom contracts",
     ],
-    cta: "Contact Sales",
-    href: "/about",
+    cta: "Subscribe",
+    href: null,
     popular: false,
+    usePortal: true,
   },
 ];
 
 export default function PricingPage() {
+  const router = useRouter();
+  const { openPortal, isLoading, isSignedIn } = usePortal();
+
+  const handlePlanClick = async (plan: (typeof plans)[number]) => {
+    if (plan.href) {
+      router.push(plan.href);
+      return;
+    }
+
+    if (plan.usePortal) {
+      if (!isSignedIn) {
+        router.push("/sign-in?redirect_url=/pricing");
+        return;
+      }
+      await openPortal(window.location.href);
+    }
+  };
+
   return (
     <div className="container py-12">
       <div className="mx-auto max-w-3xl text-center">
@@ -99,9 +131,17 @@ export default function PricingPage() {
               <Button
                 className="w-full"
                 variant={plan.popular ? "default" : "outline"}
-                asChild
+                onClick={() => handlePlanClick(plan)}
+                disabled={isLoading && plan.usePortal}
               >
-                <a href={plan.href}>{plan.cta}</a>
+                {isLoading && plan.usePortal ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  plan.cta
+                )}
               </Button>
             </CardFooter>
           </Card>

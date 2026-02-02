@@ -10,6 +10,7 @@ export const createCheckoutSchema = z.object({
 
 export const createPortalSchema = z.object({
   returnUrl: z.string().url().optional(),
+  configuration: z.string().startsWith("bpc_").optional(),
 });
 
 export type CreateCheckoutInput = z.infer<typeof createCheckoutSchema>;

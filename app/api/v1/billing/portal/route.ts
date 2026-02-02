@@ -7,7 +7,7 @@ import {
 } from "@/lib/api/errors";
 import { createPortalSchema } from "@/lib/api/validation";
 import { stripe } from "@/lib/stripe/client";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { CreatePortalResponse } from "@/lib/api/types";
 
 export async function POST(request: NextRequest) {
@@ -30,10 +30,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { returnUrl } = result.data;
+    
+
+    const { returnUrl, configuration } = result.data;
 
     // Get customer ID from subscription
-    const supabase = await createServerSupabaseClient();
+    const supabase = createAdminClient();
     const { data: subscription } = await supabase
       .from("subscriptions")
       .select("stripe_customer_id")
@@ -56,6 +58,7 @@ export async function POST(request: NextRequest) {
     const session = await stripe.billingPortal.sessions.create({
       customer: subscription.stripe_customer_id,
       return_url: finalReturnUrl,
+      ...(configuration && { configuration }),
     });
 
     const response: CreatePortalResponse = {

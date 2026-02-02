@@ -37,6 +37,7 @@ export interface CreateCheckoutResponse {
 
 export interface CreatePortalRequest {
   returnUrl?: string;
+  configuration?: string;
 }
 
 export interface CreatePortalResponse {
