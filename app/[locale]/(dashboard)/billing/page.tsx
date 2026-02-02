@@ -1,18 +1,33 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+
+import { useTranslations } from "next-intl";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Loader2 } from "lucide-react";
+import { usePortal } from "@/hooks/use-portal";
+import { useSubscription } from "@/hooks/use-subscription";
 
-export default async function BillingPage() {
-  const { userId } = await auth();
-  const t = await getTranslations("billing");
-  const tCommon = await getTranslations("common");
+export default function BillingPage() {
+  const t = useTranslations("billing");
+  const tCommon = useTranslations("common");
+  const { openPortal, isLoading: isPortalLoading } = usePortal();
+  const { subscription, plan, isLoading: isSubLoading } = useSubscription();
 
-  if (!userId) {
-    redirect("/sign-in");
-  }
+  const handleManageBilling = async () => {
+    await openPortal(window.location.href);
+  };
+
+  const isActive = subscription?.status === "active";
+  const displayPlan = plan === "free" ? tCommon("free") : plan.toUpperCase();
+  const displayPrice =
+    plan === "free" ? "$0" : plan === "pro" ? "$19" : "$99";
 
   return (
     <div className="space-y-6">
@@ -27,22 +42,64 @@ export default async function BillingPage() {
             <CardTitle>{t("currentPlan")}</CardTitle>
             <CardDescription>
               {t("currentPlanDescription", { plan: "" })}
-              <Badge variant="secondary" className="ml-1">{tCommon("free")}</Badge>
+              <Badge variant="secondary" className="ml-1">
+                {displayPlan}
+              </Badge>
+              {isActive && (
+                <Badge variant="default" className="ml-1">
+                  Active
+                </Badge>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">{t("freePlan")}</p>
-                <p className="text-sm text-muted-foreground">
-                  {t("freePlanDescription")}
-                </p>
+            {isSubLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
-              <p className="text-2xl font-bold">$0/mo</p>
-            </div>
-            <Button className="w-full" asChild>
-              <a href="/pricing">{t("upgradeToPro")}</a>
-            </Button>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">
+                      {plan === "free" ? t("freePlan") : `${plan} Plan`}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {plan === "free"
+                        ? t("freePlanDescription")
+                        : subscription?.cancelAtPeriodEnd
+                          ? "Cancels at end of billing period"
+                          : "Renews automatically"}
+                    </p>
+                  </div>
+                  <p className="text-2xl font-bold">{displayPrice}/mo</p>
+                </div>
+
+                {subscription?.currentPeriodEnd && (
+                  <p className="text-sm text-muted-foreground">
+                    Current period ends:{" "}
+                    {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                  </p>
+                )}
+
+                <Button
+                  className="w-full"
+                  onClick={handleManageBilling}
+                  disabled={isPortalLoading}
+                >
+                  {isPortalLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : plan === "free" ? (
+                    t("upgradeToPro")
+                  ) : (
+                    "Manage Subscription"
+                  )}
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -55,6 +112,21 @@ export default async function BillingPage() {
             <p className="text-sm text-muted-foreground">
               {t("noBillingHistory")}
             </p>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={handleManageBilling}
+              disabled={isPortalLoading}
+            >
+              {isPortalLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                "View Invoices in Portal"
+              )}
+            </Button>
           </CardContent>
         </Card>
       </div>
