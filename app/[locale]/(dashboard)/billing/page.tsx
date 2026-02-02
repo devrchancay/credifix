@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
 	Card,
@@ -16,18 +18,35 @@ import { useSubscription } from "@/hooks/use-subscription";
 import { capitalize } from "../../../../lib/utils";
 
 export default function BillingPage() {
+	const router = useRouter();
 	const t = useTranslations("billing");
-	const tCommon = useTranslations("common");
 	const { openPortal, isLoading: isPortalLoading } = usePortal();
 	const { subscription, plan, isLoading: isSubLoading } = useSubscription();
+
+	// Redirect to pricing if user has free plan
+	useEffect(() => {
+		if (!isSubLoading && plan === "free") {
+			router.replace("/pricing");
+		}
+	}, [isSubLoading, plan, router]);
 
 	const handleManageBilling = async () => {
 		await openPortal(window.location.href);
 	};
 
 	const isActive = subscription?.status === "active";
-	const displayPlan = plan === "free" ? tCommon("free") : plan.toUpperCase();
-	const displayPrice = plan === "free" ? "$0" : plan === "pro" ? "$19" : "$99";
+
+	// Show loading while checking subscription or redirecting
+	if (isSubLoading || plan === "free") {
+		return (
+			<div className="flex items-center justify-center min-h-[400px]">
+				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+			</div>
+		);
+	}
+
+	const displayPlan = plan.toUpperCase();
+	const displayPrice = plan === "pro" ? "$19" : "$99";
 
 	return (
 		<div className="space-y-6">
@@ -53,57 +72,43 @@ export default function BillingPage() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						{isSubLoading ? (
-							<div className="flex items-center justify-center py-4">
-								<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+						<div className="flex items-center justify-between">
+							<div>
+								<p className="font-medium">
+									{`${capitalize(plan as string)} Plan`}
+								</p>
+								<p className="text-sm text-muted-foreground">
+									{subscription?.cancelAtPeriodEnd
+										? "Cancels at end of billing period"
+										: "Renews automatically"}
+								</p>
 							</div>
-						) : (
-							<>
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="font-medium">
-											{plan === "free"
-												? t("freePlan")
-												: `${capitalize(plan as string)} Plan`}
-										</p>
-										<p className="text-sm text-muted-foreground">
-											{plan === "free"
-												? t("freePlanDescription")
-												: subscription?.cancelAtPeriodEnd
-													? "Cancels at end of billing period"
-													: "Renews automatically"}
-										</p>
-									</div>
-									<p className="text-2xl font-bold">{displayPrice}/mo</p>
-								</div>
+							<p className="text-2xl font-bold">{displayPrice}/mo</p>
+						</div>
 
-								{subscription?.currentPeriodEnd && (
-									<p className="text-sm text-muted-foreground">
-										Current period ends:{" "}
-										{new Date(
-											subscription.currentPeriodEnd,
-										).toLocaleDateString()}
-									</p>
-								)}
-
-								<Button
-									className="w-full"
-									onClick={handleManageBilling}
-									disabled={isPortalLoading}
-								>
-									{isPortalLoading ? (
-										<>
-											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-											Loading...
-										</>
-									) : plan === "free" ? (
-										t("upgradeToPro")
-									) : (
-										"Manage Subscription"
-									)}
-								</Button>
-							</>
+						{subscription?.currentPeriodEnd && (
+							<p className="text-sm text-muted-foreground">
+								Current period ends:{" "}
+								{new Date(
+									subscription.currentPeriodEnd,
+								).toLocaleDateString()}
+							</p>
 						)}
+
+						<Button
+							className="w-full"
+							onClick={handleManageBilling}
+							disabled={isPortalLoading}
+						>
+							{isPortalLoading ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									Loading...
+								</>
+							) : (
+								"Manage Subscription"
+							)}
+						</Button>
 					</CardContent>
 				</Card>
 
