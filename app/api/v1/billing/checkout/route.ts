@@ -9,7 +9,7 @@ import {
 import { createCheckoutSchema } from "@/lib/api/validation";
 import { stripe } from "@/lib/stripe/client";
 import { PLANS } from "@/lib/stripe/config";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { CreateCheckoutResponse } from "@/lib/api/types";
 
 export async function POST(request: NextRequest) {
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for existing customer
-    const supabase = await createServerSupabaseClient();
+    const supabase = createAdminClient();
     const { data: existingSubscription } = await supabase
       .from("subscriptions")
       .select("stripe_customer_id")

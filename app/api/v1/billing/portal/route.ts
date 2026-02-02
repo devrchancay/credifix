@@ -30,24 +30,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    
-
     const { returnUrl, configuration } = result.data;
-
-    // Get customer ID from subscription
     const supabase = createAdminClient();
+
+    // Try to get existing customer ID from subscription
     const { data: subscription } = await supabase
       .from("subscriptions")
       .select("stripe_customer_id")
       .eq("user_id", userId)
       .single();
 
-    if (!subscription?.stripe_customer_id) {
-      return createErrorResponse(
-        "No active subscription found",
-        404,
-        ErrorCodes.NOT_FOUND
-      );
+    let stripeCustomerId = subscription?.stripe_customer_id;
+
+    // If no subscription exists, create a new Stripe customer
+    if (!stripeCustomerId) {
+      // Get user profile for email
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email, full_name")
+        .eq("id", userId)
+        .single();
+
+      if (!profile?.email) {
+        return createErrorResponse(
+          "User profile not found. Please complete your registration.",
+          404,
+          ErrorCodes.NOT_FOUND
+        );
+      }
+
+      // Create Stripe customer
+      const customer = await stripe.customers.create({
+        email: profile.email,
+        name: profile.full_name || undefined,
+        metadata: {
+          clerk_user_id: userId,
+        },
+      });
+
+      stripeCustomerId = customer.id;
     }
 
     // Determine return URL
@@ -56,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     // Create billing portal session
     const session = await stripe.billingPortal.sessions.create({
-      customer: subscription.stripe_customer_id,
+      customer: stripeCustomerId,
       return_url: finalReturnUrl,
       ...(configuration && { configuration }),
     });

@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,10 +14,26 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Loader2 } from "lucide-react";
-import { usePortal } from "@/hooks/use-portal";
+import { createApiClient } from "@/lib/api/client";
 
-const plans = [
+type PlanType = "free" | "pro" | "enterprise";
+type IntervalType = "monthly" | "yearly";
+
+interface Plan {
+  id: PlanType;
+  name: string;
+  description: string;
+  price: string;
+  yearlyPrice?: string;
+  interval: string;
+  features: string[];
+  cta: string;
+  popular: boolean;
+}
+
+const plans: Plan[] = [
   {
+    id: "free",
     name: "Free",
     description: "For individuals getting started",
     price: "$0",
@@ -27,14 +45,14 @@ const plans = [
       "1 team member",
     ],
     cta: "Get Started",
-    href: "/sign-up",
     popular: false,
-    usePortal: false,
   },
   {
+    id: "pro",
     name: "Pro",
     description: "For professionals and small teams",
     price: "$19",
+    yearlyPrice: "$190",
     interval: "per month",
     features: [
       "Unlimited projects",
@@ -44,15 +62,15 @@ const plans = [
       "Custom integrations",
       "API access",
     ],
-    cta: "Subscribe",
-    href: null,
+    cta: "Subscribe to Pro",
     popular: true,
-    usePortal: true,
   },
   {
+    id: "enterprise",
     name: "Enterprise",
     description: "For large organizations",
     price: "$99",
+    yearlyPrice: "$990",
     interval: "per month",
     features: [
       "Everything in Pro",
@@ -62,29 +80,43 @@ const plans = [
       "SSO/SAML",
       "Custom contracts",
     ],
-    cta: "Subscribe",
-    href: null,
+    cta: "Subscribe to Enterprise",
     popular: false,
-    usePortal: true,
   },
 ];
 
+const apiClient = createApiClient();
+
 export default function PricingPage() {
   const router = useRouter();
-  const { openPortal, isLoading, isSignedIn } = usePortal();
+  const { isSignedIn } = useAuth();
+  const [loadingPlan, setLoadingPlan] = useState<PlanType | null>(null);
+  const [interval] = useState<IntervalType>("monthly");
 
-  const handlePlanClick = async (plan: (typeof plans)[number]) => {
-    if (plan.href) {
-      router.push(plan.href);
+  const handlePlanClick = async (plan: Plan) => {
+    // Free plan goes to sign-up
+    if (plan.id === "free") {
+      router.push("/sign-up");
       return;
     }
 
-    if (plan.usePortal) {
-      if (!isSignedIn) {
-        router.push("/sign-in?redirect_url=/pricing");
-        return;
-      }
-      await openPortal(window.location.href);
+    // Paid plans require authentication
+    if (!isSignedIn) {
+      router.push(`/sign-in?redirect_url=/pricing`);
+      return;
+    }
+
+    // Create checkout session
+    setLoadingPlan(plan.id);
+    try {
+      const response = await apiClient.createCheckoutSession({
+        plan: plan.id as "pro" | "enterprise",
+        interval,
+      });
+      window.location.href = response.checkoutUrl;
+    } catch (error) {
+      console.error("Checkout error:", error);
+      setLoadingPlan(null);
     }
   };
 
@@ -132,9 +164,9 @@ export default function PricingPage() {
                 className="w-full"
                 variant={plan.popular ? "default" : "outline"}
                 onClick={() => handlePlanClick(plan)}
-                disabled={isLoading && plan.usePortal}
+                disabled={loadingPlan === plan.id}
               >
-                {isLoading && plan.usePortal ? (
+                {loadingPlan === plan.id ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Loading...
