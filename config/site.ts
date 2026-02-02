@@ -1,13 +1,13 @@
 export const siteConfig = {
-  name: "FHS Template",
-  description: "A production-ready SaaS boilerplate with Next.js 15, Clerk, Supabase, and Stripe",
+  name: "Credifix",
+  description: "Credifix is a platform for monitoring and managing your credit score",
   url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   ogImage: "/og.png",
   links: {
-    twitter: "https://twitter.com/yourhandle",
-    github: "https://github.com/yourrepo",
+    twitter: "https://twitter.com/credifix",
+    github: "https://github.com/credifix",
   },
-  creator: "Florida Hitech Services",
+  creator: "Credifix",
 };
 
 export type SiteConfig = typeof siteConfig;
