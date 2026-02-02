@@ -1,127 +1,127 @@
 {
-  "common": {
-    "appName": "FHS Template",
-    "tagline": "SaaS Boilerplate",
-    "signIn": "Sign In",
-    "signUp": "Sign Up",
-    "signOut": "Sign Out",
-    "dashboard": "Dashboard",
-    "settings": "Settings",
-    "billing": "Billing",
-    "pricing": "Pricing",
-    "about": "About",
-    "admin": "Admin",
-    "getStarted": "Get Started",
-    "viewPricing": "View Pricing",
-    "learnMore": "Learn More",
-    "menu": "Menu",
-    "user": "User",
-    "free": "Free"
-  },
-  "nav": {
-    "home": "Home",
-    "builtWith": "Built with Next.js, Clerk, Supabase, and Stripe."
-  },
-  "landing": {
-    "badge": "Production Ready SaaS Template",
-    "title": "Build Your SaaS Faster",
-    "subtitle": "A production-ready boilerplate with authentication, database, payments, and internationalization. Start building in minutes, not weeks.",
-    "cta": {
-      "primary": "Get Started",
-      "secondary": "View Pricing"
-    },
-    "features": {
-      "title": "Everything You Need",
-      "subtitle": "Built with the best technologies for performance, developer experience, and scalability."
-    },
-    "ctaSection": {
-      "title": "Ready to Get Started?",
-      "subtitle": "Join thousands of developers building their SaaS with our template.",
-      "button": "Start Building Now"
-    }
-  },
-  "pricing": {
-    "title": "Simple, Transparent Pricing",
-    "subtitle": "Choose the plan that works best for you. All plans include a 14-day free trial.",
-    "monthly": "Monthly",
-    "yearly": "Yearly",
-    "popular": "Popular",
-    "plans": {
-      "free": {
-        "name": "Free",
-        "description": "For individuals getting started",
-        "cta": "Get Started"
-      },
-      "pro": {
-        "name": "Pro",
-        "description": "For professionals and small teams",
-        "cta": "Start Free Trial"
-      },
-      "enterprise": {
-        "name": "Enterprise",
-        "description": "For large organizations",
-        "cta": "Contact Sales"
-      }
-    }
-  },
-  "dashboard": {
-    "title": "Dashboard",
-    "welcome": "Welcome back, {name}!",
-    "userId": "User ID",
-    "email": "Email",
-    "status": "Status",
-    "plan": "Plan",
-    "active": "Active",
-    "upgrade": "Upgrade to Pro for more features"
-  },
-  "billing": {
-    "title": "Billing",
-    "subtitle": "Manage your subscription and billing information.",
-    "currentPlan": "Current Plan",
-    "currentPlanDescription": "You are currently on the {plan} plan.",
-    "freePlan": "Free Plan",
-    "freePlanDescription": "Basic features for personal use",
-    "upgradeToPro": "Upgrade to Pro",
-    "billingHistory": "Billing History",
-    "billingHistoryDescription": "View your past invoices and payment history.",
-    "noBillingHistory": "No billing history available. Upgrade to a paid plan to see your invoices here."
-  },
-  "settings": {
-    "title": "Settings",
-    "subtitle": "Manage your account settings and preferences."
-  },
-  "admin": {
-    "title": "Admin",
-    "subtitle": "Manage users and their roles.",
-    "adminArea": "Admin Area",
-    "adminOnly": "This content is only visible to administrators.",
-    "user": "User",
-    "email": "Email",
-    "role": "Role",
-    "joined": "Joined",
-    "roleUser": "User",
-    "roleAdmin": "Admin"
-  },
-  "about": {
-    "title": "About",
-    "subtitle": "A production-ready SaaS boilerplate built with modern technologies.",
-    "features": {
-      "nextjs": {
-        "title": "Next.js 15",
-        "description": "Built on the latest Next.js with App Router, Server Components, and Server Actions for optimal performance."
-      },
-      "clerk": {
-        "title": "Clerk Authentication",
-        "description": "Complete authentication solution with social logins, MFA, and organization management."
-      },
-      "supabase": {
-        "title": "Supabase Database",
-        "description": "PostgreSQL database with Row Level Security, real-time subscriptions, and type-safe queries."
-      },
-      "stripe": {
-        "title": "Stripe Payments",
-        "description": "Subscription billing with Stripe Checkout, Customer Portal, and webhook integration."
-      }
-    }
-  }
+	"common": {
+		"appName": "Credifix",
+		"tagline": "Monitoring and managing your credit score platform",
+		"signIn": "Sign In",
+		"signUp": "Sign Up",
+		"signOut": "Sign Out",
+		"dashboard": "Dashboard",
+		"settings": "Settings",
+		"billing": "Billing",
+		"pricing": "Pricing",
+		"about": "About",
+		"admin": "Admin",
+		"getStarted": "Get Started",
+		"viewPricing": "View Pricing",
+		"learnMore": "Learn More",
+		"menu": "Menu",
+		"user": "User",
+		"free": "Free"
+	},
+	"nav": {
+		"home": "Home",
+		"builtWith": "Built with Next.js, Clerk, Supabase, and Stripe."
+	},
+	"landing": {
+		"badge": "Production Ready SaaS Template",
+		"title": "Build Your SaaS Faster",
+		"subtitle": "A production-ready boilerplate with authentication, database, payments, and internationalization. Start building in minutes, not weeks.",
+		"cta": {
+			"primary": "Get Started",
+			"secondary": "View Pricing"
+		},
+		"features": {
+			"title": "Everything You Need",
+			"subtitle": "Built with the best technologies for performance, developer experience, and scalability."
+		},
+		"ctaSection": {
+			"title": "Ready to Get Started?",
+			"subtitle": "Join thousands of developers building their SaaS with our template.",
+			"button": "Start Building Now"
+		}
+	},
+	"pricing": {
+		"title": "Simple, Transparent Pricing",
+		"subtitle": "Choose the plan that works best for you. All plans include a 14-day free trial.",
+		"monthly": "Monthly",
+		"yearly": "Yearly",
+		"popular": "Popular",
+		"plans": {
+			"free": {
+				"name": "Free",
+				"description": "For individuals getting started",
+				"cta": "Get Started"
+			},
+			"pro": {
+				"name": "Pro",
+				"description": "For professionals and small teams",
+				"cta": "Start Free Trial"
+			},
+			"enterprise": {
+				"name": "Enterprise",
+				"description": "For large organizations",
+				"cta": "Contact Sales"
+			}
+		}
+	},
+	"dashboard": {
+		"title": "Dashboard",
+		"welcome": "Welcome back, {name}!",
+		"userId": "User ID",
+		"email": "Email",
+		"status": "Status",
+		"plan": "Plan",
+		"active": "Active",
+		"upgrade": "Upgrade to Pro for more features"
+	},
+	"billing": {
+		"title": "Billing",
+		"subtitle": "Manage your subscription and billing information.",
+		"currentPlan": "Current Plan",
+		"currentPlanDescription": "You are currently on the {plan} plan.",
+		"freePlan": "Free Plan",
+		"freePlanDescription": "Basic features for personal use",
+		"upgradeToPro": "Upgrade to Pro",
+		"billingHistory": "Billing History",
+		"billingHistoryDescription": "View your past invoices and payment history.",
+		"noBillingHistory": "No billing history available. Upgrade to a paid plan to see your invoices here."
+	},
+	"settings": {
+		"title": "Settings",
+		"subtitle": "Manage your account settings and preferences."
+	},
+	"admin": {
+		"title": "Admin",
+		"subtitle": "Manage users and their roles.",
+		"adminArea": "Admin Area",
+		"adminOnly": "This content is only visible to administrators.",
+		"user": "User",
+		"email": "Email",
+		"role": "Role",
+		"joined": "Joined",
+		"roleUser": "User",
+		"roleAdmin": "Admin"
+	},
+	"about": {
+		"title": "About",
+		"subtitle": "A production-ready SaaS boilerplate built with modern technologies.",
+		"features": {
+			"nextjs": {
+				"title": "Next.js 15",
+				"description": "Built on the latest Next.js with App Router, Server Components, and Server Actions for optimal performance."
+			},
+			"clerk": {
+				"title": "Clerk Authentication",
+				"description": "Complete authentication solution with social logins, MFA, and organization management."
+			},
+			"supabase": {
+				"title": "Supabase Database",
+				"description": "PostgreSQL database with Row Level Security, real-time subscriptions, and type-safe queries."
+			},
+			"stripe": {
+				"title": "Stripe Payments",
+				"description": "Subscription billing with Stripe Checkout, Customer Portal, and webhook integration."
+			}
+		}
+	}
 }

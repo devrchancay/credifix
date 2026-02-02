@@ -1,127 +1,127 @@
 {
-  "common": {
-    "appName": "FHS Template",
-    "tagline": "Plantilla SaaS",
-    "signIn": "Iniciar Sesion",
-    "signUp": "Registrarse",
-    "signOut": "Cerrar Sesion",
-    "dashboard": "Panel",
-    "settings": "Configuracion",
-    "billing": "Facturacion",
-    "pricing": "Precios",
-    "about": "Acerca de",
-    "admin": "Admin",
-    "getStarted": "Comenzar",
-    "viewPricing": "Ver Precios",
-    "learnMore": "Saber Mas",
-    "menu": "Menu",
-    "user": "Usuario",
-    "free": "Gratis"
-  },
-  "nav": {
-    "home": "Inicio",
-    "builtWith": "Construido con Next.js, Clerk, Supabase y Stripe."
-  },
-  "landing": {
-    "badge": "Plantilla SaaS Lista para Produccion",
-    "title": "Construye Tu SaaS Mas Rapido",
-    "subtitle": "Una plantilla lista para produccion con autenticacion, base de datos, pagos e internacionalizacion. Comienza a construir en minutos, no semanas.",
-    "cta": {
-      "primary": "Comenzar",
-      "secondary": "Ver Precios"
-    },
-    "features": {
-      "title": "Todo Lo Que Necesitas",
-      "subtitle": "Construido con las mejores tecnologias para rendimiento, experiencia de desarrollo y escalabilidad."
-    },
-    "ctaSection": {
-      "title": "Listo para Comenzar?",
-      "subtitle": "Unete a miles de desarrolladores construyendo su SaaS con nuestra plantilla.",
-      "button": "Empieza a Construir Ahora"
-    }
-  },
-  "pricing": {
-    "title": "Precios Simples y Transparentes",
-    "subtitle": "Elige el plan que mejor funcione para ti. Todos los planes incluyen 14 dias de prueba gratis.",
-    "monthly": "Mensual",
-    "yearly": "Anual",
-    "popular": "Popular",
-    "plans": {
-      "free": {
-        "name": "Gratis",
-        "description": "Para individuos comenzando",
-        "cta": "Comenzar"
-      },
-      "pro": {
-        "name": "Pro",
-        "description": "Para profesionales y equipos pequenos",
-        "cta": "Iniciar Prueba Gratis"
-      },
-      "enterprise": {
-        "name": "Empresarial",
-        "description": "Para grandes organizaciones",
-        "cta": "Contactar Ventas"
-      }
-    }
-  },
-  "dashboard": {
-    "title": "Panel",
-    "welcome": "Bienvenido de nuevo, {name}!",
-    "userId": "ID de Usuario",
-    "email": "Correo",
-    "status": "Estado",
-    "plan": "Plan",
-    "active": "Activo",
-    "upgrade": "Actualiza a Pro para mas funciones"
-  },
-  "billing": {
-    "title": "Facturacion",
-    "subtitle": "Administra tu suscripcion e informacion de facturacion.",
-    "currentPlan": "Plan Actual",
-    "currentPlanDescription": "Actualmente estas en el plan {plan}.",
-    "freePlan": "Plan Gratis",
-    "freePlanDescription": "Funciones basicas para uso personal",
-    "upgradeToPro": "Actualizar a Pro",
-    "billingHistory": "Historial de Facturacion",
-    "billingHistoryDescription": "Ve tus facturas pasadas e historial de pagos.",
-    "noBillingHistory": "No hay historial de facturacion disponible. Actualiza a un plan de pago para ver tus facturas aqui."
-  },
-  "settings": {
-    "title": "Configuracion",
-    "subtitle": "Administra la configuracion y preferencias de tu cuenta."
-  },
-  "admin": {
-    "title": "Admin",
-    "subtitle": "Administra usuarios y sus roles.",
-    "adminArea": "Area de Admin",
-    "adminOnly": "Este contenido solo es visible para administradores.",
-    "user": "Usuario",
-    "email": "Correo",
-    "role": "Rol",
-    "joined": "Registro",
-    "roleUser": "Usuario",
-    "roleAdmin": "Admin"
-  },
-  "about": {
-    "title": "Acerca de",
-    "subtitle": "Una plantilla SaaS lista para produccion construida con tecnologias modernas.",
-    "features": {
-      "nextjs": {
-        "title": "Next.js 15",
-        "description": "Construido sobre el ultimo Next.js con App Router, Server Components y Server Actions para un rendimiento optimo."
-      },
-      "clerk": {
-        "title": "Autenticacion Clerk",
-        "description": "Solucion de autenticacion completa con inicios de sesion sociales, MFA y gestion de organizaciones."
-      },
-      "supabase": {
-        "title": "Base de Datos Supabase",
-        "description": "Base de datos PostgreSQL con Row Level Security, suscripciones en tiempo real y consultas con tipos seguros."
-      },
-      "stripe": {
-        "title": "Pagos Stripe",
-        "description": "Facturacion de suscripciones con Stripe Checkout, Portal de Cliente e integracion de webhooks."
-      }
-    }
-  }
+	"common": {
+		"appName": "Credifix",
+		"tagline": "Plataforma de monitoreo y gestion de tu credito",
+		"signIn": "Iniciar Sesion",
+		"signUp": "Registrarse",
+		"signOut": "Cerrar Sesion",
+		"dashboard": "Panel",
+		"settings": "Configuracion",
+		"billing": "Facturacion",
+		"pricing": "Precios",
+		"about": "Acerca de",
+		"admin": "Admin",
+		"getStarted": "Comenzar",
+		"viewPricing": "Ver Precios",
+		"learnMore": "Saber Mas",
+		"menu": "Menu",
+		"user": "Usuario",
+		"free": "Gratis"
+	},
+	"nav": {
+		"home": "Inicio",
+		"builtWith": "Construido con Next.js, Clerk, Supabase y Stripe."
+	},
+	"landing": {
+		"badge": "Plantilla SaaS Lista para Produccion",
+		"title": "Construye Tu SaaS Mas Rapido",
+		"subtitle": "Una plantilla lista para produccion con autenticacion, base de datos, pagos e internacionalizacion. Comienza a construir en minutos, no semanas.",
+		"cta": {
+			"primary": "Comenzar",
+			"secondary": "Ver Precios"
+		},
+		"features": {
+			"title": "Todo Lo Que Necesitas",
+			"subtitle": "Construido con las mejores tecnologias para rendimiento, experiencia de desarrollo y escalabilidad."
+		},
+		"ctaSection": {
+			"title": "Listo para Comenzar?",
+			"subtitle": "Unete a miles de desarrolladores construyendo su SaaS con nuestra plantilla.",
+			"button": "Empieza a Construir Ahora"
+		}
+	},
+	"pricing": {
+		"title": "Precios Simples y Transparentes",
+		"subtitle": "Elige el plan que mejor funcione para ti. Todos los planes incluyen 14 dias de prueba gratis.",
+		"monthly": "Mensual",
+		"yearly": "Anual",
+		"popular": "Popular",
+		"plans": {
+			"free": {
+				"name": "Gratis",
+				"description": "Para individuos comenzando",
+				"cta": "Comenzar"
+			},
+			"pro": {
+				"name": "Pro",
+				"description": "Para profesionales y equipos pequenos",
+				"cta": "Iniciar Prueba Gratis"
+			},
+			"enterprise": {
+				"name": "Empresarial",
+				"description": "Para grandes organizaciones",
+				"cta": "Contactar Ventas"
+			}
+		}
+	},
+	"dashboard": {
+		"title": "Panel",
+		"welcome": "Bienvenido de nuevo, {name}!",
+		"userId": "ID de Usuario",
+		"email": "Correo",
+		"status": "Estado",
+		"plan": "Plan",
+		"active": "Activo",
+		"upgrade": "Actualiza a Pro para mas funciones"
+	},
+	"billing": {
+		"title": "Facturacion",
+		"subtitle": "Administra tu suscripcion e informacion de facturacion.",
+		"currentPlan": "Plan Actual",
+		"currentPlanDescription": "Actualmente estas en el plan {plan}.",
+		"freePlan": "Plan Gratis",
+		"freePlanDescription": "Funciones basicas para uso personal",
+		"upgradeToPro": "Actualizar a Pro",
+		"billingHistory": "Historial de Facturacion",
+		"billingHistoryDescription": "Ve tus facturas pasadas e historial de pagos.",
+		"noBillingHistory": "No hay historial de facturacion disponible. Actualiza a un plan de pago para ver tus facturas aqui."
+	},
+	"settings": {
+		"title": "Configuracion",
+		"subtitle": "Administra la configuracion y preferencias de tu cuenta."
+	},
+	"admin": {
+		"title": "Admin",
+		"subtitle": "Administra usuarios y sus roles.",
+		"adminArea": "Area de Admin",
+		"adminOnly": "Este contenido solo es visible para administradores.",
+		"user": "Usuario",
+		"email": "Correo",
+		"role": "Rol",
+		"joined": "Registro",
+		"roleUser": "Usuario",
+		"roleAdmin": "Admin"
+	},
+	"about": {
+		"title": "Acerca de",
+		"subtitle": "Una plantilla SaaS lista para produccion construida con tecnologias modernas.",
+		"features": {
+			"nextjs": {
+				"title": "Next.js 15",
+				"description": "Construido sobre el ultimo Next.js con App Router, Server Components y Server Actions para un rendimiento optimo."
+			},
+			"clerk": {
+				"title": "Autenticacion Clerk",
+				"description": "Solucion de autenticacion completa con inicios de sesion sociales, MFA y gestion de organizaciones."
+			},
+			"supabase": {
+				"title": "Base de Datos Supabase",
+				"description": "Base de datos PostgreSQL con Row Level Security, suscripciones en tiempo real y consultas con tipos seguros."
+			},
+			"stripe": {
+				"title": "Pagos Stripe",
+				"description": "Facturacion de suscripciones con Stripe Checkout, Portal de Cliente e integracion de webhooks."
+			}
+		}
+	}
 }
