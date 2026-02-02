@@ -96,15 +96,124 @@ export async function POST(req: Request) {
         break;
       }
 
-      case "customer.subscription.updated": {
-        const eventSub = event.data.object as unknown as {
+      case "customer.subscription.created": {
+        // Handle subscriptions created via Customer Portal
+        const newSub = event.data.object as unknown as {
           id: string;
+          customer: string | { id: string };
           status: Stripe.Subscription["status"];
+          metadata?: { userId?: string };
           items: { data: Array<{ price: { id: string } }> };
           current_period_start?: number;
           current_period_end?: number;
           cancel_at_period_end?: boolean;
         };
+
+        const customerId = typeof newSub.customer === "string"
+          ? newSub.customer
+          : newSub.customer.id;
+
+        // Try to get userId from subscription metadata first
+        let userId = newSub.metadata?.userId;
+
+        // If not in metadata, look up from Stripe customer metadata
+        if (!userId) {
+          const customer = await stripe.customers.retrieve(customerId);
+          if (customer && !customer.deleted) {
+            userId = (customer as Stripe.Customer).metadata?.clerk_user_id;
+          }
+        }
+
+        // If still no userId, look up from existing subscriptions in DB
+        if (!userId) {
+          const { data: existingSub } = await supabase
+            .from("subscriptions")
+            .select("user_id")
+            .eq("stripe_customer_id", customerId)
+            .single();
+          userId = existingSub?.user_id ?? undefined;
+        }
+
+        if (!userId) {
+          console.error("Could not determine userId for subscription:", newSub.id);
+          break;
+        }
+
+        const subscriptionData: InsertTables<"subscriptions"> = {
+          id: newSub.id,
+          user_id: userId,
+          stripe_customer_id: customerId,
+          stripe_price_id: newSub.items.data[0].price.id,
+          status: mapStripeStatus(newSub.status),
+          current_period_start: newSub.current_period_start
+            ? new Date(newSub.current_period_start * 1000).toISOString()
+            : null,
+          current_period_end: newSub.current_period_end
+            ? new Date(newSub.current_period_end * 1000).toISOString()
+            : null,
+          cancel_at_period_end: newSub.cancel_at_period_end ?? false,
+        };
+
+        await supabase.from("subscriptions").upsert(subscriptionData);
+        console.log("Subscription created via portal:", newSub.id);
+        break;
+      }
+
+      case "customer.subscription.updated": {
+        const eventSub = event.data.object as unknown as {
+          id: string;
+          customer: string | { id: string };
+          status: Stripe.Subscription["status"];
+          metadata?: { userId?: string };
+          items: { data: Array<{ price: { id: string } }> };
+          current_period_start?: number;
+          current_period_end?: number;
+          cancel_at_period_end?: boolean;
+        };
+
+        // Check if subscription exists in DB
+        const { data: existingSub } = await supabase
+          .from("subscriptions")
+          .select("id")
+          .eq("id", eventSub.id)
+          .single();
+
+        if (!existingSub) {
+          // Subscription doesn't exist, create it (might have been created via portal)
+          const customerId = typeof eventSub.customer === "string"
+            ? eventSub.customer
+            : eventSub.customer.id;
+
+          let userId = eventSub.metadata?.userId;
+
+          if (!userId) {
+            const customer = await stripe.customers.retrieve(customerId);
+            if (customer && !customer.deleted) {
+              userId = (customer as Stripe.Customer).metadata?.clerk_user_id;
+            }
+          }
+
+          if (userId) {
+            const subscriptionData: InsertTables<"subscriptions"> = {
+              id: eventSub.id,
+              user_id: userId,
+              stripe_customer_id: customerId,
+              stripe_price_id: eventSub.items.data[0].price.id,
+              status: mapStripeStatus(eventSub.status),
+              current_period_start: eventSub.current_period_start
+                ? new Date(eventSub.current_period_start * 1000).toISOString()
+                : null,
+              current_period_end: eventSub.current_period_end
+                ? new Date(eventSub.current_period_end * 1000).toISOString()
+                : null,
+              cancel_at_period_end: eventSub.cancel_at_period_end ?? false,
+            };
+
+            await supabase.from("subscriptions").upsert(subscriptionData);
+            console.log("Subscription created from update event:", eventSub.id);
+            break;
+          }
+        }
 
         const updateData: UpdateTables<"subscriptions"> = {
           status: mapStripeStatus(eventSub.status),

@@ -43,9 +43,14 @@ export function useSubscription() {
     fetchSubscription();
   }, [isLoaded, fetchSubscription]);
 
+  
+
   const plan: PlanName = subscription
-    ? (getPlanByPriceId(subscription.stripePriceId) ?? "free")
+    ? subscription.plan ?? "free"
     : "free";
+
+    
+
 
   return {
     subscription,

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/api/middleware";
 import { createErrorResponse, handleApiError, ErrorCodes } from "@/lib/api/errors";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanByPriceId } from "@/lib/stripe/config";
 import type { GetSubscriptionResponse, SubscriptionData } from "@/lib/api/types";
 
@@ -15,12 +15,14 @@ export async function GET(request: NextRequest) {
     const { userId } = authResult;
 
     // Get subscription from database
-    const supabase = await createServerSupabaseClient();
+    const supabase = createAdminClient();
     const { data: subscription } = await supabase
       .from("subscriptions")
       .select("*")
       .eq("user_id", userId)
-      .eq("status", "active")
+      .in("status", ["active", "trialing", "past_due"])
+      .order("created_at", { ascending: false })
+      .limit(1)
       .single();
 
     let subscriptionData: SubscriptionData | null = null;
