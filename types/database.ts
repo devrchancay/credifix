@@ -102,6 +102,209 @@ export type Database = {
           }
         ];
       };
+      referral_config: {
+        Row: {
+          id: string;
+          credits_per_referral: number;
+          credits_for_referred: number;
+          max_referrals_per_user: number | null;
+          is_active: boolean;
+          require_subscription: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          credits_per_referral?: number;
+          credits_for_referred?: number;
+          max_referrals_per_user?: number | null;
+          is_active?: boolean;
+          require_subscription?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          credits_per_referral?: number;
+          credits_for_referred?: number;
+          max_referrals_per_user?: number | null;
+          is_active?: boolean;
+          require_subscription?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      referral_codes: {
+        Row: {
+          id: string;
+          user_id: string;
+          code: string;
+          is_active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          code: string;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          code?: string;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      referrals: {
+        Row: {
+          id: string;
+          referrer_id: string;
+          referred_id: string;
+          referral_code_id: string;
+          status: "pending" | "completed" | "expired" | "cancelled";
+          credits_awarded_referrer: number;
+          credits_awarded_referred: number;
+          completed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          referrer_id: string;
+          referred_id: string;
+          referral_code_id: string;
+          status?: "pending" | "completed" | "expired" | "cancelled";
+          credits_awarded_referrer?: number;
+          credits_awarded_referred?: number;
+          completed_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          referrer_id?: string;
+          referred_id?: string;
+          referral_code_id?: string;
+          status?: "pending" | "completed" | "expired" | "cancelled";
+          credits_awarded_referrer?: number;
+          credits_awarded_referred?: number;
+          completed_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referrer_id_fkey";
+            columns: ["referrer_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "referrals_referred_id_fkey";
+            columns: ["referred_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "referrals_referral_code_id_fkey";
+            columns: ["referral_code_id"];
+            isOneToOne: false;
+            referencedRelation: "referral_codes";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      credit_transactions: {
+        Row: {
+          id: string;
+          user_id: string;
+          amount: number;
+          type: "referral_bonus" | "referred_bonus" | "purchase" | "usage" | "adjustment" | "expiry";
+          description: string | null;
+          referral_id: string | null;
+          stripe_payment_intent_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          amount: number;
+          type: "referral_bonus" | "referred_bonus" | "purchase" | "usage" | "adjustment" | "expiry";
+          description?: string | null;
+          referral_id?: string | null;
+          stripe_payment_intent_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          amount?: number;
+          type?: "referral_bonus" | "referred_bonus" | "purchase" | "usage" | "adjustment" | "expiry";
+          description?: string | null;
+          referral_id?: string | null;
+          stripe_payment_intent_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "credit_transactions_referral_id_fkey";
+            columns: ["referral_id"];
+            isOneToOne: false;
+            referencedRelation: "referrals";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      user_credits: {
+        Row: {
+          user_id: string;
+          balance: number;
+          total_earned: number;
+          total_spent: number;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          balance?: number;
+          total_earned?: number;
+          total_spent?: number;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          balance?: number;
+          total_earned?: number;
+          total_spent?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_credits_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       subscriptions: {
         Row: {
           id: string;

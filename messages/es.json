@@ -16,7 +16,8 @@
 		"learnMore": "Saber Mas",
 		"menu": "Menu",
 		"user": "Usuario",
-		"free": "Gratis"
+		"free": "Gratis",
+		"referrals": "Referidos"
 	},
 	"nav": {
 		"home": "Inicio",
@@ -101,6 +102,42 @@
 		"joined": "Registro",
 		"roleUser": "Usuario",
 		"roleAdmin": "Admin"
+	},
+	"referral": {
+		"title": "Programa de Referidos",
+		"subtitle": "Invita amigos y gana creditos por cada referido exitoso.",
+		"shareTitle": "Comparte el amor",
+		"shareSubtitle": "y gana creditos gratis",
+		"howItWorks": "Como funciona:",
+		"step1": "Comparte tu enlace de invitacion",
+		"step2": "Ellos se registran y obtienen {credits} creditos extra",
+		"step3": "Tu obtienes {credits} creditos cuando se unan",
+		"linkUsedBy": "Tu enlace de invitacion ha sido usado por {count} usuarios",
+		"copyLink": "Copiar enlace",
+		"copied": "Copiado!",
+		"yourCredits": "Tus Creditos",
+		"balance": "Saldo",
+		"totalEarned": "Total Ganado",
+		"totalSpent": "Total Gastado",
+		"referralHistory": "Historial de Referidos",
+		"noReferrals": "Aun no tienes referidos. Comparte tu enlace para comenzar!",
+		"status": "Estado",
+		"user": "Usuario",
+		"date": "Fecha",
+		"creditsAwarded": "Creditos",
+		"pending": "Pendiente",
+		"completed": "Completado",
+		"expired": "Expirado",
+		"cancelled": "Cancelado",
+		"programInactive": "El programa de referidos no esta activo actualmente.",
+		"invitePage": {
+			"title": "Has sido invitado!",
+			"subtitle": "{name} te ha invitado a unirte a {appName}",
+			"defaultSubtitle": "Has sido invitado a unirte a {appName}",
+			"bonus": "Registrate ahora y obtén {credits} creditos gratis!",
+			"cta": "Registrarse Ahora",
+			"invalidCode": "Este enlace de invitacion es invalido o ha expirado."
+		}
 	},
 	"about": {
 		"title": "Acerca de",
