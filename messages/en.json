@@ -16,7 +16,8 @@
 		"learnMore": "Learn More",
 		"menu": "Menu",
 		"user": "User",
-		"free": "Free"
+		"free": "Free",
+		"referrals": "Referrals"
 	},
 	"nav": {
 		"home": "Home",
@@ -101,6 +102,42 @@
 		"joined": "Joined",
 		"roleUser": "User",
 		"roleAdmin": "Admin"
+	},
+	"referral": {
+		"title": "Referral Program",
+		"subtitle": "Invite friends and earn credits for each successful referral.",
+		"shareTitle": "Spread the love",
+		"shareSubtitle": "and earn free credits",
+		"howItWorks": "How it works:",
+		"step1": "Share your invite link",
+		"step2": "They sign up and get extra {credits} credits",
+		"step3": "You get {credits} credits once they join",
+		"linkUsedBy": "Your invite link has been used by {count} users",
+		"copyLink": "Copy link",
+		"copied": "Copied!",
+		"yourCredits": "Your Credits",
+		"balance": "Balance",
+		"totalEarned": "Total Earned",
+		"totalSpent": "Total Spent",
+		"referralHistory": "Referral History",
+		"noReferrals": "No referrals yet. Share your link to get started!",
+		"status": "Status",
+		"user": "User",
+		"date": "Date",
+		"creditsAwarded": "Credits",
+		"pending": "Pending",
+		"completed": "Completed",
+		"expired": "Expired",
+		"cancelled": "Cancelled",
+		"programInactive": "The referral program is currently inactive.",
+		"invitePage": {
+			"title": "You've been invited!",
+			"subtitle": "{name} has invited you to join {appName}",
+			"defaultSubtitle": "You've been invited to join {appName}",
+			"bonus": "Sign up now and get {credits} free credits!",
+			"cta": "Sign Up Now",
+			"invalidCode": "This invite link is invalid or has expired."
+		}
 	},
 	"about": {
 		"title": "About",

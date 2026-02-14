@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { WebhookEvent, clerkClient } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ROLES } from "@/types/roles";
+import { processReferralSignup } from "@/lib/referral/service";
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
@@ -63,6 +64,17 @@ export async function POST(req: Request) {
         });
 
         console.log("User created in Supabase with role:", { id, email, role: ROLES.USER });
+
+        // Process referral if user signed up with a referral code
+        const referralCode = evt.data.unsafe_metadata?.referral_code as string | undefined;
+        if (referralCode) {
+          try {
+            const result = await processReferralSignup(id, referralCode);
+            console.log("Referral processing result:", result);
+          } catch (err) {
+            console.error("Failed to process referral:", err);
+          }
+        }
         break;
       }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CreditCard, Home, Settings, Shield } from "lucide-react";
+import { CreditCard, Home, Settings, Shield, Gift } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 
@@ -48,6 +48,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: t("billing"),
       url: "/billing",
       icon: CreditCard,
+    },
+    {
+      title: t("referrals"),
+      url: "/referrals",
+      icon: Gift,
     },
   ];
 

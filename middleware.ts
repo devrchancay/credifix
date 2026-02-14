@@ -11,6 +11,8 @@ const isPublicRoute = createRouteMatcher([
   "/:locale/sign-up(.*)",
   "/:locale/pricing(.*)",
   "/:locale/about(.*)",
+  "/:locale/invite/(.*)",
+  "/invite/(.*)",
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/pricing(.*)",
