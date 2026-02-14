@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { stripe } from "@/lib/stripe/client";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { InsertTables, UpdateTables } from "@/types/database";
+import { completeReferralOnSubscription } from "@/lib/referral/service";
 
 type SubscriptionStatus = InsertTables<"subscriptions">["status"];
 
@@ -90,6 +91,13 @@ export async function POST(req: Request) {
           };
 
           await supabase.from("subscriptions").upsert(subscriptionData);
+
+          // Complete pending referral and award credits
+          try {
+            await completeReferralOnSubscription(userId);
+          } catch (err) {
+            console.error("Failed to complete referral:", err);
+          }
 
           console.log("Subscription created:", sub.id);
         }
