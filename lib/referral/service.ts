@@ -1,23 +1,46 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/stripe/client";
 import { generateReferralCode } from "./generate-code";
+import { REFERRAL_DEFAULTS } from "./config";
 import type { Tables } from "@/types/database";
 
 type ReferralConfig = Tables<"referral_config">;
 
 export async function getReferralConfig(): Promise<ReferralConfig> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("referral_config")
     .select("*")
     .limit(1)
     .single();
 
-  if (error || !data) {
-    throw new Error("Referral config not found");
+  if (data) {
+    return data;
   }
 
-  return data;
+  const { data: created, error: insertError } = await supabase
+    .from("referral_config")
+    .insert({
+      credits_per_referral: REFERRAL_DEFAULTS.creditsPerReferral,
+      credits_for_referred: REFERRAL_DEFAULTS.creditsForReferred,
+      is_active: true,
+      require_subscription: false,
+    })
+    .select()
+    .single();
+
+  if (insertError || !created) {
+    const { data: retry } = await supabase
+      .from("referral_config")
+      .select("*")
+      .limit(1)
+      .single();
+
+    if (retry) return retry;
+    throw new Error("Failed to initialize referral config");
+  }
+
+  return created;
 }
 
 export async function getOrCreateReferralCode(userId: string): Promise<string> {
@@ -103,19 +126,21 @@ export async function getReferralStats(userId: string) {
   };
 }
 
+/**
+ * Called from Clerk webhook on user.created.
+ * Creates a PENDING referral record. No credits yet.
+ */
 export async function processReferralSignup(
   referredUserId: string,
   referralCode: string
 ): Promise<{ success: boolean; message: string }> {
   const supabase = createAdminClient();
 
-  // 1. Get the referral config
   const config = await getReferralConfig();
   if (!config.is_active) {
     return { success: false, message: "Referral program is not active" };
   }
 
-  // 2. Find the referral code
   const { data: codeData } = await supabase
     .from("referral_codes")
     .select("*")
@@ -127,12 +152,10 @@ export async function processReferralSignup(
     return { success: false, message: "Invalid referral code" };
   }
 
-  // 3. Don't allow self-referral
   if (codeData.user_id === referredUserId) {
     return { success: false, message: "Cannot use your own referral code" };
   }
 
-  // 4. Check if the referred user already has a referral
   const { data: existingReferral } = await supabase
     .from("referrals")
     .select("id")
@@ -143,7 +166,6 @@ export async function processReferralSignup(
     return { success: false, message: "User already has a referral" };
   }
 
-  // 5. Check max referrals per user
   if (config.max_referrals_per_user) {
     const { count } = await supabase
       .from("referrals")
@@ -155,32 +177,67 @@ export async function processReferralSignup(
     }
   }
 
-  // 6. Create the referral record
-  const { data: referral, error: referralError } = await supabase
+  // Create referral as PENDING — credits awarded when referred user subscribes
+  const { error: referralError } = await supabase
     .from("referrals")
     .insert({
       referrer_id: codeData.user_id,
       referred_id: referredUserId,
       referral_code_id: codeData.id,
+      status: "pending",
+    });
+
+  if (referralError) {
+    return { success: false, message: "Failed to create referral" };
+  }
+
+  return { success: true, message: "Referral registered, pending subscription" };
+}
+
+/**
+ * Called from Stripe webhook on checkout.session.completed.
+ * Completes a pending referral and awards credits to both users.
+ */
+export async function completeReferralOnSubscription(
+  referredUserId: string
+): Promise<void> {
+  const supabase = createAdminClient();
+
+  // Find pending referral for this user
+  const { data: referral } = await supabase
+    .from("referrals")
+    .select("*")
+    .eq("referred_id", referredUserId)
+    .eq("status", "pending")
+    .single();
+
+  if (!referral) {
+    return; // No pending referral, nothing to do
+  }
+
+  const config = await getReferralConfig();
+  if (!config.is_active) {
+    return;
+  }
+
+  // Mark referral as completed
+  await supabase
+    .from("referrals")
+    .update({
       status: "completed",
       credits_awarded_referrer: config.credits_per_referral,
       credits_awarded_referred: config.credits_for_referred,
       completed_at: new Date().toISOString(),
     })
-    .select()
-    .single();
+    .eq("id", referral.id);
 
-  if (referralError || !referral) {
-    return { success: false, message: "Failed to create referral" };
-  }
-
-  // 7. Award credits to both users (Stripe + DB)
+  // Award credits to both users via Stripe + DB
   await Promise.all([
     awardCredits(
-      codeData.user_id,
+      referral.referrer_id,
       config.credits_per_referral,
       "referral_bonus",
-      "Referral bonus for inviting a new user",
+      "Referral bonus — your invite purchased a subscription",
       referral.id
     ),
     awardCredits(
@@ -192,17 +249,19 @@ export async function processReferralSignup(
     ),
   ]);
 
-  return { success: true, message: "Referral processed successfully" };
+  console.log("Referral completed:", {
+    referralId: referral.id,
+    referrer: referral.referrer_id,
+    referred: referredUserId,
+  });
 }
 
 /**
  * Finds or creates a Stripe customer for a user.
- * Looks up existing customer from subscriptions first, then creates one if needed.
  */
 async function getOrCreateStripeCustomer(userId: string): Promise<string> {
   const supabase = createAdminClient();
 
-  // Check if user already has a Stripe customer via subscriptions
   const { data: subscription } = await supabase
     .from("subscriptions")
     .select("stripe_customer_id")
@@ -214,7 +273,6 @@ async function getOrCreateStripeCustomer(userId: string): Promise<string> {
     return subscription.stripe_customer_id;
   }
 
-  // Search Stripe by metadata
   const existingCustomers = await stripe.customers.search({
     query: `metadata["clerk_user_id"]:"${userId}"`,
     limit: 1,
@@ -224,7 +282,6 @@ async function getOrCreateStripeCustomer(userId: string): Promise<string> {
     return existingCustomers.data[0].id;
   }
 
-  // Create a new Stripe customer
   const { data: profile } = await supabase
     .from("profiles")
     .select("email, full_name")
@@ -242,9 +299,9 @@ async function getOrCreateStripeCustomer(userId: string): Promise<string> {
 
 /**
  * Awards credits to a user:
- * 1. Adds a negative balance to Stripe Customer (negative = credit in Stripe)
- * 2. Records the transaction in Supabase
- * 3. Updates the user_credits balance in Supabase
+ * 1. Adds credit to Stripe Customer Balance (negative amount = credit)
+ * 2. Records transaction in Supabase
+ * 3. Updates user_credits balance
  */
 async function awardCredits(
   userId: string,
@@ -255,13 +312,11 @@ async function awardCredits(
 ) {
   const supabase = createAdminClient();
 
-  // 1. Apply credit to Stripe Customer Balance
-  //    In Stripe, negative balance = credit for the customer
   const stripeCustomerId = await getOrCreateStripeCustomer(userId);
   const balanceTransaction = await stripe.customers.createBalanceTransaction(
     stripeCustomerId,
     {
-      amount: -amount * 100, // Convert to cents, negative = credit
+      amount: -amount * 100, // cents, negative = credit
       currency: "usd",
       description,
       metadata: {
@@ -272,7 +327,6 @@ async function awardCredits(
     }
   );
 
-  // 2. Record transaction in Supabase
   await supabase.from("credit_transactions").insert({
     user_id: userId,
     amount,
@@ -282,7 +336,6 @@ async function awardCredits(
     stripe_payment_intent_id: balanceTransaction.id,
   });
 
-  // 3. Update user credits balance
   const { data: existing } = await supabase
     .from("user_credits")
     .select("balance, total_earned")
