@@ -1,5 +1,6 @@
+import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Gift } from "lucide-react";
 import Link from "next/link";
@@ -31,6 +32,16 @@ export default async function InvitePage({ params }: Props) {
     );
   }
 
+  // Store referral code in cookie so it persists through sign-up
+  const cookieStore = await cookies();
+  cookieStore.set("referral_code", code, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+    path: "/",
+  });
+
   const subtitle = validation.referrerName
     ? t("subtitle", { name: validation.referrerName, appName: tCommon("appName") })
     : t("defaultSubtitle", { appName: tCommon("appName") });
@@ -48,7 +59,7 @@ export default async function InvitePage({ params }: Props) {
             {t("bonus", { credits: config.credits_for_referred })}
           </p>
           <Button asChild size="lg" className="w-full">
-            <Link href={`/${locale}/sign-up?ref=${code}`}>
+            <Link href={`/${locale}/sign-up`}>
               {t("cta")}
             </Link>
           </Button>
