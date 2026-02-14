@@ -1,32 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getAuthenticatedUser } from "@/lib/api/middleware";
 import { createErrorResponse, handleApiError, ErrorCodes } from "@/lib/api/errors";
 import { processReferralSignup } from "@/lib/referral/service";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("[REFERRAL REGISTER] Endpoint hit");
-
     const authResult = await getAuthenticatedUser(request);
     if (!authResult) {
-      console.log("[REFERRAL REGISTER] No auth - unauthorized");
       return createErrorResponse("Unauthorized", 401, ErrorCodes.UNAUTHORIZED);
     }
-    console.log("[REFERRAL REGISTER] User authenticated:", authResult.userId);
 
-    const body = await request.json().catch(() => ({}));
-    const code = body.code as string | undefined;
-    console.log("[REFERRAL REGISTER] Body received:", JSON.stringify(body));
-    console.log("[REFERRAL REGISTER] Code:", code);
+    const cookieStore = await cookies();
+    const code = cookieStore.get("referral_code")?.value;
+
+    console.log("[REFERRAL REGISTER] userId:", authResult.userId, "cookie:", code);
 
     if (!code) {
-      console.log("[REFERRAL REGISTER] No code in body, skipping");
       return NextResponse.json({ registered: false, message: "No referral code" });
     }
 
-    console.log("[REFERRAL REGISTER] Processing referral for user:", authResult.userId, "with code:", code);
     const result = await processReferralSignup(authResult.userId, code);
     console.log("[REFERRAL REGISTER] Result:", JSON.stringify(result));
+
+    // Clear cookie after processing
+    cookieStore.delete("referral_code");
 
     return NextResponse.json({ registered: result.success, message: result.message });
   } catch (error) {

@@ -1,8 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Gift } from "lucide-react";
+import Link from "next/link";
 import { validateReferralCode, getReferralConfig } from "@/lib/referral/service";
-import { InviteCta } from "./invite-cta";
 
 interface Props {
   params: Promise<{ code: string; locale: string }>;
@@ -46,7 +47,11 @@ export default async function InvitePage({ params }: Props) {
           <p className="text-lg font-medium">
             {t("bonus", { credits: config.credits_for_referred })}
           </p>
-          <InviteCta code={code} signUpUrl={`/${locale}/sign-up`} label={t("cta")} />
+          <Button asChild size="lg" className="w-full">
+            <Link href={`/api/v1/referral/track?code=${code}&locale=${locale}`}>
+              {t("cta")}
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     </div>
