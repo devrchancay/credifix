@@ -1,6 +1,6 @@
 export const REFERRAL_DEFAULTS = {
-  creditsPerReferral: 10,
-  creditsForReferred: 10,
+  creditsPerReferral: 15,
+  creditsForReferred: 15,
   maxReferralsPerUser: null as number | null,
   codeLength: 8,
 } as const;
