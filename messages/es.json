@@ -85,7 +85,21 @@
 		"upgradeToPro": "Actualizar a Pro",
 		"billingHistory": "Historial de Facturacion",
 		"billingHistoryDescription": "Ve tus facturas pasadas e historial de pagos.",
-		"noBillingHistory": "No hay historial de facturacion disponible. Actualiza a un plan de pago para ver tus facturas aqui."
+		"noBillingHistory": "No hay historial de facturacion disponible. Actualiza a un plan de pago para ver tus facturas aqui.",
+		"availablePlans": "Planes Disponibles",
+		"availablePlansDescription": "Compara planes y cambia tu suscripcion.",
+		"upgrade": "Mejorar",
+		"downgrade": "Reducir",
+		"current": "Plan Actual",
+		"perMonth": "/mes",
+		"perYear": "/ano",
+		"cancelSubscription": "Cancelar Suscripcion",
+		"manageSubscription": "Administrar Suscripcion",
+		"renewsAutomatically": "Se renueva automaticamente",
+		"cancelsAtEnd": "Se cancela al final del periodo de facturacion",
+		"periodEnds": "El periodo actual termina: {date}",
+		"free": "Gratis",
+		"forever": "siempre"
 	},
 	"settings": {
 		"title": "Configuracion",

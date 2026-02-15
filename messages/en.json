@@ -85,7 +85,21 @@
 		"upgradeToPro": "Upgrade to Pro",
 		"billingHistory": "Billing History",
 		"billingHistoryDescription": "View your past invoices and payment history.",
-		"noBillingHistory": "No billing history available. Upgrade to a paid plan to see your invoices here."
+		"noBillingHistory": "No billing history available. Upgrade to a paid plan to see your invoices here.",
+		"availablePlans": "Available Plans",
+		"availablePlansDescription": "Compare plans and change your subscription.",
+		"upgrade": "Upgrade",
+		"downgrade": "Downgrade",
+		"current": "Current Plan",
+		"perMonth": "/mo",
+		"perYear": "/yr",
+		"cancelSubscription": "Cancel Subscription",
+		"manageSubscription": "Manage Subscription",
+		"renewsAutomatically": "Renews automatically",
+		"cancelsAtEnd": "Cancels at end of billing period",
+		"periodEnds": "Current period ends: {date}",
+		"free": "Free",
+		"forever": "forever"
 	},
 	"settings": {
 		"title": "Settings",
