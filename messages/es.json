@@ -17,7 +17,9 @@
 		"menu": "Menu",
 		"user": "Usuario",
 		"free": "Gratis",
-		"referrals": "Referidos"
+		"referrals": "Referidos",
+		"users": "Usuarios",
+		"plans": "Planes"
 	},
 	"nav": {
 		"home": "Inicio",
@@ -101,7 +103,40 @@
 		"role": "Rol",
 		"joined": "Registro",
 		"roleUser": "Usuario",
-		"roleAdmin": "Admin"
+		"roleAdmin": "Admin",
+		"plans": {
+			"title": "Gestion de Planes",
+			"subtitle": "Administra los planes de suscripcion y precios.",
+			"name": "Nombre",
+			"slug": "Slug",
+			"description": "Descripcion",
+			"monthlyPrice": "Precio Mensual",
+			"yearlyPrice": "Precio Anual",
+			"selectPrice": "Seleccionar un precio",
+			"nonePrice": "Ninguno (gratis)",
+			"loadingPrices": "Cargando precios...",
+			"features": "Caracteristicas",
+			"limits": "Limites",
+			"status": "Estado",
+			"popular": "Popular",
+			"sortOrder": "Orden",
+			"active": "Activo",
+			"inactive": "Inactivo",
+			"actions": "Acciones",
+			"newPlan": "Nuevo Plan",
+			"editPlan": "Editar Plan",
+			"createPlan": "Crear Plan",
+			"updatePlan": "Actualizar Plan",
+			"deletePlan": "Eliminar Plan",
+			"confirmDelete": "Estas seguro de que deseas eliminar este plan?",
+			"managePricesInStripe": "Administrar precios en Stripe",
+			"noPlans": "No se encontraron planes. Crea tu primer plan.",
+			"addFeature": "Agregar",
+			"featurePlaceholder": "ej. Hasta 3 proyectos",
+			"addLimit": "Agregar",
+			"limitKeyPlaceholder": "ej. proyectos",
+			"limitValuePlaceholder": "Valor"
+		}
 	},
 	"referral": {
 		"title": "Programa de Referidos",
