@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
+import { ExternalLink, Pencil, Plus, Trash2, X } from "lucide-react";
 import type { Tables } from "@/types/database";
 
 type Plan = Tables<"plans">;
@@ -46,14 +46,19 @@ interface StripePrice {
   interval_count: number;
 }
 
+interface LimitEntry {
+  key: string;
+  value: string;
+}
+
 interface PlanFormData {
   name: string;
   slug: string;
   description: string;
   stripe_monthly_price_id: string;
   stripe_yearly_price_id: string;
-  features: string;
-  limits: string;
+  features: string[];
+  limits: LimitEntry[];
   is_active: boolean;
   is_popular: boolean;
   sort_order: number;
@@ -67,22 +72,34 @@ const emptyForm: PlanFormData = {
   description: "",
   stripe_monthly_price_id: "",
   stripe_yearly_price_id: "",
-  features: "[]",
-  limits: "{}",
+  features: [""],
+  limits: [],
   is_active: true,
   is_popular: false,
   sort_order: 0,
 };
 
 function planToForm(plan: Plan): PlanFormData {
+  const features = Array.isArray(plan.features)
+    ? (plan.features as string[])
+    : [];
+  const limitsObj =
+    plan.limits && typeof plan.limits === "object" && !Array.isArray(plan.limits)
+      ? (plan.limits as Record<string, unknown>)
+      : {};
+  const limits = Object.entries(limitsObj).map(([key, value]) => ({
+    key,
+    value: String(value),
+  }));
+
   return {
     name: plan.name,
     slug: plan.slug,
     description: plan.description ?? "",
     stripe_monthly_price_id: plan.stripe_monthly_price_id ?? "",
     stripe_yearly_price_id: plan.stripe_yearly_price_id ?? "",
-    features: JSON.stringify(plan.features, null, 2),
-    limits: JSON.stringify(plan.limits, null, 2),
+    features: features.length > 0 ? features : [""],
+    limits,
     is_active: plan.is_active,
     is_popular: plan.is_popular,
     sort_order: plan.sort_order,
@@ -176,23 +193,12 @@ export function PlanManagement() {
     setSaving(true);
 
     try {
-      let parsedFeatures;
-      let parsedLimits;
-
-      try {
-        parsedFeatures = JSON.parse(form.features);
-      } catch {
-        toast.error("Invalid JSON in features");
-        setSaving(false);
-        return;
-      }
-
-      try {
-        parsedLimits = JSON.parse(form.limits);
-      } catch {
-        toast.error("Invalid JSON in limits");
-        setSaving(false);
-        return;
+      const features = form.features.filter((f) => f.trim() !== "");
+      const limits: Record<string, number> = {};
+      for (const entry of form.limits) {
+        if (entry.key.trim()) {
+          limits[entry.key.trim()] = Number(entry.value) || 0;
+        }
       }
 
       const payload = {
@@ -201,8 +207,8 @@ export function PlanManagement() {
         description: form.description || null,
         stripe_monthly_price_id: form.stripe_monthly_price_id || null,
         stripe_yearly_price_id: form.stripe_yearly_price_id || null,
-        features: parsedFeatures,
-        limits: parsedLimits,
+        features,
+        limits,
         is_active: form.is_active,
         is_popular: form.is_popular,
         sort_order: Number(form.sort_order),
@@ -499,25 +505,115 @@ export function PlanManagement() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="features">{t("features")}</Label>
-              <Input
-                id="features"
-                value={form.features}
-                onChange={(e) =>
-                  setForm({ ...form, features: e.target.value })
-                }
-                placeholder={t("featuresPlaceholder")}
-              />
+              <div className="flex items-center justify-between">
+                <Label>{t("features")}</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      features: [...form.features, ""],
+                    })
+                  }
+                >
+                  <Plus className="mr-1 h-3 w-3" />
+                  {t("addFeature")}
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {form.features.map((feature, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Input
+                      value={feature}
+                      onChange={(e) => {
+                        const updated = [...form.features];
+                        updated[index] = e.target.value;
+                        setForm({ ...form, features: updated });
+                      }}
+                      placeholder={t("featurePlaceholder")}
+                    />
+                    {form.features.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0"
+                        onClick={() => {
+                          const updated = form.features.filter(
+                            (_, i) => i !== index
+                          );
+                          setForm({ ...form, features: updated });
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="limits">{t("limits")}</Label>
-              <Input
-                id="limits"
-                value={form.limits}
-                onChange={(e) => setForm({ ...form, limits: e.target.value })}
-                placeholder={t("limitsPlaceholder")}
-              />
+              <div className="flex items-center justify-between">
+                <Label>{t("limits")}</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      limits: [...form.limits, { key: "", value: "" }],
+                    })
+                  }
+                >
+                  <Plus className="mr-1 h-3 w-3" />
+                  {t("addLimit")}
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {form.limits.map((entry, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Input
+                      value={entry.key}
+                      onChange={(e) => {
+                        const updated = [...form.limits];
+                        updated[index] = { ...entry, key: e.target.value };
+                        setForm({ ...form, limits: updated });
+                      }}
+                      placeholder={t("limitKeyPlaceholder")}
+                      className="flex-1"
+                    />
+                    <Input
+                      type="number"
+                      value={entry.value}
+                      onChange={(e) => {
+                        const updated = [...form.limits];
+                        updated[index] = { ...entry, value: e.target.value };
+                        setForm({ ...form, limits: updated });
+                      }}
+                      placeholder={t("limitValuePlaceholder")}
+                      className="w-24"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                      onClick={() => {
+                        const updated = form.limits.filter(
+                          (_, i) => i !== index
+                        );
+                        setForm({ ...form, limits: updated });
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4">

@@ -131,8 +131,11 @@
 			"confirmDelete": "Estas seguro de que deseas eliminar este plan?",
 			"managePricesInStripe": "Administrar precios en Stripe",
 			"noPlans": "No se encontraron planes. Crea tu primer plan.",
-			"featuresPlaceholder": "Caracteristica 1, Caracteristica 2, Caracteristica 3",
-			"limitsPlaceholder": "{\"max_users\": 10, \"storage_gb\": 5}"
+			"addFeature": "Agregar",
+			"featurePlaceholder": "ej. Hasta 3 proyectos",
+			"addLimit": "Agregar",
+			"limitKeyPlaceholder": "ej. proyectos",
+			"limitValuePlaceholder": "Valor"
 		}
 	},
 	"referral": {
