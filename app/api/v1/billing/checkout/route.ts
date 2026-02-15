@@ -8,7 +8,7 @@ import {
 } from "@/lib/api/errors";
 import { createCheckoutSchema } from "@/lib/api/validation";
 import { stripe } from "@/lib/stripe/client";
-import { PLANS } from "@/lib/stripe/config";
+import { getPlanBySlug } from "@/lib/plans/service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { CreateCheckoutResponse } from "@/lib/api/types";
 
@@ -38,22 +38,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { plan, interval, successUrl, cancelUrl, platform } = result.data;
+    const { plan: planSlug, interval, successUrl, cancelUrl, platform } = result.data;
 
-    // Validate plan has pricing
-    const planConfig = PLANS[plan];
-    if (!("priceId" in planConfig)) {
+    // Fetch plan from DB
+    const plan = await getPlanBySlug(planSlug);
+    if (!plan) {
       return createErrorResponse(
-        "Cannot checkout free plan",
-        400,
-        ErrorCodes.VALIDATION_ERROR
+        "Plan not found",
+        404,
+        ErrorCodes.NOT_FOUND
       );
     }
 
-    const priceId = planConfig.priceId[interval];
+    // Determine price ID based on interval
+    const priceId =
+      interval === "monthly"
+        ? plan.stripe_monthly_price_id
+        : plan.stripe_yearly_price_id;
+
     if (!priceId) {
       return createErrorResponse(
-        "Price not configured for this interval",
+        "Price not configured for this plan/interval",
         400,
         ErrorCodes.VALIDATION_ERROR
       );
@@ -89,8 +94,8 @@ export async function POST(request: NextRequest) {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: finalSuccessUrl,
       cancel_url: finalCancelUrl,
-      metadata: { userId },
-      subscription_data: { metadata: { userId } },
+      metadata: { userId, planId: plan.id },
+      subscription_data: { metadata: { userId, planId: plan.id } },
     });
 
     if (!session.url) {

@@ -3,13 +3,13 @@ import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getPlanByPriceId } from "@/lib/stripe/config";
+import { getPlanByPriceId } from "@/lib/plans/service";
 
 async function getUserSubscription(userId: string) {
   const supabase = createAdminClient();
   const { data: subscription } = await supabase
     .from("subscriptions")
-    .select("*")
+    .select("*, plans(slug)")
     .eq("user_id", userId)
     .in("status", ["active", "trialing", "past_due"])
     .order("created_at", { ascending: false })
@@ -20,7 +20,16 @@ async function getUserSubscription(userId: string) {
     return { plan: "free", status: null, subscription: null };
   }
 
-  const plan = getPlanByPriceId(subscription.stripe_price_id) ?? "free";
+  // Use joined plan slug, fallback to lookup by price ID
+  const plans = subscription.plans as { slug: string } | null;
+  let plan: string;
+  if (plans?.slug) {
+    plan = plans.slug;
+  } else {
+    const dbPlan = await getPlanByPriceId(subscription.stripe_price_id);
+    plan = dbPlan?.slug ?? "free";
+  }
+
   return { plan, status: subscription.status, subscription };
 }
 

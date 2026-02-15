@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createCheckoutSchema = z.object({
-  plan: z.enum(["pro", "enterprise"]),
+  plan: z.string().min(1),
   interval: z.enum(["monthly", "yearly"]),
   successUrl: z.string().url().optional(),
   cancelUrl: z.string().url().optional(),

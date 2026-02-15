@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createApiClient, ApiError } from "@/lib/api/client";
-import { getPlanByPriceId, type PlanName } from "@/lib/stripe/config";
 import type { SubscriptionData } from "@/lib/api/types";
 
 const apiClient = createApiClient();
@@ -43,14 +42,7 @@ export function useSubscription() {
     fetchSubscription();
   }, [isLoaded, fetchSubscription]);
 
-  
-
-  const plan: PlanName = subscription
-    ? subscription.plan ?? "free"
-    : "free";
-
-    
-
+  const plan: string = subscription?.plan ?? "free";
 
   return {
     subscription,

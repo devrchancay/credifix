@@ -1,4 +1,5 @@
-import type { PlanName, BillingInterval } from "@/lib/stripe/config";
+import type { BillingInterval } from "@/lib/stripe/config";
+import type { Tables } from "@/types/database";
 
 // Subscription status from database
 export type SubscriptionStatus =
@@ -19,7 +20,7 @@ export type Platform = "web" | "mobile";
 // ============================================
 
 export interface CreateCheckoutRequest {
-  plan: Exclude<PlanName, "free">;
+  plan: string;
   interval: BillingInterval;
   successUrl?: string;
   cancelUrl?: string;
@@ -51,7 +52,7 @@ export interface CreatePortalResponse {
 export interface SubscriptionData {
   id: string;
   status: SubscriptionStatus;
-  plan: PlanName;
+  plan: string;
   stripePriceId: string;
   stripeCustomerId: string;
   currentPeriodStart: string | null;
@@ -62,6 +63,12 @@ export interface SubscriptionData {
 export interface GetSubscriptionResponse {
   subscription: SubscriptionData | null;
 }
+
+// ============================================
+// Plans
+// ============================================
+
+export type PlanData = Tables<"plans">;
 
 // ============================================
 // Error Response
