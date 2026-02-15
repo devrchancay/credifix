@@ -15,6 +15,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogFooter,
@@ -28,6 +37,15 @@ import type { Tables } from "@/types/database";
 
 type Plan = Tables<"plans">;
 
+interface StripePrice {
+  id: string;
+  product_name: string;
+  amount: number;
+  currency: string;
+  interval: string;
+  interval_count: number;
+}
+
 interface PlanFormData {
   name: string;
   slug: string;
@@ -40,6 +58,8 @@ interface PlanFormData {
   is_popular: boolean;
   sort_order: number;
 }
+
+const NONE_VALUE = "__none__";
 
 const emptyForm: PlanFormData = {
   name: "",
@@ -69,8 +89,34 @@ function planToForm(plan: Plan): PlanFormData {
   };
 }
 
+function formatPrice(price: StripePrice): string {
+  const amount = price.amount.toLocaleString("en-US", {
+    style: "currency",
+    currency: price.currency,
+  });
+  let suffix = `/${price.interval}`;
+  if (price.interval === "month" && price.interval_count === 1) {
+    suffix = "/mo";
+  } else if (price.interval === "year" || (price.interval === "month" && price.interval_count > 1)) {
+    suffix = "/yr";
+  }
+  return `${price.product_name} — ${amount}${suffix}`;
+}
+
+function groupByProduct(prices: StripePrice[]) {
+  const groups: Record<string, StripePrice[]> = {};
+  for (const price of prices) {
+    if (!groups[price.product_name]) {
+      groups[price.product_name] = [];
+    }
+    groups[price.product_name].push(price);
+  }
+  return groups;
+}
+
 export function PlanManagement() {
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [stripePrices, setStripePrices] = useState<StripePrice[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -80,6 +126,7 @@ export function PlanManagement() {
 
   useEffect(() => {
     fetchPlans();
+    fetchStripePrices();
   }, []);
 
   async function fetchPlans() {
@@ -96,6 +143,19 @@ export function PlanManagement() {
       toast.error("Failed to fetch plans");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchStripePrices() {
+    try {
+      const res = await fetch("/api/admin/plans/stripe-prices");
+      const data = await res.json();
+
+      if (res.ok) {
+        setStripePrices(data.prices);
+      }
+    } catch {
+      // Stripe prices are optional, don't block the UI
     }
   }
 
@@ -219,6 +279,8 @@ export function PlanManagement() {
       toast.error("Failed to update plan");
     }
   }
+
+  const priceGroups = groupByProduct(stripePrices);
 
   if (loading) {
     return (
@@ -355,36 +417,84 @@ export function PlanManagement() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="stripe_monthly_price_id">
-                  {t("stripeMonthlyPriceId")}
-                </Label>
-                <Input
-                  id="stripe_monthly_price_id"
-                  value={form.stripe_monthly_price_id}
-                  onChange={(e) =>
+                <Label>{t("monthlyPrice")}</Label>
+                <Select
+                  value={form.stripe_monthly_price_id || NONE_VALUE}
+                  onValueChange={(value) =>
                     setForm({
                       ...form,
-                      stripe_monthly_price_id: e.target.value,
+                      stripe_monthly_price_id:
+                        value === NONE_VALUE ? "" : value,
                     })
                   }
-                  placeholder="price_..."
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        stripePrices.length === 0
+                          ? t("loadingPrices")
+                          : t("selectPrice")
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE_VALUE}>
+                      {t("nonePrice")}
+                    </SelectItem>
+                    {Object.entries(priceGroups).map(
+                      ([productName, prices]) => (
+                        <SelectGroup key={productName}>
+                          <SelectLabel>{productName}</SelectLabel>
+                          {prices.map((price) => (
+                            <SelectItem key={price.id} value={price.id}>
+                              {formatPrice(price)}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="stripe_yearly_price_id">
-                  {t("stripeYearlyPriceId")}
-                </Label>
-                <Input
-                  id="stripe_yearly_price_id"
-                  value={form.stripe_yearly_price_id}
-                  onChange={(e) =>
+                <Label>{t("yearlyPrice")}</Label>
+                <Select
+                  value={form.stripe_yearly_price_id || NONE_VALUE}
+                  onValueChange={(value) =>
                     setForm({
                       ...form,
-                      stripe_yearly_price_id: e.target.value,
+                      stripe_yearly_price_id:
+                        value === NONE_VALUE ? "" : value,
                     })
                   }
-                  placeholder="price_..."
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        stripePrices.length === 0
+                          ? t("loadingPrices")
+                          : t("selectPrice")
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE_VALUE}>
+                      {t("nonePrice")}
+                    </SelectItem>
+                    {Object.entries(priceGroups).map(
+                      ([productName, prices]) => (
+                        <SelectGroup key={productName}>
+                          <SelectLabel>{productName}</SelectLabel>
+                          {prices.map((price) => (
+                            <SelectItem key={price.id} value={price.id}>
+                              {formatPrice(price)}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
