@@ -305,11 +305,66 @@ export type Database = {
           }
         ];
       };
+      plans: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          description: string | null;
+          price_monthly: number;
+          price_yearly: number;
+          stripe_monthly_price_id: string | null;
+          stripe_yearly_price_id: string | null;
+          features: Json;
+          limits: Json;
+          is_active: boolean;
+          is_popular: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          description?: string | null;
+          price_monthly?: number;
+          price_yearly?: number;
+          stripe_monthly_price_id?: string | null;
+          stripe_yearly_price_id?: string | null;
+          features?: Json;
+          limits?: Json;
+          is_active?: boolean;
+          is_popular?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          slug?: string;
+          description?: string | null;
+          price_monthly?: number;
+          price_yearly?: number;
+          stripe_monthly_price_id?: string | null;
+          stripe_yearly_price_id?: string | null;
+          features?: Json;
+          limits?: Json;
+          is_active?: boolean;
+          is_popular?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       subscriptions: {
         Row: {
           id: string;
           user_id: string | null;
           organization_id: string | null;
+          plan_id: string | null;
           stripe_customer_id: string;
           stripe_price_id: string;
           status:
@@ -331,6 +386,7 @@ export type Database = {
           id: string;
           user_id?: string | null;
           organization_id?: string | null;
+          plan_id?: string | null;
           stripe_customer_id: string;
           stripe_price_id: string;
           status:
@@ -352,6 +408,7 @@ export type Database = {
           id?: string;
           user_id?: string | null;
           organization_id?: string | null;
+          plan_id?: string | null;
           stripe_customer_id?: string;
           stripe_price_id?: string;
           status?:
@@ -382,6 +439,13 @@ export type Database = {
             columns: ["organization_id"];
             isOneToOne: false;
             referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "plans";
             referencedColumns: ["id"];
           }
         ];

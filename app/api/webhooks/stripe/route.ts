@@ -4,6 +4,7 @@ import { stripe } from "@/lib/stripe/client";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { InsertTables, UpdateTables } from "@/types/database";
 import { completeReferralOnSubscription } from "@/lib/referral/service";
+import { getPlanByPriceId } from "@/lib/plans/service";
 
 type SubscriptionStatus = InsertTables<"subscriptions">["status"];
 
@@ -19,6 +20,14 @@ function mapStripeStatus(status: Stripe.Subscription["status"]): SubscriptionSta
     paused: "paused",
   };
   return statusMap[status] ?? "incomplete";
+}
+
+async function resolvePlanId(priceId: string, metadata?: { planId?: string }): Promise<string | null> {
+  if (metadata?.planId) {
+    return metadata.planId;
+  }
+  const plan = await getPlanByPriceId(priceId);
+  return plan?.id ?? null;
 }
 
 export async function POST(req: Request) {
@@ -69,17 +78,22 @@ export async function POST(req: Request) {
             id: string;
             customer: string | { id: string };
             status: Stripe.Subscription["status"];
+            metadata?: { planId?: string };
             items: { data: Array<{ price: { id: string } }> };
             current_period_start?: number;
             current_period_end?: number;
             cancel_at_period_end?: boolean;
           };
 
+          const priceId = sub.items.data[0].price.id;
+          const planId = await resolvePlanId(priceId, session.metadata as { planId?: string });
+
           const subscriptionData: InsertTables<"subscriptions"> = {
             id: sub.id,
             user_id: userId,
+            plan_id: planId,
             stripe_customer_id: typeof sub.customer === "string" ? sub.customer : sub.customer.id,
-            stripe_price_id: sub.items.data[0].price.id,
+            stripe_price_id: priceId,
             status: mapStripeStatus(sub.status),
             current_period_start: sub.current_period_start
               ? new Date(sub.current_period_start * 1000).toISOString()
@@ -110,7 +124,7 @@ export async function POST(req: Request) {
           id: string;
           customer: string | { id: string };
           status: Stripe.Subscription["status"];
-          metadata?: { userId?: string };
+          metadata?: { userId?: string; planId?: string };
           items: { data: Array<{ price: { id: string } }> };
           current_period_start?: number;
           current_period_end?: number;
@@ -147,11 +161,15 @@ export async function POST(req: Request) {
           break;
         }
 
+        const priceId = newSub.items.data[0].price.id;
+        const planId = await resolvePlanId(priceId, newSub.metadata);
+
         const subscriptionData: InsertTables<"subscriptions"> = {
           id: newSub.id,
           user_id: userId,
+          plan_id: planId,
           stripe_customer_id: customerId,
-          stripe_price_id: newSub.items.data[0].price.id,
+          stripe_price_id: priceId,
           status: mapStripeStatus(newSub.status),
           current_period_start: newSub.current_period_start
             ? new Date(newSub.current_period_start * 1000).toISOString()
@@ -172,12 +190,15 @@ export async function POST(req: Request) {
           id: string;
           customer: string | { id: string };
           status: Stripe.Subscription["status"];
-          metadata?: { userId?: string };
+          metadata?: { userId?: string; planId?: string };
           items: { data: Array<{ price: { id: string } }> };
           current_period_start?: number;
           current_period_end?: number;
           cancel_at_period_end?: boolean;
         };
+
+        const priceId = eventSub.items.data[0].price.id;
+        const planId = await resolvePlanId(priceId, eventSub.metadata);
 
         // Check if subscription exists in DB
         const { data: existingSub } = await supabase
@@ -205,8 +226,9 @@ export async function POST(req: Request) {
             const subscriptionData: InsertTables<"subscriptions"> = {
               id: eventSub.id,
               user_id: userId,
+              plan_id: planId,
               stripe_customer_id: customerId,
-              stripe_price_id: eventSub.items.data[0].price.id,
+              stripe_price_id: priceId,
               status: mapStripeStatus(eventSub.status),
               current_period_start: eventSub.current_period_start
                 ? new Date(eventSub.current_period_start * 1000).toISOString()
@@ -225,7 +247,8 @@ export async function POST(req: Request) {
 
         const updateData: UpdateTables<"subscriptions"> = {
           status: mapStripeStatus(eventSub.status),
-          stripe_price_id: eventSub.items.data[0].price.id,
+          stripe_price_id: priceId,
+          plan_id: planId,
           current_period_start: eventSub.current_period_start
             ? new Date(eventSub.current_period_start * 1000).toISOString()
             : undefined,
