@@ -61,6 +61,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: t("admin"),
       url: "/admin",
       icon: Shield,
+      isActive: true,
+      items: [
+        {
+          title: t("users"),
+          url: "/admin",
+        },
+      ],
     },
   ];
 
