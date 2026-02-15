@@ -18,7 +18,8 @@
 		"user": "Usuario",
 		"free": "Gratis",
 		"referrals": "Referidos",
-		"users": "Usuarios"
+		"users": "Usuarios",
+		"plans": "Planes"
 	},
 	"nav": {
 		"home": "Inicio",
@@ -102,7 +103,34 @@
 		"role": "Rol",
 		"joined": "Registro",
 		"roleUser": "Usuario",
-		"roleAdmin": "Admin"
+		"roleAdmin": "Admin",
+		"plans": {
+			"title": "Gestion de Planes",
+			"subtitle": "Administra los planes de suscripcion y precios.",
+			"name": "Nombre",
+			"slug": "Slug",
+			"description": "Descripcion",
+			"stripeMonthlyPriceId": "ID Precio Mensual Stripe",
+			"stripeYearlyPriceId": "ID Precio Anual Stripe",
+			"features": "Caracteristicas",
+			"limits": "Limites",
+			"status": "Estado",
+			"popular": "Popular",
+			"sortOrder": "Orden",
+			"active": "Activo",
+			"inactive": "Inactivo",
+			"actions": "Acciones",
+			"newPlan": "Nuevo Plan",
+			"editPlan": "Editar Plan",
+			"createPlan": "Crear Plan",
+			"updatePlan": "Actualizar Plan",
+			"deletePlan": "Eliminar Plan",
+			"confirmDelete": "Estas seguro de que deseas eliminar este plan?",
+			"managePricesInStripe": "Administrar precios en Stripe",
+			"noPlans": "No se encontraron planes. Crea tu primer plan.",
+			"featuresPlaceholder": "Caracteristica 1, Caracteristica 2, Caracteristica 3",
+			"limitsPlaceholder": "{\"max_users\": 10, \"storage_gb\": 5}"
+		}
 	},
 	"referral": {
 		"title": "Programa de Referidos",
