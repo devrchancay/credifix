@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { CreditCard, Home, Settings, Shield, Gift } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/hooks/use-user";
 import { useTranslations } from "next-intl";
 
 import { NavMain } from "@/components/nav-main";
@@ -18,20 +18,19 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { ROLES, type UserPublicMetadata } from "@/types/roles";
+import { ROLES } from "@/types/roles";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useUser();
+  const { fullName, email, role } = useUser();
   const t = useTranslations("common");
 
   const userData = {
-    name: user?.fullName ?? user?.firstName ?? t("user"),
-    email: user?.primaryEmailAddress?.emailAddress ?? "",
-    avatar: user?.imageUrl ?? "",
+    name: fullName ?? t("user"),
+    email: email ?? "",
+    avatar: "",
   };
 
-  const metadata = user?.publicMetadata as UserPublicMetadata | undefined;
-  const isAdmin = metadata?.role === ROLES.ADMIN;
+  const isAdmin = role === ROLES.ADMIN;
 
   const baseNavItems = [
     {

@@ -1,14 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { auth } from "@clerk/nextjs/server";
 import type { Database } from "@/types/database";
 
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
-  const { getToken } = await auth();
-
-  // Get Clerk JWT for Supabase RLS
-  const accessToken = await getToken({ template: "supabase" });
 
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,11 +22,6 @@ export async function createServerSupabaseClient() {
             // Handle server component context where cookies can't be set
           }
         },
-      },
-      global: {
-        headers: accessToken
-          ? { Authorization: `Bearer ${accessToken}` }
-          : {},
       },
     }
   );

@@ -23,7 +23,7 @@
 	},
 	"nav": {
 		"home": "Home",
-		"builtWith": "Built with Next.js, Clerk, Supabase, and Stripe."
+		"builtWith": "Built with Next.js, Supabase, and Stripe."
 	},
 	"landing": {
 		"badge": "Production Ready SaaS Template",
@@ -75,6 +75,7 @@
 		"status": "Status",
 		"plan": "Plan",
 		"active": "Active",
+		"inactive": "Inactive",
 		"upgrade": "Upgrade to Pro for more features"
 	},
 	"billing": {
@@ -91,7 +92,19 @@
 	},
 	"settings": {
 		"title": "Settings",
-		"subtitle": "Manage your account settings and preferences."
+		"subtitle": "Manage your account settings and preferences.",
+		"profile": "Profile",
+		"profileDescription": "Update your personal information.",
+		"fullName": "Full Name",
+		"emailLabel": "Email",
+		"emailHelp": "Email cannot be changed here.",
+		"save": "Save Changes",
+		"profileUpdated": "Profile updated successfully.",
+		"changePassword": "Change Password",
+		"passwordDescription": "Update your account password.",
+		"newPassword": "New Password",
+		"updatePassword": "Update Password",
+		"passwordUpdated": "Password updated successfully."
 	},
 	"admin": {
 		"title": "Admin",
@@ -182,9 +195,9 @@
 				"title": "Next.js 15",
 				"description": "Built on the latest Next.js with App Router, Server Components, and Server Actions for optimal performance."
 			},
-			"clerk": {
-				"title": "Clerk Authentication",
-				"description": "Complete authentication solution with social logins, MFA, and organization management."
+			"auth": {
+				"title": "Supabase Auth",
+				"description": "Built-in authentication with email/password, social logins, and Row Level Security integration."
 			},
 			"supabase": {
 				"title": "Supabase Database",
