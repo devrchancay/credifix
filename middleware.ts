@@ -25,7 +25,11 @@ function isPublicRoute(pathname: string): boolean {
 }
 
 function isIgnoredByIntl(pathname: string): boolean {
-  return pathname.startsWith("/api/") || pathname === "/docs";
+  return (
+    pathname.startsWith("/api/") ||
+    pathname === "/docs" ||
+    pathname.startsWith("/auth/callback")
+  );
 }
 
 export async function middleware(request: NextRequest) {
