@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default async function AboutPage() {
   const t = await getTranslations("about");
 
-  const features = ["nextjs", "clerk", "supabase", "stripe"] as const;
+  const features = ["nextjs", "auth", "supabase", "stripe"] as const;
 
   return (
     <div className="container py-12">

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { clerkClient } from "@clerk/nextjs/server";
 import { isAdmin } from "@/lib/roles";
 import { ROLES, type Role } from "@/types/roles";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function PATCH(
   req: NextRequest,
@@ -21,12 +21,13 @@ export async function PATCH(
   }
 
   try {
-    const clerk = await clerkClient();
-    await clerk.users.updateUserMetadata(userId, {
-      publicMetadata: {
-        role,
-      },
-    });
+    const supabase = createAdminClient();
+    const { error } = await supabase
+      .from("profiles")
+      .update({ role })
+      .eq("id", userId);
+
+    if (error) throw error;
 
     return NextResponse.json({ success: true, role });
   } catch (error) {

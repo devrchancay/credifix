@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/components/providers/auth-provider";
 import { createApiClient, ApiError } from "@/lib/api/client";
 import type { SubscriptionData } from "@/lib/api/types";
 

@@ -7,7 +7,7 @@ import {
   Settings,
 } from "lucide-react";
 import Link from "next/link";
-import { useClerk } from "@clerk/nextjs";
+import { useAuth } from "@/components/providers/auth-provider";
 import { useTranslations } from "next-intl";
 
 import {
@@ -41,7 +41,7 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
-  const { signOut } = useClerk();
+  const { signOut } = useAuth();
   const t = useTranslations("common");
 
   const initials = user.name
@@ -105,7 +105,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/" })}>
+            <DropdownMenuItem onClick={() => signOut()}>
               <LogOut />
               {t("signOut")}
             </DropdownMenuItem>

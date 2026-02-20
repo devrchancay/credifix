@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         email: profile.email,
         name: profile.full_name || undefined,
         metadata: {
-          clerk_user_id: userId,
+          user_id: userId,
         },
       });
 

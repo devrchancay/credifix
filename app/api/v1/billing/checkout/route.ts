@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
 import { getAuthenticatedUser } from "@/lib/api/middleware";
 import {
   createErrorResponse,
@@ -21,9 +20,15 @@ export async function POST(request: NextRequest) {
     }
     const { userId } = authResult;
 
-    // Get user details
-    const user = await currentUser();
-    if (!user) {
+    // Get user profile for email
+    const supabase = createAdminClient();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", userId)
+      .single();
+
+    if (!profile) {
       return createErrorResponse("User not found", 404, ErrorCodes.NOT_FOUND);
     }
 
@@ -65,7 +70,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for existing customer
-    const supabase = createAdminClient();
     const { data: existingSubscription } = await supabase
       .from("subscriptions")
       .select("stripe_customer_id")
@@ -88,7 +92,7 @@ export async function POST(request: NextRequest) {
       customer: existingSubscription?.stripe_customer_id ?? undefined,
       customer_email: existingSubscription
         ? undefined
-        : user.emailAddresses[0]?.emailAddress,
+        : profile.email,
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
