@@ -255,7 +255,7 @@ export const openApiSpec: OpenAPIV3.Document = {
       BearerAuth: {
         type: "http",
         scheme: "bearer",
-        description: "Clerk session token. Obtain from Clerk SDK using `getToken()`.",
+        description: "Supabase Auth access token. Obtain from `supabase.auth.getSession()`.",
       },
     },
     schemas: {

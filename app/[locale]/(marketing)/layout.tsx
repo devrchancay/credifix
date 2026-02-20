@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export default async function MarketingLayout({
   children,
@@ -11,6 +11,13 @@ export default async function MarketingLayout({
 }) {
   const t = await getTranslations("common");
   const tNav = await getTranslations("nav");
+
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const isSignedIn = !!user;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -37,19 +44,20 @@ export default async function MarketingLayout({
           </div>
           <div className="flex flex-1 items-center justify-end space-x-4">
             <ThemeToggle />
-            <SignedOut>
-              <Button variant="ghost" asChild>
-                <Link href="/sign-in">{t("signIn")}</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/sign-up">{t("getStarted")}</Link>
-              </Button>
-            </SignedOut>
-            <SignedIn>
+            {isSignedIn ? (
               <Button asChild>
                 <Link href="/dashboard">{t("dashboard")}</Link>
               </Button>
-            </SignedIn>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link href="/sign-in">{t("signIn")}</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/sign-up">{t("getStarted")}</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>

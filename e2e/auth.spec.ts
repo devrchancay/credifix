@@ -13,26 +13,29 @@ test.describe("Authentication", () => {
   test("should display sign-in page correctly", async ({ page }) => {
     await page.goto("/sign-in");
 
-    // Clerk sign-in component should be visible
-    await expect(page.locator(".cl-signIn-root")).toBeVisible({
+    // Sign-in form should be visible
+    await expect(page.getByRole("heading", { name: /sign in/i })).toBeVisible({
       timeout: 10000,
     });
+    await expect(page.getByLabel(/email/i)).toBeVisible();
+    await expect(page.getByLabel(/password/i)).toBeVisible();
   });
 
   test("should display sign-up page correctly", async ({ page }) => {
     await page.goto("/sign-up");
 
-    // Clerk sign-up component should be visible
-    await expect(page.locator(".cl-signUp-root")).toBeVisible({
+    // Sign-up form should be visible
+    await expect(page.getByRole("heading", { name: /create account/i })).toBeVisible({
       timeout: 10000,
     });
+    await expect(page.getByLabel(/full name/i)).toBeVisible();
+    await expect(page.getByLabel(/email/i)).toBeVisible();
   });
 
   test("should allow navigation to sign-up from sign-in", async ({ page }) => {
     await page.goto("/sign-in");
 
-    // Look for the sign-up link within Clerk component
-    const signUpLink = page.locator('a[href*="sign-up"]').first();
+    const signUpLink = page.getByRole("link", { name: /sign up/i });
     await signUpLink.click();
 
     await expect(page).toHaveURL(/sign-up/);

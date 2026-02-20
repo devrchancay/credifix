@@ -142,7 +142,7 @@ export async function POST(req: Request) {
         if (!userId) {
           const customer = await stripe.customers.retrieve(customerId);
           if (customer && !customer.deleted) {
-            userId = (customer as Stripe.Customer).metadata?.clerk_user_id;
+            userId = (customer as Stripe.Customer).metadata?.user_id;
           }
         }
 
@@ -218,7 +218,7 @@ export async function POST(req: Request) {
           if (!userId) {
             const customer = await stripe.customers.retrieve(customerId);
             if (customer && !customer.deleted) {
-              userId = (customer as Stripe.Customer).metadata?.clerk_user_id;
+              userId = (customer as Stripe.Customer).metadata?.user_id;
             }
           }
 

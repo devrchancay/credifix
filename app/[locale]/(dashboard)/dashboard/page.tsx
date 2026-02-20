@@ -1,7 +1,7 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanByPriceId } from "@/lib/plans/service";
 
@@ -20,7 +20,6 @@ async function getUserSubscription(userId: string) {
     return { plan: "free", status: null, subscription: null };
   }
 
-  // Use joined plan slug, fallback to lookup by price ID
   const plans = subscription.plans as { slug: string } | null;
   let plan: string;
   if (plans?.slug) {
@@ -34,8 +33,16 @@ async function getUserSubscription(userId: string) {
 }
 
 export default async function DashboardPage() {
-  const { userId } = await auth();
-  const user = await currentUser();
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const userId = user?.id;
+
+  const { data: profile } = userId
+    ? await supabase.from("profiles").select("*").eq("id", userId).single()
+    : { data: null };
+
   const t = await getTranslations("dashboard");
   const tCommon = await getTranslations("common");
 
@@ -46,12 +53,14 @@ export default async function DashboardPage() {
   const displayPlan = plan === "free" ? tCommon("free") : plan.toUpperCase();
   const isActive = status === "active" || status === "trialing";
 
+  const firstName = profile?.full_name?.split(" ")[0] ?? "User";
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground">
-          {t("welcome", { name: user?.firstName ?? "User" })}
+          {t("welcome", { name: firstName })}
         </p>
       </div>
 
@@ -73,7 +82,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-xs text-muted-foreground">
-              {user?.emailAddresses[0]?.emailAddress ?? "N/A"}
+              {profile?.email ?? user?.email ?? "N/A"}
             </div>
           </CardContent>
         </Card>
