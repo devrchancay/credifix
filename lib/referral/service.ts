@@ -127,7 +127,7 @@ export async function getReferralStats(userId: string) {
 }
 
 /**
- * Called from Clerk webhook on user.created.
+ * Called during user signup (via referral register endpoint).
  * Creates a PENDING referral record. No credits yet.
  */
 export async function processReferralSignup(
@@ -274,7 +274,7 @@ async function getOrCreateStripeCustomer(userId: string): Promise<string> {
   }
 
   const existingCustomers = await stripe.customers.search({
-    query: `metadata["clerk_user_id"]:"${userId}"`,
+    query: `metadata["user_id"]:"${userId}"`,
     limit: 1,
   });
 
@@ -291,7 +291,7 @@ async function getOrCreateStripeCustomer(userId: string): Promise<string> {
   const customer = await stripe.customers.create({
     email: profile?.email ?? undefined,
     name: profile?.full_name ?? undefined,
-    metadata: { clerk_user_id: userId },
+    metadata: { user_id: userId },
   });
 
   return customer.id;

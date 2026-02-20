@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { clerkClient } from "@clerk/nextjs/server";
 import { isAdmin } from "@/lib/roles";
-import { getRoleFromMetadata } from "@/lib/roles";
-import type { UserPublicMetadata } from "@/types/roles";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET() {
   const hasAccess = await isAdmin();
@@ -12,21 +10,27 @@ export async function GET() {
   }
 
   try {
-    const clerk = await clerkClient();
-    const { data: users } = await clerk.users.getUserList({
-      limit: 100,
-      orderBy: "-created_at",
-    });
+    const supabase = createAdminClient();
+    const { data: profiles, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
 
-    const formattedUsers = users.map((user) => ({
-      id: user.id,
-      email: user.emailAddresses[0]?.emailAddress ?? "",
-      firstName: user.firstName,
-      lastName: user.lastName,
-      imageUrl: user.imageUrl,
-      role: getRoleFromMetadata(user.publicMetadata as UserPublicMetadata),
-      createdAt: user.createdAt,
-    }));
+    if (error) throw error;
+
+    const formattedUsers = (profiles ?? []).map((profile) => {
+      const [firstName, ...lastParts] = (profile.full_name ?? "").split(" ");
+      return {
+        id: profile.id,
+        email: profile.email,
+        firstName: firstName || null,
+        lastName: lastParts.join(" ") || null,
+        imageUrl: profile.avatar_url,
+        role: profile.role,
+        createdAt: profile.created_at,
+      };
+    });
 
     return NextResponse.json({ users: formattedUsers });
   } catch (error) {

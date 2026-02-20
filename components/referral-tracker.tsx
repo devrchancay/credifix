@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/components/providers/auth-provider";
 
 export function ReferralTracker() {
   const { userId, isLoaded } = useAuth();

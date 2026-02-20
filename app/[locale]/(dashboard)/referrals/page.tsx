@@ -1,6 +1,6 @@
-import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getReferralStats, getOrCreateReferralCode, getReferralConfig } from "@/lib/referral/service";
 import { ReferralDashboard } from "./referral-dashboard";
@@ -19,11 +19,16 @@ async function hasActiveSubscription(userId: string): Promise<boolean> {
 }
 
 export default async function ReferralsPage() {
-  const { userId } = await auth();
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!userId) {
+  if (!user) {
     return null;
   }
+
+  const userId = user.id;
 
   const isSubscribed = await hasActiveSubscription(userId);
   if (!isSubscribed) {

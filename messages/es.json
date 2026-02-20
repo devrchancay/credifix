@@ -19,11 +19,13 @@
 		"free": "Gratis",
 		"referrals": "Referidos",
 		"users": "Usuarios",
-		"plans": "Planes"
+		"plans": "Planes",
+		"continueWithGoogle": "Continuar con Google",
+		"orContinueWith": "o continuar con correo"
 	},
 	"nav": {
 		"home": "Inicio",
-		"builtWith": "Construido con Next.js, Clerk, Supabase y Stripe."
+		"builtWith": "Construido con Next.js, Supabase y Stripe."
 	},
 	"landing": {
 		"badge": "Plantilla SaaS Lista para Produccion",
@@ -75,6 +77,7 @@
 		"status": "Estado",
 		"plan": "Plan",
 		"active": "Activo",
+		"inactive": "Inactivo",
 		"upgrade": "Actualiza a Pro para mas funciones"
 	},
 	"billing": {
@@ -91,7 +94,19 @@
 	},
 	"settings": {
 		"title": "Configuracion",
-		"subtitle": "Administra la configuracion y preferencias de tu cuenta."
+		"subtitle": "Administra la configuracion y preferencias de tu cuenta.",
+		"profile": "Perfil",
+		"profileDescription": "Actualiza tu informacion personal.",
+		"fullName": "Nombre Completo",
+		"emailLabel": "Correo",
+		"emailHelp": "El correo no se puede cambiar aqui.",
+		"save": "Guardar Cambios",
+		"profileUpdated": "Perfil actualizado exitosamente.",
+		"changePassword": "Cambiar Contrasena",
+		"passwordDescription": "Actualiza la contrasena de tu cuenta.",
+		"newPassword": "Nueva Contrasena",
+		"updatePassword": "Actualizar Contrasena",
+		"passwordUpdated": "Contrasena actualizada exitosamente."
 	},
 	"admin": {
 		"title": "Admin",
@@ -182,9 +197,9 @@
 				"title": "Next.js 15",
 				"description": "Construido sobre el ultimo Next.js con App Router, Server Components y Server Actions para un rendimiento optimo."
 			},
-			"clerk": {
-				"title": "Autenticacion Clerk",
-				"description": "Solucion de autenticacion completa con inicios de sesion sociales, MFA y gestion de organizaciones."
+			"auth": {
+				"title": "Supabase Auth",
+				"description": "Autenticacion integrada con email/contrasena, inicios de sesion sociales e integracion con Row Level Security."
 			},
 			"supabase": {
 				"title": "Base de Datos Supabase",
