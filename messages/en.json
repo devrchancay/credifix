@@ -19,7 +19,9 @@
 		"free": "Free",
 		"referrals": "Referrals",
 		"users": "Users",
-		"plans": "Plans"
+		"plans": "Plans",
+		"continueWithGoogle": "Continue with Google",
+		"orContinueWith": "or continue with email"
 	},
 	"nav": {
 		"home": "Home",
