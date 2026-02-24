@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { ExternalLink, Loader2 } from "lucide-react";
 import { usePortal } from "@/hooks/use-portal";
 import { useSubscription } from "@/hooks/use-subscription";
 import { capitalize } from "../../../../lib/utils";
@@ -106,34 +106,10 @@ export default function BillingPage() {
 									Loading...
 								</>
 							) : (
-								"Manage Subscription"
-							)}
-						</Button>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader>
-						<CardTitle>{t("billingHistory")}</CardTitle>
-						<CardDescription>{t("billingHistoryDescription")}</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<p className="text-sm text-muted-foreground">
-							{t("noBillingHistory")}
-						</p>
-						<Button
-							variant="outline"
-							className="mt-4"
-							onClick={handleManageBilling}
-							disabled={isPortalLoading}
-						>
-							{isPortalLoading ? (
 								<>
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									Loading...
+									Manage Subscription
+									<ExternalLink className="ml-2 h-4 w-4" />
 								</>
-							) : (
-								"View Invoices in Portal"
 							)}
 						</Button>
 					</CardContent>
