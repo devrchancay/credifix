@@ -79,5 +79,5 @@ class ApiClient {
  * Uses cookies for authentication.
  */
 export function createApiClient(baseUrl?: string): ApiClient {
-  return new ApiClient(baseUrl ?? process.env.NEXT_PUBLIC_APP_URL ?? "");
+  return new ApiClient(baseUrl ?? "");
 }
