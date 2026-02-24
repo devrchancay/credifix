@@ -29,7 +29,7 @@ export function usePortal() {
           returnUrl,
         });
 
-        window.location.href = response.portalUrl;
+        window.open(response.portalUrl, "_blank", "noopener,noreferrer");
         return response.portalUrl;
       } catch (err) {
         const message =
