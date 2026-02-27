@@ -18,6 +18,7 @@
 		"user": "Usuario",
 		"free": "Gratis",
 		"referrals": "Referidos",
+		"creditAnalysis": "Analisis de Credito",
 		"users": "Usuarios",
 		"plans": "Planes",
 		"continueWithGoogle": "Continuar con Google",
@@ -187,6 +188,27 @@
 			"bonus": "Registrate ahora y obtén {credits} creditos gratis!",
 			"cta": "Registrarse Ahora",
 			"invalidCode": "Este enlace de invitacion es invalido o ha expirado."
+		}
+	},
+	"creditAnalysis": {
+		"title": "Analisis de Credito",
+		"subtitle": "Conversa con nuestro asistente de IA para analizar tu perfil crediticio.",
+		"chat": {
+			"placeholder": "Escribe tu mensaje aqui...",
+			"assistant": "Asistente de Credito",
+			"assistantDescription": "IA especializada en analisis crediticio",
+			"emptyState": "Inicia una conversacion para analizar tu credito",
+			"attachFile": "Adjuntar archivo",
+			"recordAudio": "Grabar audio",
+			"stopRecording": "Detener",
+			"recording": "Grabando..."
+		},
+		"responses": {
+			"greeting": "Hola! Soy tu asistente de analisis de credito. Puedo ayudarte a revisar tu historial crediticio, analizar reportes de credito y darte recomendaciones para mejorar tu puntaje. Puedes enviarme archivos como reportes de credito en PDF o grabar mensajes de voz. Como puedo ayudarte hoy?",
+			"analyzing": "Gracias por la informacion. Estoy analizando tu perfil crediticio. Basado en lo que me compartes, te recomiendo revisar tus pagos recurrentes y asegurarte de mantener tu utilizacion de credito por debajo del 30%. Quieres que profundice en algun aspecto especifico?",
+			"recommendation": "Basado en mi analisis, aqui van algunas recomendaciones clave: 1) Mantener los pagos al dia es fundamental para tu puntaje. 2) Evita abrir muchas cuentas nuevas en poco tiempo. 3) Revisa tu reporte de credito regularmente para detectar errores. Necesitas ayuda con algo mas?",
+			"fileReceived": "He recibido tu archivo. Estoy revisando el documento para extraer la informacion relevante de tu credito. Dame un momento para analizarlo y te dare un resumen detallado con recomendaciones personalizadas.",
+			"audioReceived": "He recibido tu mensaje de voz. Dejame procesar lo que mencionas y prepararte una respuesta detallada sobre tu situacion crediticia."
 		}
 	},
 	"about": {
