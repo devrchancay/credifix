@@ -18,6 +18,7 @@
 		"user": "User",
 		"free": "Free",
 		"referrals": "Referrals",
+		"creditAnalysis": "Credit Analysis",
 		"users": "Users",
 		"plans": "Plans",
 		"continueWithGoogle": "Continue with Google",
@@ -187,6 +188,27 @@
 			"bonus": "Sign up now and get {credits} free credits!",
 			"cta": "Sign Up Now",
 			"invalidCode": "This invite link is invalid or has expired."
+		}
+	},
+	"creditAnalysis": {
+		"title": "Credit Analysis",
+		"subtitle": "Chat with our AI assistant to analyze your credit profile.",
+		"chat": {
+			"placeholder": "Type your message here...",
+			"assistant": "Credit Assistant",
+			"assistantDescription": "AI specialized in credit analysis",
+			"emptyState": "Start a conversation to analyze your credit",
+			"attachFile": "Attach file",
+			"recordAudio": "Record audio",
+			"stopRecording": "Stop",
+			"recording": "Recording..."
+		},
+		"responses": {
+			"greeting": "Hello! I'm your credit analysis assistant. I can help you review your credit history, analyze credit reports, and give you recommendations to improve your score. You can send me files like PDF credit reports or record voice messages. How can I help you today?",
+			"analyzing": "Thank you for the information. I'm analyzing your credit profile. Based on what you're sharing, I recommend reviewing your recurring payments and making sure to keep your credit utilization below 30%. Would you like me to go deeper into any specific aspect?",
+			"recommendation": "Based on my analysis, here are some key recommendations: 1) Keeping payments on time is fundamental for your score. 2) Avoid opening many new accounts in a short period. 3) Review your credit report regularly to detect errors. Do you need help with anything else?",
+			"fileReceived": "I've received your file. I'm reviewing the document to extract the relevant credit information. Give me a moment to analyze it and I'll provide you with a detailed summary and personalized recommendations.",
+			"audioReceived": "I've received your voice message. Let me process what you mentioned and prepare a detailed response about your credit situation."
 		}
 	},
 	"about": {
