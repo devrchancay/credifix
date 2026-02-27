@@ -24,6 +24,7 @@ export function ChatContainer() {
     messages: aiMessages,
     isLoading,
     isTranscribing,
+    isProcessingFiles,
     error,
     sendMessage,
   } = useChatAI();
@@ -87,7 +88,12 @@ export function ChatContainer() {
         )}
       </div>
 
-      {/* Transcribing indicator */}
+      {/* Processing indicators */}
+      {isProcessingFiles && (
+        <div className="border-t px-4 py-2 text-sm text-muted-foreground animate-pulse">
+          {tChat("processingFiles")}
+        </div>
+      )}
       {isTranscribing && (
         <div className="border-t px-4 py-2 text-sm text-muted-foreground animate-pulse">
           {tChat("transcribing")}

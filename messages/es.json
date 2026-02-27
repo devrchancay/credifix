@@ -242,6 +242,7 @@
 			"errorGeneric": "Algo salio mal. Por favor intenta de nuevo.",
 			"newChat": "Nuevo Chat",
 			"transcribing": "Transcribiendo audio...",
+			"processingFiles": "Procesando archivos...",
 			"transcriptionError": "No se pudo transcribir el audio"
 		},
 		"responses": {

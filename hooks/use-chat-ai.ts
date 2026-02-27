@@ -13,12 +13,23 @@ export interface ConversationSummary {
   updatedAt: string;
 }
 
+type ProcessedFileResult =
+  | { kind: "text"; name: string; mimeType: string; content: string }
+  | {
+      kind: "image";
+      name: string;
+      mimeType: string;
+      base64: string;
+      mediaType: string;
+    };
+
 export function useChatAI() {
   const { userId, isLoaded } = useAuth();
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const pendingAttachmentsRef = useRef<Attachment[]>([]);
+  const pendingFileContentsRef = useRef<ProcessedFileResult[]>([]);
 
   const transport = useMemo(
     () =>
@@ -29,6 +40,10 @@ export function useChatAI() {
           attachments:
             pendingAttachmentsRef.current.length > 0
               ? pendingAttachmentsRef.current
+              : undefined,
+          fileContents:
+            pendingFileContentsRef.current.length > 0
+              ? pendingFileContentsRef.current
               : undefined,
         },
       }),
@@ -45,9 +60,11 @@ export function useChatAI() {
     transport,
     onFinish() {
       pendingAttachmentsRef.current = [];
+      pendingFileContentsRef.current = [];
     },
     onError() {
       pendingAttachmentsRef.current = [];
+      pendingFileContentsRef.current = [];
     },
   });
 
@@ -131,6 +148,7 @@ export function useChatAI() {
   }, [setMessages]);
 
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isProcessingFiles, setIsProcessingFiles] = useState(false);
 
   const transcribeAudio = useCallback(
     async (blob: Blob, name: string): Promise<string | null> => {
@@ -152,6 +170,35 @@ export function useChatAI() {
     []
   );
 
+  const processFiles = useCallback(
+    async (
+      files: Attachment[]
+    ): Promise<ProcessedFileResult[]> => {
+      const filesWithBlobs = files.filter(
+        (a) => a.type === "file" && a.blob
+      );
+      if (filesWithBlobs.length === 0) return [];
+
+      const formData = new FormData();
+      for (const file of filesWithBlobs) {
+        formData.append("files", file.blob!, file.name);
+      }
+
+      try {
+        const res = await fetch("/api/v1/files/process", {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) return [];
+        const data = await res.json();
+        return data.files || [];
+      } catch {
+        return [];
+      }
+    },
+    []
+  );
+
   const sendMessage = useCallback(
     async (content: string, attachments?: Attachment[]) => {
       // Strip blobs from attachments for metadata-only transport
@@ -163,12 +210,27 @@ export function useChatAI() {
         pendingAttachmentsRef.current = metadataAttachments;
       }
 
+      let messageText = content;
+
+      // Process file attachments (extract text content)
+      const fileAttachments = attachments?.filter(
+        (a) => a.type === "file" && a.blob
+      );
+
+      if (fileAttachments && fileAttachments.length > 0) {
+        setIsProcessingFiles(true);
+        try {
+          const processedFiles = await processFiles(fileAttachments);
+          pendingFileContentsRef.current = processedFiles;
+        } finally {
+          setIsProcessingFiles(false);
+        }
+      }
+
       // Transcribe audio attachments
       const audioAttachments = attachments?.filter(
         (a) => a.type === "audio" && a.blob
       );
-
-      let messageText = content;
 
       if (audioAttachments && audioAttachments.length > 0) {
         setIsTranscribing(true);
@@ -195,16 +257,20 @@ export function useChatAI() {
 
       sdkSendMessage({ text: messageText });
     },
-    [sdkSendMessage, transcribeAudio]
+    [sdkSendMessage, transcribeAudio, processFiles]
   );
 
   const isLoading =
-    isTranscribing || status === "submitted" || status === "streaming";
+    isTranscribing ||
+    isProcessingFiles ||
+    status === "submitted" ||
+    status === "streaming";
 
   return {
     messages,
     isLoading,
     isTranscribing,
+    isProcessingFiles,
     status,
     conversationId,
     error,
