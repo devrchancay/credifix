@@ -266,7 +266,11 @@
 			"newChat": "Nuevo Chat",
 			"transcribing": "Transcribiendo audio...",
 			"processingFiles": "Procesando archivos...",
-			"transcriptionError": "No se pudo transcribir el audio"
+			"transcriptionError": "No se pudo transcribir el audio",
+			"history": "Historial de Chats",
+			"noHistory": "Aun no hay conversaciones. Inicia un nuevo chat!",
+			"untitledChat": "Nueva conversacion",
+			"deleteChat": "Eliminar conversacion"
 		},
 		"responses": {
 			"greeting": "Hola! Soy tu asistente de analisis de credito. Puedo ayudarte a revisar tu historial crediticio, analizar reportes de credito y darte recomendaciones para mejorar tu puntaje. Puedes enviarme archivos como reportes de credito en PDF o grabar mensajes de voz. Como puedo ayudarte hoy?",
