@@ -7,15 +7,13 @@ const intlMiddleware = createIntlMiddleware(routing);
 
 const publicPaths = [
   "/",
-  "/pricing",
-  "/about",
   "/sign-in",
   "/sign-up",
   "/invite",
 ];
 
 function isPublicRoute(pathname: string): boolean {
-  // Strip locale prefix if present (e.g. /es/pricing -> /pricing)
+  // Strip locale prefix if present (e.g. /es/sign-in -> /sign-in)
   const strippedPath = pathname.replace(/^\/(en|es)/, "") || "/";
 
   return publicPaths.some((route) => {
@@ -72,6 +70,17 @@ export async function middleware(request: NextRequest) {
   response.cookies.getAll().forEach((cookie) => {
     intlResponse.cookies.set(cookie.name, cookie.value);
   });
+
+  // Redirect root to sign-in or dashboard
+  const strippedPath = pathname.replace(/^\/(en|es)/, "") || "/";
+  if (strippedPath === "/") {
+    const locale = pathname.match(/^\/(en|es)/)?.[1] || "en";
+    if (user) {
+      return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+    } else {
+      return NextResponse.redirect(new URL(`/${locale}/sign-in`, request.url));
+    }
+  }
 
   // Protect non-public routes
   if (!isPublicRoute(pathname) && !user) {

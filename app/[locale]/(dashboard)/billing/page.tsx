@@ -26,7 +26,7 @@ export default function BillingPage() {
 	// Redirect to pricing if user has free plan
 	useEffect(() => {
 		if (!isSubLoading && plan === "free") {
-			router.replace("/pricing");
+			router.replace("/dashboard");
 		}
 	}, [isSubLoading, plan, router]);
 
