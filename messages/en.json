@@ -242,6 +242,7 @@
 			"errorGeneric": "Something went wrong. Please try again.",
 			"newChat": "New Chat",
 			"transcribing": "Transcribing audio...",
+			"processingFiles": "Processing files...",
 			"transcriptionError": "Could not transcribe audio"
 		},
 		"responses": {
