@@ -114,19 +114,25 @@ export async function POST(request: Request) {
       getSystemPrompt(),
     ]);
 
-    // 6. Build attachment context (for audio-only, since file contents are now in the message text)
+    // 6. Build attachment context for all attachment types
     let attachmentContext = "";
     if (attachments && attachments.length > 0) {
-      const audioAttachments = attachments.filter((a) => a.type === "audio");
+      const descriptions: string[] = [];
 
-      if (audioAttachments.length > 0) {
-        const fileDescriptions = audioAttachments
-          .map(
-            (a) =>
-              `[Audio message: ${a.name}, duration: ${a.duration || "unknown"}s]`
-          )
-          .join("\n");
-        attachmentContext = `\n\nThe user has attached the following files:\n${fileDescriptions}\nAcknowledge these attachments in your response.`;
+      for (const a of attachments) {
+        if (a.type === "audio") {
+          descriptions.push(
+            `- Audio message: ${a.name}, duration: ${a.duration || "unknown"}s`
+          );
+        } else {
+          descriptions.push(
+            `- File: ${a.name} (${(a.size / 1024).toFixed(1)} KB)`
+          );
+        }
+      }
+
+      if (descriptions.length > 0) {
+        attachmentContext = `\n\nThe user has attached the following files:\n${descriptions.join("\n")}\nThe file contents have been extracted and included in the user's message. Acknowledge these attachments and analyze their contents in your response.`;
       }
     }
 
