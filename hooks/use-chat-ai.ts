@@ -191,6 +191,27 @@ export function useChatAI() {
     setMessageAttachments({});
   }, [setMessages]);
 
+  const deleteConversation = useCallback(
+    async (id: string) => {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("conversations")
+        .delete()
+        .eq("id", id);
+
+      if (!error) {
+        setConversations((prev) => prev.filter((c) => c.id !== id));
+        // If deleting the active conversation, reset to new chat
+        if (conversationId === id) {
+          setMessages([]);
+          setConversationId(null);
+          setMessageAttachments({});
+        }
+      }
+    },
+    [conversationId, setMessages]
+  );
+
   const selectAgent = useCallback(
     (newAgentId: string) => {
       // Only allow switching agents when no conversation is active
@@ -355,6 +376,7 @@ export function useChatAI() {
     conversations,
     loadConversation,
     startNewConversation,
+    deleteConversation,
     isLoadingConversations,
   };
 }
