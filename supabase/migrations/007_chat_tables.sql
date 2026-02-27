@@ -5,7 +5,7 @@
 -- Conversations table: one per chat session per user
 CREATE TABLE conversations (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   title TEXT,
   thread_id TEXT,  -- OpenAI thread ID if using Assistants API
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -35,7 +35,7 @@ CREATE TABLE ai_config (
   assistant_id TEXT,
   max_tokens INTEGER NOT NULL DEFAULT 4096,
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_by UUID REFERENCES profiles(id) ON DELETE SET NULL
+  updated_by TEXT REFERENCES profiles(id) ON DELETE SET NULL
 );
 
 -- Knowledge files table: tracks files uploaded to OpenAI Vector Store
@@ -47,7 +47,7 @@ CREATE TABLE knowledge_files (
   file_size INTEGER,
   mime_type TEXT,
   status TEXT NOT NULL DEFAULT 'processing' CHECK (status IN ('processing', 'completed', 'failed')),
-  uploaded_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  uploaded_by TEXT REFERENCES profiles(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -85,26 +85,26 @@ ALTER TABLE knowledge_files ENABLE ROW LEVEL SECURITY;
 -- Conversations: users can only CRUD their own
 CREATE POLICY "Users can view their own conversations"
   ON conversations FOR SELECT
-  USING (user_id = auth.uid());
+  USING (user_id = auth.uid()::text);
 
 CREATE POLICY "Users can create their own conversations"
   ON conversations FOR INSERT
-  WITH CHECK (user_id = auth.uid());
+  WITH CHECK (user_id = auth.uid()::text);
 
 CREATE POLICY "Users can update their own conversations"
   ON conversations FOR UPDATE
-  USING (user_id = auth.uid());
+  USING (user_id = auth.uid()::text);
 
 CREATE POLICY "Users can delete their own conversations"
   ON conversations FOR DELETE
-  USING (user_id = auth.uid());
+  USING (user_id = auth.uid()::text);
 
 -- Messages: users can CRUD messages in their own conversations
 CREATE POLICY "Users can view messages in their conversations"
   ON messages FOR SELECT
   USING (
     conversation_id IN (
-      SELECT id FROM conversations WHERE user_id = auth.uid()
+      SELECT id FROM conversations WHERE user_id = auth.uid()::text
     )
   );
 
@@ -112,7 +112,7 @@ CREATE POLICY "Users can insert messages in their conversations"
   ON messages FOR INSERT
   WITH CHECK (
     conversation_id IN (
-      SELECT id FROM conversations WHERE user_id = auth.uid()
+      SELECT id FROM conversations WHERE user_id = auth.uid()::text
     )
   );
 
@@ -120,20 +120,20 @@ CREATE POLICY "Users can delete messages in their conversations"
   ON messages FOR DELETE
   USING (
     conversation_id IN (
-      SELECT id FROM conversations WHERE user_id = auth.uid()
+      SELECT id FROM conversations WHERE user_id = auth.uid()::text
     )
   );
 
 -- AI Config: all authenticated users can read, only admin can update
 CREATE POLICY "Authenticated users can read ai_config"
   ON ai_config FOR SELECT
-  USING (auth.uid() IS NOT NULL);
+  USING (auth.uid()::text IS NOT NULL);
 
 CREATE POLICY "Admins can update ai_config"
   ON ai_config FOR UPDATE
   USING (
     EXISTS (
-      SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
+      SELECT 1 FROM profiles WHERE id = auth.uid()::text AND role = 'admin'
     )
   );
 
@@ -141,20 +141,20 @@ CREATE POLICY "Admins can insert ai_config"
   ON ai_config FOR INSERT
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
+      SELECT 1 FROM profiles WHERE id = auth.uid()::text AND role = 'admin'
     )
   );
 
 -- Knowledge files: all authenticated can read, only admin can insert/delete
 CREATE POLICY "Authenticated users can read knowledge_files"
   ON knowledge_files FOR SELECT
-  USING (auth.uid() IS NOT NULL);
+  USING (auth.uid()::text IS NOT NULL);
 
 CREATE POLICY "Admins can insert knowledge_files"
   ON knowledge_files FOR INSERT
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
+      SELECT 1 FROM profiles WHERE id = auth.uid()::text AND role = 'admin'
     )
   );
 
@@ -162,7 +162,7 @@ CREATE POLICY "Admins can delete knowledge_files"
   ON knowledge_files FOR DELETE
   USING (
     EXISTS (
-      SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
+      SELECT 1 FROM profiles WHERE id = auth.uid()::text AND role = 'admin'
     )
   );
 
@@ -170,7 +170,7 @@ CREATE POLICY "Admins can update knowledge_files"
   ON knowledge_files FOR UPDATE
   USING (
     EXISTS (
-      SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
+      SELECT 1 FROM profiles WHERE id = auth.uid()::text AND role = 'admin'
     )
   );
 
