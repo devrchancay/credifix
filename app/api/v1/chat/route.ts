@@ -80,10 +80,8 @@ function injectFileContent(
         ? msg.content
         : [{ type: "text" as const, text: msg.content as string }];
 
-      const newContent: Array<
-        | { type: "text"; text: string }
-        | { type: "image"; image: string; mimeType: string }
-      > = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const newContent: any[] = [];
 
       // Add existing text content with file context appended
       for (const part of currentContent) {
@@ -93,7 +91,8 @@ function injectFileContent(
             text: part.text + textContext,
           });
         } else {
-          newContent.push(part as { type: "text"; text: string });
+          // Preserve existing non-text parts (images, files, etc.)
+          newContent.push(part);
         }
       }
 
