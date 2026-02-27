@@ -130,21 +130,81 @@ export function useChatAI() {
     setConversationId(null);
   }, [setMessages]);
 
-  const sendMessage = useCallback(
-    (content: string, attachments?: Attachment[]) => {
-      if (attachments && attachments.length > 0) {
-        pendingAttachmentsRef.current = attachments;
+  const [isTranscribing, setIsTranscribing] = useState(false);
+
+  const transcribeAudio = useCallback(
+    async (blob: Blob, name: string): Promise<string | null> => {
+      const formData = new FormData();
+      formData.append("file", blob, name);
+
+      try {
+        const res = await fetch("/api/v1/transcribe", {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data.text || null;
+      } catch {
+        return null;
       }
-      sdkSendMessage({ text: content });
     },
-    [sdkSendMessage]
+    []
   );
 
-  const isLoading = status === "submitted" || status === "streaming";
+  const sendMessage = useCallback(
+    async (content: string, attachments?: Attachment[]) => {
+      // Strip blobs from attachments for metadata-only transport
+      const metadataAttachments = attachments?.map(
+        ({ blob: _blob, ...rest }) => rest
+      );
+
+      if (metadataAttachments && metadataAttachments.length > 0) {
+        pendingAttachmentsRef.current = metadataAttachments;
+      }
+
+      // Transcribe audio attachments
+      const audioAttachments = attachments?.filter(
+        (a) => a.type === "audio" && a.blob
+      );
+
+      let messageText = content;
+
+      if (audioAttachments && audioAttachments.length > 0) {
+        setIsTranscribing(true);
+        try {
+          const transcriptions = await Promise.all(
+            audioAttachments.map((a) => transcribeAudio(a.blob!, a.name))
+          );
+          const validTranscriptions = transcriptions.filter(Boolean);
+
+          if (validTranscriptions.length > 0) {
+            const transcriptionText = validTranscriptions.join("\n");
+            if (content.trim()) {
+              messageText = `${content}\n\n[Audio]: ${transcriptionText}`;
+            } else {
+              messageText = transcriptionText;
+            }
+          } else if (!content.trim()) {
+            messageText = "[Audio message could not be transcribed]";
+          }
+        } finally {
+          setIsTranscribing(false);
+        }
+      }
+
+      sdkSendMessage({ text: messageText });
+    },
+    [sdkSendMessage, transcribeAudio]
+  );
+
+  const isLoading =
+    isTranscribing || status === "submitted" || status === "streaming";
 
   return {
     messages,
     isLoading,
+    isTranscribing,
     status,
     conversationId,
     error,

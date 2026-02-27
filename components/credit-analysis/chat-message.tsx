@@ -13,6 +13,7 @@ export type Attachment = {
   size: number;
   url?: string;
   duration?: number;
+  blob?: Blob;
 };
 
 export type ChatMessage = {

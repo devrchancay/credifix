@@ -240,7 +240,9 @@
 			"stopRecording": "Detener",
 			"recording": "Grabando...",
 			"errorGeneric": "Algo salio mal. Por favor intenta de nuevo.",
-			"newChat": "Nuevo Chat"
+			"newChat": "Nuevo Chat",
+			"transcribing": "Transcribiendo audio...",
+			"transcriptionError": "No se pudo transcribir el audio"
 		},
 		"responses": {
 			"greeting": "Hola! Soy tu asistente de analisis de credito. Puedo ayudarte a revisar tu historial crediticio, analizar reportes de credito y darte recomendaciones para mejorar tu puntaje. Puedes enviarme archivos como reportes de credito en PDF o grabar mensajes de voz. Como puedo ayudarte hoy?",
