@@ -1,6 +1,7 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import OpenAI from "openai";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getAgent, type Agent } from "./agents";
 
 // Vercel AI SDK provider (reads OPENAI_API_KEY from env automatically)
 export const openaiProvider = createOpenAI({});
@@ -20,6 +21,31 @@ export interface AIConfig {
   assistantId: string | null;
 }
 
+/** Get AI config for a specific agent */
+export function getAIConfigFromAgent(agent: Agent): AIConfig {
+  return {
+    systemPrompt: agent.systemPrompt,
+    model: agent.model,
+    temperature: agent.temperature,
+    topP: agent.topP,
+    maxTokens: agent.maxTokens,
+    vectorStoreId: agent.vectorStoreId,
+    assistantId: agent.assistantId,
+  };
+}
+
+/** Get AI config by agent ID */
+export async function getAIConfigByAgentId(
+  agentId: string
+): Promise<AIConfig> {
+  const agent = await getAgent(agentId);
+  if (agent) {
+    return getAIConfigFromAgent(agent);
+  }
+  return getAIConfig();
+}
+
+/** Legacy: get AI config from singleton ai_config table (fallback) */
 export async function getAIConfig(): Promise<AIConfig> {
   try {
     const supabase = createAdminClient();

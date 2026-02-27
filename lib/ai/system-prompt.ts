@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getAgent } from "./agents";
 
 export const DEFAULT_SYSTEM_PROMPT = `You are a professional credit analysis assistant for Credifix. Your role is to help users understand and improve their credit profiles.
 
@@ -22,6 +23,19 @@ Guidelines:
 
 You are NOT a licensed financial advisor. Always recommend users consult with qualified professionals for specific financial decisions.`;
 
+/** Get system prompt for a specific agent */
+export async function getSystemPromptByAgentId(
+  agentId: string
+): Promise<string> {
+  try {
+    const agent = await getAgent(agentId);
+    return agent?.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+  } catch {
+    return DEFAULT_SYSTEM_PROMPT;
+  }
+}
+
+/** Legacy: get system prompt from singleton ai_config (fallback) */
 export async function getSystemPrompt(): Promise<string> {
   try {
     const supabase = createAdminClient();
