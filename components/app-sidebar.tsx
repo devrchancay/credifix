@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CreditCard, Home, Settings, Shield, Gift, FileSearch } from "lucide-react";
+import { CreditCard, Home, Settings, Shield, Gift, FileSearch, BrainCircuit } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { useTranslations } from "next-intl";
 
@@ -74,6 +74,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {
           title: t("plans"),
           url: "/admin/plans",
+        },
+        {
+          title: t("aiSettings"),
+          url: "/admin/ai-settings",
         },
       ],
     },

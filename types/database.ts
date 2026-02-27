@@ -362,6 +362,173 @@ export type Database = {
         };
         Relationships: [];
       };
+      conversations: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string | null;
+          thread_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title?: string | null;
+          thread_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string | null;
+          thread_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "conversations_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          role: "user" | "assistant" | "system";
+          content: string;
+          citations: Json | null;
+          attachments: Json;
+          tokens_used: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          role: "user" | "assistant" | "system";
+          content: string;
+          citations?: Json | null;
+          attachments?: Json;
+          tokens_used?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          conversation_id?: string;
+          role?: "user" | "assistant" | "system";
+          content?: string;
+          citations?: Json | null;
+          attachments?: Json;
+          tokens_used?: number | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "conversations";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      ai_config: {
+        Row: {
+          id: string;
+          system_prompt: string;
+          model: string;
+          temperature: number;
+          top_p: number;
+          vector_store_id: string | null;
+          assistant_id: string | null;
+          max_tokens: number;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          system_prompt: string;
+          model?: string;
+          temperature?: number;
+          top_p?: number;
+          vector_store_id?: string | null;
+          assistant_id?: string | null;
+          max_tokens?: number;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          system_prompt?: string;
+          model?: string;
+          temperature?: number;
+          top_p?: number;
+          vector_store_id?: string | null;
+          assistant_id?: string | null;
+          max_tokens?: number;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ai_config_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      knowledge_files: {
+        Row: {
+          id: string;
+          openai_file_id: string;
+          vector_store_id: string;
+          filename: string;
+          file_size: number | null;
+          mime_type: string | null;
+          status: "processing" | "completed" | "failed";
+          uploaded_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          openai_file_id: string;
+          vector_store_id: string;
+          filename: string;
+          file_size?: number | null;
+          mime_type?: string | null;
+          status?: "processing" | "completed" | "failed";
+          uploaded_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          openai_file_id?: string;
+          vector_store_id?: string;
+          filename?: string;
+          file_size?: number | null;
+          mime_type?: string | null;
+          status?: "processing" | "completed" | "failed";
+          uploaded_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_files_uploaded_by_fkey";
+            columns: ["uploaded_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       subscriptions: {
         Row: {
           id: string;

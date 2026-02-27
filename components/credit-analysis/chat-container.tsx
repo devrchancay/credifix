@@ -1,42 +1,47 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { ChatMessageBubble, type ChatMessage, type Attachment } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { TypingIndicator } from "./typing-indicator";
 import { Bot, FileSearch } from "lucide-react";
+import { useChatAI } from "@/hooks/use-chat-ai";
 
-function getSimulatedResponse(
-  t: (key: string) => string,
-  hasFiles: boolean,
-  hasAudio: boolean
-): string {
-  if (hasAudio) return t("creditAnalysis.responses.audioReceived");
-  if (hasFiles) return t("creditAnalysis.responses.fileReceived");
-
-  const generalResponses = [
-    t("creditAnalysis.responses.analyzing"),
-    t("creditAnalysis.responses.recommendation"),
-  ];
-  return generalResponses[Math.floor(Math.random() * generalResponses.length)];
-}
-
-function createGreeting(t: (key: string) => string): ChatMessage {
-  return {
-    id: crypto.randomUUID(),
-    role: "assistant",
-    content: t("creditAnalysis.responses.greeting"),
-    createdAt: new Date(),
-  };
+/** Extract text content from a UIMessage's parts */
+function getTextFromParts(parts: Array<{ type: string; text?: string }>): string {
+  return parts
+    .filter((p): p is { type: "text"; text: string } => p.type === "text")
+    .map((p) => p.text)
+    .join("");
 }
 
 export function ChatContainer() {
-  const t = useTranslations();
   const tChat = useTranslations("creditAnalysis.chat");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>(() => [createGreeting(t)]);
-  const [isTyping, setIsTyping] = useState(false);
+
+  const {
+    messages: aiMessages,
+    isLoading,
+    error,
+    sendMessage,
+  } = useChatAI();
+
+  // Convert UIMessage (parts-based) to ChatMessage (content-based) for rendering
+  const messages: ChatMessage[] = useMemo(() => {
+    return aiMessages.map((m) => ({
+      id: m.id,
+      role: m.role as "user" | "assistant",
+      content: getTextFromParts(m.parts as Array<{ type: string; text?: string }>),
+      createdAt: new Date(),
+    }));
+  }, [aiMessages]);
+
+  // Show typing indicator when loading but assistant hasn't started streaming yet
+  const showTyping =
+    isLoading &&
+    (messages.length === 0 ||
+      messages[messages.length - 1]?.role === "user");
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -44,35 +49,10 @@ export function ChatContainer() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isTyping, scrollToBottom]);
+  }, [messages, isLoading, scrollToBottom]);
 
   const handleSend = (content: string, attachments: Attachment[]) => {
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content,
-      attachments: attachments.length > 0 ? attachments : undefined,
-      createdAt: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setIsTyping(true);
-
-    const hasFiles = attachments.some((a) => a.type === "file");
-    const hasAudio = attachments.some((a) => a.type === "audio");
-
-    // Simulate assistant response
-    setTimeout(() => {
-      const response = getSimulatedResponse(t, hasFiles, hasAudio);
-      const assistantMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: response,
-        createdAt: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsTyping(false);
-    }, 1500 + Math.random() * 1000);
+    sendMessage(content, attachments.length > 0 ? attachments : undefined);
   };
 
   return (
@@ -90,7 +70,7 @@ export function ChatContainer() {
 
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto">
-        {messages.length === 0 ? (
+        {messages.length === 0 && !isLoading ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">
             <Bot className="size-12 opacity-30" />
             <p className="text-sm">{tChat("emptyState")}</p>
@@ -100,14 +80,21 @@ export function ChatContainer() {
             {messages.map((message) => (
               <ChatMessageBubble key={message.id} message={message} />
             ))}
-            {isTyping && <TypingIndicator />}
+            {showTyping && <TypingIndicator />}
             <div ref={messagesEndRef} />
           </div>
         )}
       </div>
 
+      {/* Error display */}
+      {error && (
+        <div className="border-t px-4 py-2 text-sm text-destructive">
+          {tChat("errorGeneric")}
+        </div>
+      )}
+
       {/* Input */}
-      <ChatInput onSend={handleSend} disabled={isTyping} />
+      <ChatInput onSend={handleSend} disabled={isLoading} />
     </div>
   );
 }
