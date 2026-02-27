@@ -13,15 +13,12 @@ export interface ConversationSummary {
   updatedAt: string;
 }
 
-type ProcessedFileResult =
-  | { kind: "text"; name: string; mimeType: string; content: string }
-  | {
-      kind: "image";
-      name: string;
-      mimeType: string;
-      base64: string;
-      mediaType: string;
-    };
+interface ProcessedFileResult {
+  kind: "text" | "image";
+  name: string;
+  mimeType: string;
+  content?: string;
+}
 
 export function useChatAI() {
   const { userId, isLoaded } = useAuth();
@@ -29,7 +26,6 @@ export function useChatAI() {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const pendingAttachmentsRef = useRef<Attachment[]>([]);
-  const pendingFileContentsRef = useRef<ProcessedFileResult[]>([]);
 
   const transport = useMemo(
     () =>
@@ -37,14 +33,11 @@ export function useChatAI() {
         api: "/api/v1/chat",
         body: {
           conversationId,
-          attachments:
-            pendingAttachmentsRef.current.length > 0
+          get attachments() {
+            return pendingAttachmentsRef.current.length > 0
               ? pendingAttachmentsRef.current
-              : undefined,
-          fileContents:
-            pendingFileContentsRef.current.length > 0
-              ? pendingFileContentsRef.current
-              : undefined,
+              : undefined;
+          },
         },
       }),
     [conversationId]
@@ -60,11 +53,9 @@ export function useChatAI() {
     transport,
     onFinish() {
       pendingAttachmentsRef.current = [];
-      pendingFileContentsRef.current = [];
     },
     onError() {
       pendingAttachmentsRef.current = [];
-      pendingFileContentsRef.current = [];
     },
   });
 
@@ -212,7 +203,7 @@ export function useChatAI() {
 
       let messageText = content;
 
-      // Process file attachments (extract text content)
+      // Process file attachments → extract text and inject into message
       const fileAttachments = attachments?.filter(
         (a) => a.type === "file" && a.blob
       );
@@ -221,7 +212,19 @@ export function useChatAI() {
         setIsProcessingFiles(true);
         try {
           const processedFiles = await processFiles(fileAttachments);
-          pendingFileContentsRef.current = processedFiles;
+          const fileTexts = processedFiles
+            .filter((f) => f.kind === "text")
+            .map(
+              (f) =>
+                `[File: ${f.name}]\n${f.content}\n[End of ${f.name}]`
+            );
+
+          if (fileTexts.length > 0) {
+            const fileSection = fileTexts.join("\n\n");
+            messageText = messageText.trim()
+              ? `${messageText}\n\n${fileSection}`
+              : fileSection;
+          }
         } finally {
           setIsProcessingFiles(false);
         }
@@ -242,12 +245,12 @@ export function useChatAI() {
 
           if (validTranscriptions.length > 0) {
             const transcriptionText = validTranscriptions.join("\n");
-            if (content.trim()) {
-              messageText = `${content}\n\n[Audio]: ${transcriptionText}`;
+            if (messageText.trim()) {
+              messageText = `${messageText}\n\n[Audio]: ${transcriptionText}`;
             } else {
               messageText = transcriptionText;
             }
-          } else if (!content.trim()) {
+          } else if (!messageText.trim()) {
             messageText = "[Audio message could not be transcribed]";
           }
         } finally {
