@@ -40,30 +40,11 @@ test.describe("Authentication", () => {
 
     await expect(page).toHaveURL(/sign-up/);
   });
-});
 
-test.describe("Public Pages", () => {
-  test("should display landing page", async ({ page }) => {
+  test("should redirect root to sign-in for unauthenticated users", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.locator("h1")).toContainText(/Build Your SaaS/i);
-    await expect(page.getByRole("link", { name: /get started/i })).toBeVisible();
-  });
-
-  test("should display pricing page", async ({ page }) => {
-    await page.goto("/pricing");
-
-    await expect(page.locator("h1")).toContainText(/pricing/i);
-
-    // Check that all plan cards are visible
-    await expect(page.getByText("Free")).toBeVisible();
-    await expect(page.getByText("Pro")).toBeVisible();
-    await expect(page.getByText("Enterprise")).toBeVisible();
-  });
-
-  test("should display about page", async ({ page }) => {
-    await page.goto("/about");
-
-    await expect(page.locator("h1")).toContainText(/about/i);
+    // Should be redirected to sign-in
+    await expect(page).toHaveURL(/sign-in/);
   });
 });

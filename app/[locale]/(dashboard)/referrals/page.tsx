@@ -32,7 +32,7 @@ export default async function ReferralsPage() {
 
   const isSubscribed = await hasActiveSubscription(userId);
   if (!isSubscribed) {
-    redirect("/pricing");
+    redirect("/dashboard");
   }
 
   const t = await getTranslations("referral");
