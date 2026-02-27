@@ -27,6 +27,7 @@ export function ChatContainer() {
     isProcessingFiles,
     error,
     sendMessage,
+    messageAttachments,
   } = useChatAI();
 
   // Convert UIMessage (parts-based) to ChatMessage (content-based) for rendering
@@ -35,9 +36,10 @@ export function ChatContainer() {
       id: m.id,
       role: m.role as "user" | "assistant",
       content: getTextFromParts(m.parts as Array<{ type: string; text?: string }>),
+      attachments: messageAttachments[m.id],
       createdAt: new Date(),
     }));
-  }, [aiMessages]);
+  }, [aiMessages, messageAttachments]);
 
   // Show typing indicator when loading but assistant hasn't started streaming yet
   const showTyping =
