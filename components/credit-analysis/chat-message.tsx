@@ -67,6 +67,25 @@ function AttachmentPreview({ attachment }: { attachment: Attachment }) {
   );
 }
 
+/** Strip embedded file content markers from user messages for cleaner display */
+function cleanUserContent(content: string): string {
+  // Remove [File: name]...[End of name] blocks
+  let cleaned = content.replace(
+    /\[File: [^\]]+\]\n[\s\S]*?\[End of [^\]]+\]/g,
+    ""
+  );
+  // Remove [Image attached: ...] markers
+  cleaned = cleaned.replace(/\[Image attached: [^\]]+\]/g, "");
+  // Remove [Audio]: ... markers
+  cleaned = cleaned.replace(/\[Audio\]: .*/g, "");
+  // Remove [Audio message could not be transcribed]
+  cleaned = cleaned.replace(
+    /\[Audio message could not be transcribed\]/g,
+    ""
+  );
+  return cleaned.trim();
+}
+
 export function ChatMessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
 
@@ -103,18 +122,23 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
           </div>
         )}
 
-        {message.content && (
-          <div
-            className={cn(
-              "rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
-              isUser
-                ? "bg-primary text-primary-foreground rounded-tr-sm"
-                : "bg-muted text-foreground rounded-tl-sm"
-            )}
-          >
-            <p className="whitespace-pre-wrap">{message.content}</p>
-          </div>
-        )}
+        {(() => {
+          const displayContent = isUser
+            ? cleanUserContent(message.content)
+            : message.content;
+          return displayContent ? (
+            <div
+              className={cn(
+                "rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+                isUser
+                  ? "bg-primary text-primary-foreground rounded-tr-sm"
+                  : "bg-muted text-foreground rounded-tl-sm"
+              )}
+            >
+              <p className="whitespace-pre-wrap">{displayContent}</p>
+            </div>
+          ) : null;
+        })()}
       </div>
     </div>
   );
