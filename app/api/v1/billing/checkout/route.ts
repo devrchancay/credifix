@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     const finalCancelUrl =
       platform === "mobile" && cancelUrl
         ? cancelUrl
-        : `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`;
+        : `${process.env.NEXT_PUBLIC_APP_URL}/billing?canceled=true`;
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
