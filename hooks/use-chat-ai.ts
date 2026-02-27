@@ -23,6 +23,7 @@ interface ProcessedFileResult {
 export function useChatAI() {
   const { userId, isLoaded } = useAuth();
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [agentId, setAgentId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const pendingAttachmentsRef = useRef<Attachment[]>([]);
@@ -38,6 +39,7 @@ export function useChatAI() {
         api: "/api/v1/chat",
         body: {
           conversationId,
+          agentId,
           get attachments() {
             return pendingAttachmentsRef.current.length > 0
               ? pendingAttachmentsRef.current
@@ -45,7 +47,7 @@ export function useChatAI() {
           },
         },
       }),
-    [conversationId]
+    [conversationId, agentId]
   );
 
   const {
@@ -168,6 +170,17 @@ export function useChatAI() {
         setMessages(loadedMessages);
         setConversationId(id);
       }
+
+      // Also load the agent_id for this conversation
+      const { data: convData } = await supabase
+        .from("conversations")
+        .select("agent_id")
+        .eq("id", id)
+        .single();
+
+      if (convData?.agent_id) {
+        setAgentId(convData.agent_id);
+      }
     },
     [setMessages]
   );
@@ -177,6 +190,16 @@ export function useChatAI() {
     setConversationId(null);
     setMessageAttachments({});
   }, [setMessages]);
+
+  const selectAgent = useCallback(
+    (newAgentId: string) => {
+      // Only allow switching agents when no conversation is active
+      if (!conversationId) {
+        setAgentId(newAgentId);
+      }
+    },
+    [conversationId]
+  );
 
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isProcessingFiles, setIsProcessingFiles] = useState(false);
@@ -324,8 +347,10 @@ export function useChatAI() {
     isProcessingFiles,
     status,
     conversationId,
+    agentId,
     error,
     sendMessage,
+    selectAgent,
     messageAttachments,
     conversations,
     loadConversation,

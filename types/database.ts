@@ -362,12 +362,78 @@ export type Database = {
         };
         Relationships: [];
       };
+      agents: {
+        Row: {
+          id: string;
+          slug: string;
+          name: string;
+          description: string | null;
+          tier: "basic" | "premium";
+          is_active: boolean;
+          system_prompt: string;
+          model: string;
+          temperature: number;
+          top_p: number;
+          max_tokens: number;
+          vector_store_id: string | null;
+          assistant_id: string | null;
+          created_at: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          name: string;
+          description?: string | null;
+          tier?: "basic" | "premium";
+          is_active?: boolean;
+          system_prompt: string;
+          model?: string;
+          temperature?: number;
+          top_p?: number;
+          max_tokens?: number;
+          vector_store_id?: string | null;
+          assistant_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          name?: string;
+          description?: string | null;
+          tier?: "basic" | "premium";
+          is_active?: boolean;
+          system_prompt?: string;
+          model?: string;
+          temperature?: number;
+          top_p?: number;
+          max_tokens?: number;
+          vector_store_id?: string | null;
+          assistant_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "agents_updated_by_fkey";
+            columns: ["updated_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       conversations: {
         Row: {
           id: string;
           user_id: string;
           title: string | null;
           thread_id: string | null;
+          agent_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -376,6 +442,7 @@ export type Database = {
           user_id: string;
           title?: string | null;
           thread_id?: string | null;
+          agent_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -384,6 +451,7 @@ export type Database = {
           user_id?: string;
           title?: string | null;
           thread_id?: string | null;
+          agent_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -393,6 +461,13 @@ export type Database = {
             columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "conversations_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "agents";
             referencedColumns: ["id"];
           }
         ];
@@ -490,6 +565,7 @@ export type Database = {
           id: string;
           openai_file_id: string;
           vector_store_id: string;
+          agent_id: string | null;
           filename: string;
           file_size: number | null;
           mime_type: string | null;
@@ -501,6 +577,7 @@ export type Database = {
           id?: string;
           openai_file_id: string;
           vector_store_id: string;
+          agent_id?: string | null;
           filename: string;
           file_size?: number | null;
           mime_type?: string | null;
@@ -512,6 +589,7 @@ export type Database = {
           id?: string;
           openai_file_id?: string;
           vector_store_id?: string;
+          agent_id?: string | null;
           filename?: string;
           file_size?: number | null;
           mime_type?: string | null;
@@ -525,6 +603,13 @@ export type Database = {
             columns: ["uploaded_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "knowledge_files_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "agents";
             referencedColumns: ["id"];
           }
         ];
