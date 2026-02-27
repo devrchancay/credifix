@@ -3,6 +3,8 @@
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bot, User, FileText, Mic } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export type MessageRole = "user" | "assistant";
 
@@ -135,7 +137,15 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
                   : "bg-muted text-foreground rounded-tl-sm"
               )}
             >
-              <p className="whitespace-pre-wrap">{displayContent}</p>
+              {isUser ? (
+                <p className="whitespace-pre-wrap">{displayContent}</p>
+              ) : (
+                <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-2 prose-pre:my-2 prose-pre:bg-background/50 prose-pre:rounded-lg prose-code:text-xs prose-code:before:content-none prose-code:after:content-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {displayContent}
+                  </ReactMarkdown>
+                </div>
+              )}
             </div>
           ) : null;
         })()}
