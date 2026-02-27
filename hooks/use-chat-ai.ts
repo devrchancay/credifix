@@ -26,6 +26,11 @@ export function useChatAI() {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const pendingAttachmentsRef = useRef<Attachment[]>([]);
+  const pendingDisplayAttachmentsRef = useRef<Attachment[] | null>(null);
+  const lastUserMessageIdRef = useRef<string | null>(null);
+  const [messageAttachments, setMessageAttachments] = useState<
+    Record<string, Attachment[]>
+  >({});
 
   const transport = useMemo(
     () =>
@@ -58,6 +63,29 @@ export function useChatAI() {
       pendingAttachmentsRef.current = [];
     },
   });
+
+  // Associate pending attachments with new user messages for display
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const lastMsg = messages[messages.length - 1];
+    // Check for user messages, or the message before the last (in case assistant already replied)
+    const lastUserMsg = lastMsg.role === "user"
+      ? lastMsg
+      : messages.length >= 2 && messages[messages.length - 2].role === "user"
+        ? messages[messages.length - 2]
+        : null;
+
+    if (
+      lastUserMsg &&
+      lastUserMsg.id !== lastUserMessageIdRef.current &&
+      pendingDisplayAttachmentsRef.current
+    ) {
+      lastUserMessageIdRef.current = lastUserMsg.id;
+      const atts = pendingDisplayAttachmentsRef.current;
+      pendingDisplayAttachmentsRef.current = null;
+      setMessageAttachments((prev) => ({ ...prev, [lastUserMsg.id]: atts }));
+    }
+  }, [messages]);
 
   // Extract conversationId from the response headers via a fetch wrapper is not
   // straightforward in v6. Instead, we watch for new assistant messages and
@@ -114,18 +142,29 @@ export function useChatAI() {
       const supabase = createClient();
       const { data } = await supabase
         .from("messages")
-        .select("id, role, content, created_at")
+        .select("id, role, content, attachments, created_at")
         .eq("conversation_id", id)
         .order("created_at", { ascending: true });
 
       if (data) {
+        const attachmentsMap: Record<string, Attachment[]> = {};
         const loadedMessages: UIMessage[] = data
           .filter((m) => m.role !== "system")
-          .map((m) => ({
-            id: m.id,
-            role: m.role as "user" | "assistant",
-            parts: [{ type: "text" as const, text: m.content }],
-          }));
+          .map((m) => {
+            if (
+              m.attachments &&
+              Array.isArray(m.attachments) &&
+              m.attachments.length > 0
+            ) {
+              attachmentsMap[m.id] = m.attachments as unknown as Attachment[];
+            }
+            return {
+              id: m.id,
+              role: m.role as "user" | "assistant",
+              parts: [{ type: "text" as const, text: m.content }],
+            };
+          });
+        setMessageAttachments(attachmentsMap);
         setMessages(loadedMessages);
         setConversationId(id);
       }
@@ -136,6 +175,7 @@ export function useChatAI() {
   const startNewConversation = useCallback(() => {
     setMessages([]);
     setConversationId(null);
+    setMessageAttachments({});
   }, [setMessages]);
 
   const [isTranscribing, setIsTranscribing] = useState(false);
@@ -199,6 +239,7 @@ export function useChatAI() {
 
       if (metadataAttachments && metadataAttachments.length > 0) {
         pendingAttachmentsRef.current = metadataAttachments;
+        pendingDisplayAttachmentsRef.current = metadataAttachments;
       }
 
       let messageText = content;
@@ -212,15 +253,22 @@ export function useChatAI() {
         setIsProcessingFiles(true);
         try {
           const processedFiles = await processFiles(fileAttachments);
-          const fileTexts = processedFiles
-            .filter((f) => f.kind === "text")
-            .map(
-              (f) =>
-                `[File: ${f.name}]\n${f.content}\n[End of ${f.name}]`
-            );
+          const fileSections: string[] = [];
 
-          if (fileTexts.length > 0) {
-            const fileSection = fileTexts.join("\n\n");
+          for (const f of processedFiles) {
+            if (f.kind === "text" && f.content) {
+              fileSections.push(
+                `[File: ${f.name}]\n${f.content}\n[End of ${f.name}]`
+              );
+            } else if (f.kind === "image") {
+              fileSections.push(
+                `[Image attached: ${f.name} (${f.mimeType})]`
+              );
+            }
+          }
+
+          if (fileSections.length > 0) {
+            const fileSection = fileSections.join("\n\n");
             messageText = messageText.trim()
               ? `${messageText}\n\n${fileSection}`
               : fileSection;
@@ -278,6 +326,7 @@ export function useChatAI() {
     conversationId,
     error,
     sendMessage,
+    messageAttachments,
     conversations,
     loadConversation,
     startNewConversation,
