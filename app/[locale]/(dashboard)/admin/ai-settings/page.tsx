@@ -2,9 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { RequireRole } from "@/components/auth/require-role";
 import { ROLES } from "@/types/roles";
 import { BrainCircuit } from "lucide-react";
-import { AIConfigEditor } from "@/components/admin/ai-config-editor";
-import { KnowledgeBaseManager } from "@/components/admin/knowledge-base-manager";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AgentSettingsView } from "@/components/admin/agent-settings-view";
 
 export default async function AISettingsPage() {
   const t = await getTranslations("admin.aiSettings");
@@ -22,20 +20,7 @@ export default async function AISettingsPage() {
           </p>
         </div>
 
-        <Tabs defaultValue="config">
-          <TabsList>
-            <TabsTrigger value="config">{t("configTab")}</TabsTrigger>
-            <TabsTrigger value="knowledge">{t("knowledgeBaseTab")}</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="config" className="mt-6">
-            <AIConfigEditor />
-          </TabsContent>
-
-          <TabsContent value="knowledge" className="mt-6">
-            <KnowledgeBaseManager />
-          </TabsContent>
-        </Tabs>
+        <AgentSettingsView />
       </div>
     </RequireRole>
   );

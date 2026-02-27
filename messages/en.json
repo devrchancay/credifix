@@ -121,9 +121,27 @@
 		"joined": "Joined",
 		"roleUser": "User",
 		"roleAdmin": "Admin",
+		"agents": {
+			"title": "AI Agents",
+			"subtitle": "Manage your AI agents and their configurations.",
+			"newAgent": "New Agent",
+			"noAgents": "No agents found. Create your first agent.",
+			"confirmDelete": "Are you sure you want to delete this agent?",
+			"inactive": "Inactive",
+			"agentIdentity": "Agent Identity",
+			"agentIdentityDescription": "Define the agent's name, slug, tier, and status.",
+			"agentName": "Name",
+			"agentNamePlaceholder": "e.g. Credit Analysis Premium",
+			"agentSlug": "Slug",
+			"agentDescription": "Description",
+			"agentDescriptionPlaceholder": "Brief description of what this agent does...",
+			"agentTier": "Tier",
+			"agentActive": "Active"
+		},
 		"aiSettings": {
 			"title": "AI Settings",
-			"subtitle": "Configure the AI assistant, system prompt, and knowledge base.",
+			"subtitle": "Configure the AI agents, system prompts, and knowledge bases.",
+			"selectAgentPrompt": "Select an agent from the list to configure it.",
 			"configTab": "Configuration",
 			"knowledgeBaseTab": "Knowledge Base",
 			"systemPrompt": "System Prompt",
@@ -230,6 +248,11 @@
 	"creditAnalysis": {
 		"title": "Credit Analysis",
 		"subtitle": "Chat with our AI assistant to analyze your credit profile.",
+		"agents": {
+			"selectAgent": "Select an agent",
+			"basic": "Basic",
+			"premium": "Premium"
+		},
 		"chat": {
 			"placeholder": "Type your message here...",
 			"assistant": "Credit Assistant",

@@ -39,7 +39,11 @@ function formatFileSize(bytes: number | null): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function KnowledgeBaseManager() {
+interface KnowledgeBaseManagerProps {
+  agentId: string;
+}
+
+export function KnowledgeBaseManager({ agentId }: KnowledgeBaseManagerProps) {
   const t = useTranslations("admin.aiSettings");
   const [files, setFiles] = useState<KnowledgeFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,23 +56,24 @@ export function KnowledgeBaseManager() {
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const loadFiles = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const res = await fetch("/api/admin/knowledge-base");
+      const res = await fetch(`/api/admin/agents/${agentId}/knowledge-base`);
       if (!res.ok) throw new Error("Failed to load");
       const data = await res.json();
       setFiles(data.files);
       setHasVectorStore(true);
     } catch {
       // Check if it's because vector store is not initialized
-      const configRes = await fetch("/api/admin/ai-config");
-      if (configRes.ok) {
-        const configData = await configRes.json();
-        setHasVectorStore(!!configData.config?.vector_store_id);
+      const agentRes = await fetch(`/api/admin/agents/${agentId}`);
+      if (agentRes.ok) {
+        const agentData = await agentRes.json();
+        setHasVectorStore(!!agentData.agent?.vector_store_id);
       }
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [agentId]);
 
   useEffect(() => {
     loadFiles();
@@ -83,7 +88,7 @@ export function KnowledgeBaseManager() {
         for (const file of processingFiles) {
           try {
             const res = await fetch(
-              `/api/admin/knowledge-base/${file.id}`
+              `/api/admin/agents/${agentId}/knowledge-base/${file.id}`
             );
             if (!res.ok) continue;
             const data = await res.json();
@@ -112,14 +117,14 @@ export function KnowledgeBaseManager() {
         pollingRef.current = null;
       }
     };
-  }, [files]);
+  }, [files, agentId]);
 
   const handleInitialize = async () => {
     setIsInitializing(true);
     setError(null);
 
     try {
-      const res = await fetch("/api/admin/knowledge-base/init", {
+      const res = await fetch(`/api/admin/agents/${agentId}/knowledge-base/init`, {
         method: "POST",
       });
       if (!res.ok) {
@@ -148,7 +153,7 @@ export function KnowledgeBaseManager() {
         formData.append("files", file);
       });
 
-      const res = await fetch("/api/admin/knowledge-base", {
+      const res = await fetch(`/api/admin/agents/${agentId}/knowledge-base`, {
         method: "POST",
         body: formData,
       });
@@ -172,7 +177,7 @@ export function KnowledgeBaseManager() {
     setDeletingIds((prev) => new Set(prev).add(fileId));
 
     try {
-      const res = await fetch(`/api/admin/knowledge-base/${fileId}`, {
+      const res = await fetch(`/api/admin/agents/${agentId}/knowledge-base/${fileId}`, {
         method: "DELETE",
       });
 

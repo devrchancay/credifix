@@ -3,8 +3,9 @@ import {
   type UIMessage,
   convertToModelMessages,
 } from "ai";
-import { openaiProvider, getAIConfig } from "@/lib/ai/config";
-import { getSystemPrompt } from "@/lib/ai/system-prompt";
+import { openaiProvider } from "@/lib/ai/config";
+import { getAgent, getDefaultAgent } from "@/lib/ai/agents";
+import { getAIConfigFromAgent } from "@/lib/ai/config";
 import { getAuthenticatedUser } from "@/lib/api/middleware";
 import {
   createErrorResponse,
@@ -35,10 +36,12 @@ export async function POST(request: Request) {
     const {
       messages: uiMessages,
       conversationId,
+      agentId,
       attachments,
     } = body as {
       messages: UIMessage[];
       conversationId?: string;
+      agentId?: string;
       attachments?: Array<{
         id: string;
         name: string;
@@ -56,7 +59,39 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Get or create conversation
+    // 3. Resolve agent: use provided agentId, or look up from conversation, or use default
+    let resolvedAgentId = agentId;
+
+    if (!resolvedAgentId && conversationId) {
+      const supabase = createAdminClient();
+      const { data: conv } = await supabase
+        .from("conversations")
+        .select("agent_id")
+        .eq("id", conversationId)
+        .eq("user_id", userId)
+        .single();
+      resolvedAgentId = conv?.agent_id ?? undefined;
+    }
+
+    let agent;
+    if (resolvedAgentId) {
+      agent = await getAgent(resolvedAgentId);
+    }
+    if (!agent) {
+      agent = await getDefaultAgent();
+    }
+
+    if (!agent) {
+      return createErrorResponse(
+        "No agent available",
+        500,
+        ErrorCodes.INTERNAL_ERROR
+      );
+    }
+
+    const aiConfig = getAIConfigFromAgent(agent);
+
+    // 4. Get or create conversation
     const supabase = createAdminClient();
     let activeConversationId = conversationId;
 
@@ -68,7 +103,7 @@ export async function POST(request: Request) {
 
       const { data: conversation, error: convError } = await supabase
         .from("conversations")
-        .insert({ user_id: userId, title })
+        .insert({ user_id: userId, title, agent_id: agent.id })
         .select("id")
         .single();
 
@@ -97,7 +132,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // 4. Persist the latest user message
+    // 5. Persist the latest user message
     const lastMsg = uiMessages[uiMessages.length - 1];
     if (lastMsg && lastMsg.role === "user") {
       await supabase.from("messages").insert({
@@ -107,12 +142,6 @@ export async function POST(request: Request) {
         attachments: attachments || [],
       });
     }
-
-    // 5. Load AI config from DB
-    const [aiConfig, systemPrompt] = await Promise.all([
-      getAIConfig(),
-      getSystemPrompt(),
-    ]);
 
     // 6. Build attachment context for all attachment types
     let attachmentContext = "";
@@ -143,7 +172,7 @@ export async function POST(request: Request) {
     const finalConversationId = activeConversationId;
     const streamResult = streamText({
       model: openaiProvider(aiConfig.model),
-      system: systemPrompt + attachmentContext,
+      system: aiConfig.systemPrompt + attachmentContext,
       messages: modelMessages,
       temperature: aiConfig.temperature,
       topP: aiConfig.topP,
@@ -166,6 +195,7 @@ export async function POST(request: Request) {
     // 9. Return streaming response with conversationId header
     const response = streamResult.toUIMessageStreamResponse();
     response.headers.set("X-Conversation-Id", activeConversationId);
+    response.headers.set("X-Agent-Id", agent.id);
 
     return response;
   } catch (error) {

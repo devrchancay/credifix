@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { ChatMessageBubble, type ChatMessage, type Attachment } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { TypingIndicator } from "./typing-indicator";
+import { AgentSelector } from "./agent-selector";
 import { Bot, FileSearch } from "lucide-react";
 import { useChatAI } from "@/hooks/use-chat-ai";
 
@@ -25,8 +26,11 @@ export function ChatContainer() {
     isLoading,
     isTranscribing,
     isProcessingFiles,
+    conversationId,
+    agentId,
     error,
     sendMessage,
+    selectAgent,
     messageAttachments,
   } = useChatAI();
 
@@ -59,6 +63,9 @@ export function ChatContainer() {
     sendMessage(content, attachments.length > 0 ? attachments : undefined);
   };
 
+  // Disable agent switching once a conversation is active
+  const canSwitchAgent = !conversationId && messages.length === 0;
+
   return (
     <div className="flex h-[calc(100vh-10rem)] flex-col rounded-xl border bg-background shadow-sm">
       {/* Header */}
@@ -71,6 +78,13 @@ export function ChatContainer() {
           <p className="text-xs text-muted-foreground">{tChat("assistantDescription")}</p>
         </div>
       </div>
+
+      {/* Agent Selector */}
+      <AgentSelector
+        selectedAgentId={agentId}
+        onSelectAgent={selectAgent}
+        disabled={!canSwitchAgent}
+      />
 
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto">

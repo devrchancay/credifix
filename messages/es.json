@@ -121,9 +121,27 @@
 		"joined": "Registro",
 		"roleUser": "Usuario",
 		"roleAdmin": "Admin",
+		"agents": {
+			"title": "Agentes de IA",
+			"subtitle": "Administra tus agentes de IA y sus configuraciones.",
+			"newAgent": "Nuevo Agente",
+			"noAgents": "No se encontraron agentes. Crea tu primer agente.",
+			"confirmDelete": "Estas seguro de que deseas eliminar este agente?",
+			"inactive": "Inactivo",
+			"agentIdentity": "Identidad del Agente",
+			"agentIdentityDescription": "Define el nombre, slug, nivel y estado del agente.",
+			"agentName": "Nombre",
+			"agentNamePlaceholder": "ej. Analisis de Credito Premium",
+			"agentSlug": "Slug",
+			"agentDescription": "Descripcion",
+			"agentDescriptionPlaceholder": "Breve descripcion de lo que hace este agente...",
+			"agentTier": "Nivel",
+			"agentActive": "Activo"
+		},
 		"aiSettings": {
 			"title": "Configuracion de IA",
-			"subtitle": "Configura el asistente de IA, prompt del sistema y base de conocimiento.",
+			"subtitle": "Configura los agentes de IA, prompts del sistema y bases de conocimiento.",
+			"selectAgentPrompt": "Selecciona un agente de la lista para configurarlo.",
 			"configTab": "Configuracion",
 			"knowledgeBaseTab": "Base de Conocimiento",
 			"systemPrompt": "Prompt del Sistema",
@@ -230,6 +248,11 @@
 	"creditAnalysis": {
 		"title": "Analisis de Credito",
 		"subtitle": "Conversa con nuestro asistente de IA para analizar tu perfil crediticio.",
+		"agents": {
+			"selectAgent": "Selecciona un agente",
+			"basic": "Basico",
+			"premium": "Premium"
+		},
 		"chat": {
 			"placeholder": "Escribe tu mensaje aqui...",
 			"assistant": "Asistente de Credito",
