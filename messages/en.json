@@ -240,7 +240,9 @@
 			"stopRecording": "Stop",
 			"recording": "Recording...",
 			"errorGeneric": "Something went wrong. Please try again.",
-			"newChat": "New Chat"
+			"newChat": "New Chat",
+			"transcribing": "Transcribing audio...",
+			"transcriptionError": "Could not transcribe audio"
 		},
 		"responses": {
 			"greeting": "Hello! I'm your credit analysis assistant. I can help you review your credit history, analyze credit reports, and give you recommendations to improve your score. You can send me files like PDF credit reports or record voice messages. How can I help you today?",

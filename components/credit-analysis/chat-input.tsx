@@ -56,6 +56,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
       type: "file" as const,
       size: file.size,
       url: URL.createObjectURL(file),
+      blob: file,
     }));
 
     setAttachments((prev) => [...prev, ...newAttachments]);
@@ -95,6 +96,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
             size: blob.size,
             url,
             duration,
+            blob,
           },
         ]);
 
