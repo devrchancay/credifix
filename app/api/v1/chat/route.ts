@@ -177,6 +177,13 @@ export async function POST(request: Request) {
       temperature: aiConfig.temperature,
       topP: aiConfig.topP,
       maxOutputTokens: aiConfig.maxTokens,
+      tools: aiConfig.vectorStoreId
+        ? {
+            file_search: openaiProvider.tools.fileSearch({
+              vectorStoreIds: [aiConfig.vectorStoreId],
+            }),
+          }
+        : undefined,
       async onFinish({ text, usage }) {
         await supabase.from("messages").insert({
           conversation_id: finalConversationId,
