@@ -16,46 +16,26 @@ export async function GET(
 
   try {
     const supabase = createAdminClient();
-    const { data: file, error } = await supabase
-      .from("knowledge_files")
-      .select("*")
-      .eq("id", fileId)
-      .eq("agent_id", agentId)
+    const { data: agent } = await supabase
+      .from("agents")
+      .select("id, vector_store_id")
+      .eq("id", agentId)
       .single();
 
-    if (error || !file) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    if (!agent?.vector_store_id) {
+      return NextResponse.json({ error: "Agent or vector store not found" }, { status: 404 });
     }
 
-    if (file.status === "processing") {
-      try {
-        const openaiStatus = await getFileStatus(
-          file.vector_store_id,
-          file.openai_file_id
-        );
-        const mappedStatus =
-          openaiStatus === "completed"
-            ? "completed"
-            : openaiStatus === "failed"
-              ? "failed"
-              : "processing";
+    const status = await getFileStatus(agent.vector_store_id, fileId);
 
-        if (mappedStatus !== file.status) {
-          await supabase
-            .from("knowledge_files")
-            .update({ status: mappedStatus })
-            .eq("id", fileId);
+    const mappedStatus =
+      status === "completed"
+        ? "completed"
+        : status === "failed" || status === "cancelled"
+          ? "failed"
+          : "processing";
 
-          return NextResponse.json({
-            file: { ...file, status: mappedStatus },
-          });
-        }
-      } catch {
-        // If we can't reach OpenAI, return current DB status
-      }
-    }
-
-    return NextResponse.json({ file });
+    return NextResponse.json({ file: { id: fileId, status: mappedStatus } });
   } catch (error) {
     console.error("Error fetching file status:", error);
     return NextResponse.json(
@@ -78,29 +58,17 @@ export async function DELETE(
 
   try {
     const supabase = createAdminClient();
-    const { data: file, error } = await supabase
-      .from("knowledge_files")
-      .select("*")
-      .eq("id", fileId)
-      .eq("agent_id", agentId)
+    const { data: agent } = await supabase
+      .from("agents")
+      .select("id, vector_store_id")
+      .eq("id", agentId)
       .single();
 
-    if (error || !file) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 });
+    if (!agent?.vector_store_id) {
+      return NextResponse.json({ error: "Agent or vector store not found" }, { status: 404 });
     }
 
-    try {
-      await deleteFile(file.vector_store_id, file.openai_file_id);
-    } catch (openaiError) {
-      console.error("Error deleting from OpenAI:", openaiError);
-    }
-
-    const { error: deleteError } = await supabase
-      .from("knowledge_files")
-      .delete()
-      .eq("id", fileId);
-
-    if (deleteError) throw deleteError;
+    await deleteFile(agent.vector_store_id, fileId);
 
     return NextResponse.json({ success: true });
   } catch (error) {
