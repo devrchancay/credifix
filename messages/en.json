@@ -169,7 +169,7 @@
 			"lastUpdated": "Last updated",
 			"uploadFiles": "Upload Files",
 			"dropFilesHere": "Click to select files or drag and drop",
-			"acceptedFormats": "Accepted formats: PDF, TXT, MD, DOCX, JSON, CSV, HTML",
+			"acceptedFormats": "Accepted formats: PDF, TXT, MD, DOCX, JSON, CSV, HTML (max 10MB per file)",
 			"uploading": "Uploading...",
 			"filesList": "Uploaded Files",
 			"statusProcessing": "Processing",
@@ -177,7 +177,8 @@
 			"statusFailed": "Failed",
 			"totalFiles": "Total Files",
 			"totalSize": "Total Size",
-			"filesReady": "Files Ready"
+			"filesReady": "Files Ready",
+			"fileSizeError": "The following files exceed the {limit} limit: {files}"
 		},
 		"plans": {
 			"title": "Plans Management",
@@ -274,7 +275,8 @@
 			"history": "Chat History",
 			"noHistory": "No conversations yet. Start a new chat!",
 			"untitledChat": "New conversation",
-			"deleteChat": "Delete conversation"
+			"deleteChat": "Delete conversation",
+			"fileSizeError": "The following files exceed the {limit} limit: {files}"
 		},
 		"responses": {
 			"greeting": "Hello! I'm your credit analysis assistant. I can help you review your credit history, analyze credit reports, and give you recommendations to improve your score. You can send me files like PDF credit reports or record voice messages. How can I help you today?",

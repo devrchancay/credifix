@@ -169,7 +169,7 @@
 			"lastUpdated": "Ultima actualizacion",
 			"uploadFiles": "Subir Archivos",
 			"dropFilesHere": "Haz clic para seleccionar archivos o arrastra y suelta",
-			"acceptedFormats": "Formatos aceptados: PDF, TXT, MD, DOCX, JSON, CSV, HTML",
+			"acceptedFormats": "Formatos aceptados: PDF, TXT, MD, DOCX, JSON, CSV, HTML (max 10MB por archivo)",
 			"uploading": "Subiendo...",
 			"filesList": "Archivos Subidos",
 			"statusProcessing": "Procesando",
@@ -177,7 +177,8 @@
 			"statusFailed": "Error",
 			"totalFiles": "Total de Archivos",
 			"totalSize": "Tamano Total",
-			"filesReady": "Archivos Listos"
+			"filesReady": "Archivos Listos",
+			"fileSizeError": "Los siguientes archivos exceden el limite de {limit}: {files}"
 		},
 		"plans": {
 			"title": "Gestion de Planes",
@@ -274,7 +275,8 @@
 			"history": "Historial de Chats",
 			"noHistory": "Aun no hay conversaciones. Inicia un nuevo chat!",
 			"untitledChat": "Nueva conversacion",
-			"deleteChat": "Eliminar conversacion"
+			"deleteChat": "Eliminar conversacion",
+			"fileSizeError": "Los siguientes archivos exceden el limite de {limit}: {files}"
 		},
 		"responses": {
 			"greeting": "Hola! Soy tu asistente de analisis de credito. Puedo ayudarte a revisar tu historial crediticio, analizar reportes de credito y darte recomendaciones para mejorar tu puntaje. Puedes enviarme archivos como reportes de credito en PDF o grabar mensajes de voz. Como puedo ayudarte hoy?",

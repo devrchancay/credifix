@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 interface KnowledgeFile {
   id: string;
   filename: string;
@@ -134,6 +136,13 @@ export function KnowledgeBaseManager({ agentId }: KnowledgeBaseManagerProps) {
 
   const uploadFiles = async (fileList: File[]) => {
     if (fileList.length === 0) return;
+
+    const oversized = fileList.filter((f) => f.size > MAX_FILE_SIZE);
+    if (oversized.length > 0) {
+      const names = oversized.map((f) => f.name).join(", ");
+      setError(t("fileSizeError", { files: names, limit: "10MB" }));
+      return;
+    }
 
     setIsUploading(true);
     setError(null);

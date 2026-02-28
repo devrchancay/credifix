@@ -224,6 +224,7 @@ export function useChatAI() {
 
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isProcessingFiles, setIsProcessingFiles] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   const transcribeAudio = useCallback(
     async (blob: Blob, name: string): Promise<string | null> => {
@@ -259,17 +260,27 @@ export function useChatAI() {
         formData.append("files", file.blob!, file.name);
       }
 
-      try {
-        const res = await fetch("/api/v1/files/process", {
-          method: "POST",
-          body: formData,
-        });
-        if (!res.ok) return [];
-        const data = await res.json();
-        return data.files || [];
-      } catch {
-        return [];
+      const res = await fetch("/api/v1/files/process", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        let errorMessage: string;
+        try {
+          const data = await res.json();
+          errorMessage = data.error || data.message || `Upload failed (${res.status})`;
+        } catch {
+          errorMessage =
+            res.status === 413
+              ? "File too large. Maximum size is 10MB."
+              : `Upload failed (${res.status})`;
+        }
+        throw new Error(errorMessage);
       }
+
+      const data = await res.json();
+      return data.files || [];
     },
     []
   );
@@ -287,6 +298,7 @@ export function useChatAI() {
       }
 
       let messageText = content;
+      setFileError(null);
 
       // Process file attachments → extract text and inject into message
       const fileAttachments = attachments?.filter(
@@ -317,6 +329,12 @@ export function useChatAI() {
               ? `${messageText}\n\n${fileSection}`
               : fileSection;
           }
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Failed to process files";
+          setFileError(msg);
+          pendingAttachmentsRef.current = [];
+          pendingDisplayAttachmentsRef.current = null;
+          return;
         } finally {
           setIsProcessingFiles(false);
         }
@@ -361,6 +379,8 @@ export function useChatAI() {
     status === "submitted" ||
     status === "streaming";
 
+  const clearFileError = useCallback(() => setFileError(null), []);
+
   return {
     messages,
     isLoading,
@@ -370,6 +390,8 @@ export function useChatAI() {
     conversationId,
     agentId,
     error,
+    fileError,
+    clearFileError,
     sendMessage,
     selectAgent,
     messageAttachments,
