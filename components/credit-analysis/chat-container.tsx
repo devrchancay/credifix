@@ -7,7 +7,7 @@ import { ChatInput } from "./chat-input";
 import { TypingIndicator } from "./typing-indicator";
 import { AgentSelector } from "./agent-selector";
 import { ChatHistory } from "./chat-history";
-import { Bot, FileSearch, History, Plus, PanelLeftClose, PanelLeft } from "lucide-react";
+import { AlertCircle, Bot, FileSearch, History, Plus, PanelLeftClose, PanelLeft, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -40,6 +40,8 @@ export function ChatContainer() {
     conversationId,
     agentId,
     error,
+    fileError,
+    clearFileError,
     sendMessage,
     selectAgent,
     messageAttachments,
@@ -220,6 +222,21 @@ export function ChatContainer() {
         {error && (
           <div className="border-t px-4 py-2 text-sm text-destructive">
             {tChat("errorGeneric")}
+          </div>
+        )}
+
+        {/* File error display */}
+        {fileError && (
+          <div className="flex items-center gap-2 border-t px-4 py-2 text-sm text-destructive">
+            <AlertCircle className="size-4 shrink-0" />
+            <span className="flex-1">{fileError}</span>
+            <button
+              type="button"
+              onClick={clearFileError}
+              className="shrink-0 rounded-full p-0.5 hover:bg-destructive/20"
+            >
+              <X className="size-3.5" />
+            </button>
           </div>
         )}
 

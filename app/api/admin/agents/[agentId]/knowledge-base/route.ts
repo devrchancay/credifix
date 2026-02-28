@@ -7,6 +7,8 @@ import {
   type VectorStoreFile,
 } from "@/lib/ai/vector-store";
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ agentId: string }> }
@@ -88,6 +90,17 @@ export async function POST(
         { error: "No files provided" },
         { status: 400 }
       );
+    }
+
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          {
+            error: `File "${file.name}" exceeds maximum size of ${MAX_FILE_SIZE / 1024 / 1024}MB`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const results: VectorStoreFile[] = [];

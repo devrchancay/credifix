@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
+  AlertCircle,
   Paperclip,
   Mic,
   MicOff,
@@ -14,6 +15,8 @@ import {
 import { cn } from "@/lib/utils";
 import type { Attachment } from "./chat-message";
 import { useTranslations } from "next-intl";
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 type ChatInputProps = {
   onSend: (message: string, attachments: Attachment[]) => void;
@@ -27,6 +30,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
   const [text, setText] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
 
@@ -49,6 +53,16 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
+
+    setFileError(null);
+
+    const oversized = Array.from(files).filter((f) => f.size > MAX_FILE_SIZE);
+    if (oversized.length > 0) {
+      const names = oversized.map((f) => f.name).join(", ");
+      setFileError(t("fileSizeError", { files: names, limit: "10MB" }));
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     const newAttachments: Attachment[] = Array.from(files).map((file) => ({
       id: crypto.randomUUID(),
@@ -156,6 +170,20 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
   return (
     <div className="border-t bg-background p-4">
+      {fileError && (
+        <div className="mb-3 flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+          <AlertCircle className="size-3.5 shrink-0" />
+          <span className="flex-1">{fileError}</span>
+          <button
+            type="button"
+            onClick={() => setFileError(null)}
+            className="shrink-0 rounded-full p-0.5 hover:bg-destructive/20"
+          >
+            <X className="size-3" />
+          </button>
+        </div>
+      )}
+
       {attachments.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {attachments.map((att) => (
