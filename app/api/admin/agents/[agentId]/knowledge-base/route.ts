@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdmin } from "@/lib/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { uploadFile } from "@/lib/ai/vector-store";
+import {
+  uploadFile,
+  listFilesWithDetails,
+  type VectorStoreFile,
+} from "@/lib/ai/vector-store";
 
 export async function GET(
   _req: NextRequest,
@@ -17,15 +20,23 @@ export async function GET(
 
   try {
     const supabase = createAdminClient();
-    const { data: files, error } = await supabase
-      .from("knowledge_files")
-      .select("*")
-      .eq("agent_id", agentId)
-      .order("created_at", { ascending: false });
+    const { data: agent } = await supabase
+      .from("agents")
+      .select("id, vector_store_id")
+      .eq("id", agentId)
+      .single();
 
-    if (error) throw error;
+    if (!agent) {
+      return NextResponse.json({ error: "Agent not found" }, { status: 404 });
+    }
 
-    return NextResponse.json({ files: files ?? [] });
+    if (!agent.vector_store_id) {
+      return NextResponse.json({ files: [], hasVectorStore: false });
+    }
+
+    const files = await listFilesWithDetails(agent.vector_store_id);
+
+    return NextResponse.json({ files, hasVectorStore: true });
   } catch (error) {
     console.error("Error fetching knowledge files:", error);
     return NextResponse.json(
@@ -49,7 +60,6 @@ export async function POST(
   try {
     const supabase = createAdminClient();
 
-    // Get agent's vector_store_id
     const { data: agent } = await supabase
       .from("agents")
       .select("id, vector_store_id")
@@ -70,11 +80,6 @@ export async function POST(
       );
     }
 
-    const userSupabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-    } = await userSupabase.auth.getUser();
-
     const formData = await request.formData();
     const files = formData.getAll("files") as File[];
 
@@ -85,7 +90,7 @@ export async function POST(
       );
     }
 
-    const results = [];
+    const results: VectorStoreFile[] = [];
 
     for (const file of files) {
       const { fileId, status } = await uploadFile(
@@ -93,27 +98,18 @@ export async function POST(
         file
       );
 
-      const { data: record, error: insertError } = await supabase
-        .from("knowledge_files")
-        .insert({
-          openai_file_id: fileId,
-          vector_store_id: agent.vector_store_id,
-          agent_id: agentId,
-          filename: file.name,
-          file_size: file.size,
-          mime_type: file.type || null,
-          status: status === "completed" ? "completed" : "processing",
-          uploaded_by: user?.id || null,
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        console.error("Error inserting knowledge file:", insertError);
-        continue;
-      }
-
-      results.push(record);
+      results.push({
+        id: fileId,
+        filename: file.name,
+        fileSize: file.size,
+        status:
+          status === "completed"
+            ? "completed"
+            : status === "failed" || status === "cancelled"
+              ? "failed"
+              : "processing",
+        createdAt: Math.floor(Date.now() / 1000),
+      });
     }
 
     return NextResponse.json({ files: results });

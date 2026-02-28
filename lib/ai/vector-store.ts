@@ -1,8 +1,45 @@
 import { openaiClient } from "./config";
 
+export interface VectorStoreFile {
+  id: string;
+  filename: string;
+  fileSize: number;
+  status: "processing" | "completed" | "failed";
+  createdAt: number;
+}
+
 export async function createVectorStore(name: string): Promise<string> {
   const vectorStore = await openaiClient.vectorStores.create({ name });
   return vectorStore.id;
+}
+
+function mapOpenAIStatus(
+  status: string
+): "processing" | "completed" | "failed" {
+  if (status === "completed") return "completed";
+  if (status === "failed" || status === "cancelled") return "failed";
+  return "processing";
+}
+
+export async function listFilesWithDetails(
+  vectorStoreId: string
+): Promise<VectorStoreFile[]> {
+  const vsFiles = await openaiClient.vectorStores.files.list(vectorStoreId);
+
+  const files = await Promise.all(
+    vsFiles.data.map(async (vsFile) => {
+      const fileDetail = await openaiClient.files.retrieve(vsFile.id);
+      return {
+        id: vsFile.id,
+        filename: fileDetail.filename,
+        fileSize: fileDetail.bytes,
+        status: mapOpenAIStatus(vsFile.status),
+        createdAt: vsFile.created_at,
+      };
+    })
+  );
+
+  return files.sort((a, b) => b.createdAt - a.createdAt);
 }
 
 export async function uploadFile(
