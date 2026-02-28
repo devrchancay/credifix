@@ -136,7 +136,11 @@
 			"agentDescription": "Descripcion",
 			"agentDescriptionPlaceholder": "Breve descripcion de lo que hace este agente...",
 			"agentTier": "Nivel",
-			"agentActive": "Activo"
+			"agentActive": "Activo",
+			"createAgent": "Crear Agente",
+			"createAgentDescription": "Configura un nuevo agente de IA con nombre y configuracion basica.",
+			"requiredFields": "Nombre y slug son requeridos.",
+			"cancel": "Cancelar"
 		},
 		"aiSettings": {
 			"title": "Configuracion de IA",

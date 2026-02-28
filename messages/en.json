@@ -136,7 +136,11 @@
 			"agentDescription": "Description",
 			"agentDescriptionPlaceholder": "Brief description of what this agent does...",
 			"agentTier": "Tier",
-			"agentActive": "Active"
+			"agentActive": "Active",
+			"createAgent": "Create Agent",
+			"createAgentDescription": "Set up a new AI agent with a name and basic configuration.",
+			"requiredFields": "Name and slug are required.",
+			"cancel": "Cancel"
 		},
 		"aiSettings": {
 			"title": "AI Settings",
