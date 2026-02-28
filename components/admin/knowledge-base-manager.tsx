@@ -22,14 +22,10 @@ import { useTranslations } from "next-intl";
 
 interface KnowledgeFile {
   id: string;
-  openai_file_id: string;
-  vector_store_id: string;
   filename: string;
-  file_size: number | null;
-  mime_type: string | null;
+  fileSize: number;
   status: "processing" | "completed" | "failed";
-  uploaded_by: string | null;
-  created_at: string;
+  createdAt: number;
 }
 
 function formatFileSize(bytes: number | null): string {
@@ -62,14 +58,9 @@ export function KnowledgeBaseManager({ agentId }: KnowledgeBaseManagerProps) {
       if (!res.ok) throw new Error("Failed to load");
       const data = await res.json();
       setFiles(data.files);
-      setHasVectorStore(true);
+      setHasVectorStore(data.hasVectorStore ?? false);
     } catch {
-      // Check if it's because vector store is not initialized
-      const agentRes = await fetch(`/api/admin/agents/${agentId}`);
-      if (agentRes.ok) {
-        const agentData = await agentRes.json();
-        setHasVectorStore(!!agentData.agent?.vector_store_id);
-      }
+      setHasVectorStore(false);
     } finally {
       setIsLoading(false);
     }
@@ -251,7 +242,7 @@ export function KnowledgeBaseManager({ agentId }: KnowledgeBaseManagerProps) {
     );
   }
 
-  const totalSize = files.reduce((acc, f) => acc + (f.file_size || 0), 0);
+  const totalSize = files.reduce((acc, f) => acc + (f.fileSize || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -336,8 +327,8 @@ export function KnowledgeBaseManager({ agentId }: KnowledgeBaseManagerProps) {
                     <div>
                       <p className="text-sm font-medium">{file.filename}</p>
                       <p className="text-xs text-muted-foreground">
-                        {formatFileSize(file.file_size)} &middot;{" "}
-                        {new Date(file.created_at).toLocaleDateString()}
+                        {formatFileSize(file.fileSize)} &middot;{" "}
+                        {new Date(file.createdAt * 1000).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
