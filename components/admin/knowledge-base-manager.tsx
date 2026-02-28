@@ -47,6 +47,7 @@ export function KnowledgeBaseManager({ agentId }: KnowledgeBaseManagerProps) {
   const [isInitializing, setIsInitializing] = useState(false);
   const [hasVectorStore, setHasVectorStore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -131,16 +132,15 @@ export function KnowledgeBaseManager({ agentId }: KnowledgeBaseManagerProps) {
     }
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = e.target.files;
-    if (!selectedFiles || selectedFiles.length === 0) return;
+  const uploadFiles = async (fileList: File[]) => {
+    if (fileList.length === 0) return;
 
     setIsUploading(true);
     setError(null);
 
     try {
       const formData = new FormData();
-      Array.from(selectedFiles).forEach((file) => {
+      fileList.forEach((file) => {
         formData.append("files", file);
       });
 
@@ -162,6 +162,19 @@ export function KnowledgeBaseManager({ agentId }: KnowledgeBaseManagerProps) {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = e.target.files;
+    if (!selectedFiles || selectedFiles.length === 0) return;
+    await uploadFiles(Array.from(selectedFiles));
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    await uploadFiles(droppedFiles);
   };
 
   const handleDelete = async (fileId: string) => {
@@ -285,19 +298,37 @@ export function KnowledgeBaseManager({ agentId }: KnowledgeBaseManagerProps) {
             onChange={handleUpload}
             className="hidden"
           />
-          <Button
-            variant="outline"
-            className="w-full border-dashed py-8"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => !isUploading && fileInputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (!isUploading) fileInputRef.current?.click();
+              }
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+            className={`flex w-full cursor-pointer items-center justify-center rounded-md border-2 border-dashed py-8 transition-colors ${
+              isDragging
+                ? "border-primary bg-primary/5"
+                : "border-muted-foreground/25 hover:border-muted-foreground/50"
+            } ${isUploading ? "pointer-events-none opacity-50" : ""}`}
           >
             {isUploading ? (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             ) : (
-              <Upload className="mr-2 h-5 w-5" />
+              <Upload className="mr-2 h-5 w-5 text-muted-foreground" />
             )}
-            {isUploading ? t("uploading") : t("dropFilesHere")}
-          </Button>
+            <span className="text-sm text-muted-foreground">
+              {isUploading ? t("uploading") : t("dropFilesHere")}
+            </span>
+          </div>
         </CardContent>
       </Card>
 
