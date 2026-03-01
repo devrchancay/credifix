@@ -6,8 +6,13 @@ import {
   listFilesWithDetails,
   type VectorStoreFile,
 } from "@/lib/ai/vector-store";
+import { KNOWLEDGE_TEMP_BUCKET } from "@/lib/supabase/storage";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+interface StagedFile {
+  storagePath: string;
+  filename: string;
+  fileSize: number;
+}
 
 export async function GET(
   _req: NextRequest,
@@ -82,47 +87,68 @@ export async function POST(
       );
     }
 
-    const formData = await request.formData();
-    const files = formData.getAll("files") as File[];
+    const body = await request.json();
+    const stagedFiles: StagedFile[] = body.files;
 
-    if (files.length === 0) {
+    if (!stagedFiles || stagedFiles.length === 0) {
       return NextResponse.json(
         { error: "No files provided" },
         { status: 400 }
       );
     }
 
-    for (const file of files) {
-      if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json(
-          {
-            error: `File "${file.name}" exceeds maximum size of ${MAX_FILE_SIZE / 1024 / 1024}MB`,
-          },
-          { status: 400 }
-        );
-      }
-    }
-
     const results: VectorStoreFile[] = [];
 
-    for (const file of files) {
-      const { fileId, status } = await uploadFile(
-        agent.vector_store_id,
-        file
-      );
+    for (const staged of stagedFiles) {
+      try {
+        // Download from Supabase Storage
+        const { data: fileData, error: downloadError } = await supabase.storage
+          .from(KNOWLEDGE_TEMP_BUCKET)
+          .download(staged.storagePath);
 
-      results.push({
-        id: fileId,
-        filename: file.name,
-        fileSize: file.size,
-        status:
-          status === "completed"
-            ? "completed"
-            : status === "failed" || status === "cancelled"
-              ? "failed"
-              : "processing",
-        createdAt: Math.floor(Date.now() / 1000),
-      });
+        if (downloadError || !fileData) {
+          console.error(`Failed to download ${staged.storagePath}:`, downloadError);
+          results.push({
+            id: "",
+            filename: staged.filename,
+            fileSize: staged.fileSize,
+            status: "failed",
+            createdAt: Math.floor(Date.now() / 1000),
+          });
+          continue;
+        }
+
+        // Convert Blob to File for OpenAI SDK
+        const file = new File([fileData], staged.filename, {
+          type: fileData.type,
+        });
+
+        const { fileId, status } = await uploadFile(
+          agent.vector_store_id,
+          file
+        );
+
+        results.push({
+          id: fileId,
+          filename: staged.filename,
+          fileSize: staged.fileSize,
+          status:
+            status === "completed"
+              ? "completed"
+              : status === "failed" || status === "cancelled"
+                ? "failed"
+                : "processing",
+          createdAt: Math.floor(Date.now() / 1000),
+        });
+      } finally {
+        // Always clean up from storage
+        await supabase.storage
+          .from(KNOWLEDGE_TEMP_BUCKET)
+          .remove([staged.storagePath])
+          .catch((err: unknown) =>
+            console.error(`Storage cleanup failed for ${staged.storagePath}:`, err)
+          );
+      }
     }
 
     return NextResponse.json({ files: results });
