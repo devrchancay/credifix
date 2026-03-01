@@ -50,6 +50,13 @@ export function useChatAI() {
     [conversationId, agentId]
   );
 
+  // Force useChat to recreate its internal Chat instance when transport changes
+  // (AI SDK v6 stores Chat in a ref and only recreates when `id` changes)
+  const chatId = useMemo(
+    () => `${agentId ?? "default"}-${conversationId ?? "new"}`,
+    [agentId, conversationId]
+  );
+
   const {
     messages,
     status,
@@ -57,6 +64,7 @@ export function useChatAI() {
     sendMessage: sdkSendMessage,
     setMessages,
   } = useChat({
+    id: chatId,
     transport,
     onFinish() {
       pendingAttachmentsRef.current = [];
