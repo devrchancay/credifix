@@ -19,6 +19,11 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { createClient } from "@/lib/supabase/client";
+import {
+  KNOWLEDGE_TEMP_BUCKET,
+  getStoragePath,
+} from "@/lib/supabase/storage";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -147,15 +152,33 @@ export function KnowledgeBaseManager({ agentId }: KnowledgeBaseManagerProps) {
     setIsUploading(true);
     setError(null);
 
-    try {
-      const formData = new FormData();
-      fileList.forEach((file) => {
-        formData.append("files", file);
-      });
+    const supabase = createClient();
+    const stagedFiles: { storagePath: string; filename: string; fileSize: number }[] = [];
 
+    try {
+      // Phase 1: Upload files to Supabase Storage (bypasses Vercel 4.5MB limit)
+      for (const file of fileList) {
+        const storagePath = getStoragePath(agentId, file.name);
+        const { error: uploadError } = await supabase.storage
+          .from(KNOWLEDGE_TEMP_BUCKET)
+          .upload(storagePath, file, { upsert: false });
+
+        if (uploadError) {
+          throw new Error(`Failed to stage "${file.name}": ${uploadError.message}`);
+        }
+
+        stagedFiles.push({
+          storagePath,
+          filename: file.name,
+          fileSize: file.size,
+        });
+      }
+
+      // Phase 2: Notify API with storage paths (small JSON body)
       const res = await fetch(`/api/admin/agents/${agentId}/knowledge-base`, {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ files: stagedFiles }),
       });
 
       if (!res.ok) {
@@ -166,6 +189,13 @@ export function KnowledgeBaseManager({ agentId }: KnowledgeBaseManagerProps) {
       const data = await res.json();
       setFiles((prev) => [...data.files, ...prev]);
     } catch (err) {
+      // Best-effort cleanup of staged files
+      for (const staged of stagedFiles) {
+        supabase.storage
+          .from(KNOWLEDGE_TEMP_BUCKET)
+          .remove([staged.storagePath])
+          .catch(() => {});
+      }
       setError(err instanceof Error ? err.message : "Failed to upload files");
     } finally {
       setIsUploading(false);
