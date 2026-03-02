@@ -256,7 +256,8 @@
 		"agents": {
 			"selectAgent": "Select an agent",
 			"basic": "Basic",
-			"premium": "Premium"
+			"premium": "Premium",
+			"locked": "Upgrade to unlock"
 		},
 		"chat": {
 			"placeholder": "Type your message here...",
