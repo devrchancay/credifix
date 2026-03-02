@@ -60,10 +60,10 @@ export async function POST(request: Request) {
     }
 
     // 3. Resolve agent: use provided agentId, or look up from conversation, or use default
+    const supabase = createAdminClient();
     let resolvedAgentId = agentId;
 
     if (!resolvedAgentId && conversationId) {
-      const supabase = createAdminClient();
       const { data: conv } = await supabase
         .from("conversations")
         .select("agent_id")
@@ -89,10 +89,28 @@ export async function POST(request: Request) {
       );
     }
 
+    // Block premium agents for users without active subscription
+    if (agent.tier === "premium") {
+      const { data: sub } = await supabase
+        .from("subscriptions")
+        .select("id, status")
+        .eq("user_id", userId)
+        .in("status", ["active", "trialing"])
+        .limit(1)
+        .maybeSingle();
+
+      if (!sub) {
+        return createErrorResponse(
+          "Premium agent requires an active subscription",
+          403,
+          ErrorCodes.FORBIDDEN
+        );
+      }
+    }
+
     const aiConfig = getAIConfigFromAgent(agent);
 
     // 4. Get or create conversation
-    const supabase = createAdminClient();
     let activeConversationId = conversationId;
 
     if (!activeConversationId) {
