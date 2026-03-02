@@ -336,27 +336,10 @@ async function awardCredits(
     stripe_payment_intent_id: balanceTransaction.id,
   });
 
-  const { data: existing } = await supabase
-    .from("user_credits")
-    .select("balance, total_earned")
-    .eq("user_id", userId)
-    .single();
-
-  if (existing) {
-    await supabase
-      .from("user_credits")
-      .update({
-        balance: existing.balance + amount,
-        total_earned: existing.total_earned + amount,
-      })
-      .eq("user_id", userId);
-  } else {
-    await supabase.from("user_credits").insert({
-      user_id: userId,
-      balance: amount,
-      total_earned: amount,
-    });
-  }
+  await supabase.rpc("increment_user_credits", {
+    p_user_id: userId,
+    p_amount: amount,
+  });
 }
 
 export async function validateReferralCode(
