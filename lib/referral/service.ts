@@ -299,9 +299,9 @@ async function getOrCreateStripeCustomer(userId: string): Promise<string> {
 
 /**
  * Awards credits to a user:
- * 1. Adds credit to Stripe Customer Balance (negative amount = credit)
- * 2. Records transaction in Supabase
- * 3. Updates user_credits balance
+ * 1. Records transaction in Supabase (always)
+ * 2. Updates user_credits balance (always)
+ * 3. Adds credit to Stripe Customer Balance (best-effort)
  */
 async function awardCredits(
   userId: string,
@@ -312,34 +312,48 @@ async function awardCredits(
 ) {
   const supabase = createAdminClient();
 
-  const stripeCustomerId = await getOrCreateStripeCustomer(userId);
-  const balanceTransaction = await stripe.customers.createBalanceTransaction(
-    stripeCustomerId,
-    {
-      amount: -amount * 100, // cents, negative = credit
-      currency: "usd",
-      description,
-      metadata: {
-        type,
-        referral_id: referralId,
-        user_id: userId,
-      },
-    }
-  );
-
+  // 1. Record in DB first — this must always succeed
   await supabase.from("credit_transactions").insert({
     user_id: userId,
     amount,
     type,
     description,
     referral_id: referralId,
-    stripe_payment_intent_id: balanceTransaction.id,
   });
 
   await supabase.rpc("increment_user_credits", {
     p_user_id: userId,
     p_amount: amount,
   });
+
+  // 2. Stripe balance — best-effort, don't block credit award if this fails
+  try {
+    const stripeCustomerId = await getOrCreateStripeCustomer(userId);
+    const balanceTransaction = await stripe.customers.createBalanceTransaction(
+      stripeCustomerId,
+      {
+        amount: -amount * 100, // cents, negative = credit
+        currency: "usd",
+        description,
+        metadata: {
+          type,
+          referral_id: referralId,
+          user_id: userId,
+        },
+      }
+    );
+
+    // Update transaction with Stripe reference
+    await supabase
+      .from("credit_transactions")
+      .update({ stripe_payment_intent_id: balanceTransaction.id })
+      .eq("user_id", userId)
+      .eq("referral_id", referralId)
+      .eq("type", type)
+      .is("stripe_payment_intent_id", null);
+  } catch (err) {
+    console.error("Stripe balance transaction failed (credits still awarded in DB):", err);
+  }
 }
 
 export async function validateReferralCode(
