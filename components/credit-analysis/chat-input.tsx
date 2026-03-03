@@ -7,7 +7,7 @@ import {
   Paperclip,
   Mic,
   MicOff,
-  Send,
+  ArrowUp,
   X,
   FileText,
   Square,
@@ -42,7 +42,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto";
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
     }
   }, []);
 
@@ -169,100 +169,67 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const canSend = (text.trim().length > 0 || attachments.length > 0) && !disabled;
 
   return (
-    <div className="border-t bg-background p-4">
-      {fileError && (
-        <div className="mb-3 flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-          <AlertCircle className="size-3.5 shrink-0" />
-          <span className="flex-1">{fileError}</span>
-          <button
-            type="button"
-            onClick={() => setFileError(null)}
-            className="shrink-0 rounded-full p-0.5 hover:bg-destructive/20"
-          >
-            <X className="size-3" />
-          </button>
-        </div>
-      )}
-
-      {attachments.length > 0 && (
-        <div className="mb-3 flex flex-wrap gap-2">
-          {attachments.map((att) => (
-            <div
-              key={att.id}
-              className="flex items-center gap-1.5 rounded-lg border bg-muted/50 px-2.5 py-1.5 text-xs"
+    <div className="border-t bg-background/80 px-4 py-4 backdrop-blur-sm">
+      <div className="mx-auto max-w-3xl">
+        {fileError && (
+          <div className="mb-3 flex items-center gap-2 rounded-xl border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <AlertCircle className="size-4 shrink-0" />
+            <span className="flex-1">{fileError}</span>
+            <button
+              type="button"
+              onClick={() => setFileError(null)}
+              className="shrink-0 rounded-full p-0.5 hover:bg-destructive/20"
             >
-              {att.type === "audio" ? (
-                <Mic className="size-3.5 text-muted-foreground" />
-              ) : (
-                <FileText className="size-3.5 text-muted-foreground" />
-              )}
-              <span className="max-w-[120px] truncate">{att.name}</span>
-              <button
-                type="button"
-                onClick={() => removeAttachment(att.id)}
-                className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20"
+              <X className="size-3.5" />
+            </button>
+          </div>
+        )}
+
+        {attachments.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {attachments.map((att) => (
+              <div
+                key={att.id}
+                className="flex items-center gap-1.5 rounded-lg border bg-muted/50 px-2.5 py-1.5 text-sm"
               >
-                <X className="size-3" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+                {att.type === "audio" ? (
+                  <Mic className="size-3.5 text-muted-foreground" />
+                ) : (
+                  <FileText className="size-3.5 text-muted-foreground" />
+                )}
+                <span className="max-w-[150px] truncate">{att.name}</span>
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(att.id)}
+                  className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20"
+                >
+                  <X className="size-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
-      {isRecording && (
-        <div className="mb-3 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 dark:border-red-900 dark:bg-red-950/30">
-          <div className="size-2 animate-pulse rounded-full bg-red-500" />
-          <span className="text-sm text-red-600 dark:text-red-400">
-            {t("recording")} {formatTime(recordingDuration)}
-          </span>
-          <Button
-            variant="ghost"
-            size="xs"
-            onClick={stopRecording}
-            className="ml-auto text-red-600 hover:text-red-700 dark:text-red-400"
-          >
-            <Square className="size-3" />
-            {t("stopRecording")}
-          </Button>
-        </div>
-      )}
+        {isRecording && (
+          <div className="mb-3 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 dark:border-red-900 dark:bg-red-950/30">
+            <div className="size-2 animate-pulse rounded-full bg-red-500" />
+            <span className="text-sm text-red-600 dark:text-red-400">
+              {t("recording")} {formatTime(recordingDuration)}
+            </span>
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={stopRecording}
+              className="ml-auto text-red-600 hover:text-red-700 dark:text-red-400"
+            >
+              <Square className="size-3" />
+              {t("stopRecording")}
+            </Button>
+          </div>
+        )}
 
-      <div className="flex items-end gap-2">
-        <div className="flex gap-1">
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.png,.jpg,.jpeg"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={disabled}
-            title={t("attachFile")}
-          >
-            <Paperclip className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={isRecording ? stopRecording : startRecording}
-            disabled={disabled}
-            className={cn(isRecording && "text-red-500 hover:text-red-600")}
-            title={isRecording ? t("stopRecording") : t("recordAudio")}
-          >
-            {isRecording ? (
-              <MicOff className="size-4" />
-            ) : (
-              <Mic className="size-4" />
-            )}
-          </Button>
-        </div>
-
-        <div className="relative flex-1">
+        {/* Input box */}
+        <div className="relative rounded-2xl border bg-muted/30 shadow-sm transition-shadow focus-within:shadow-md focus-within:ring-2 focus-within:ring-ring/20">
           <textarea
             ref={textareaRef}
             value={text}
@@ -271,17 +238,58 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
             placeholder={t("placeholder")}
             disabled={disabled}
             rows={1}
-            className="w-full resize-none rounded-xl border bg-muted/30 px-4 py-2.5 pr-12 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+            className="w-full resize-none bg-transparent px-4 pb-12 pt-3.5 text-base placeholder:text-muted-foreground/60 focus:outline-none disabled:opacity-50"
           />
-          <Button
-            variant="default"
-            size="icon-sm"
-            onClick={handleSend}
-            disabled={!canSend}
-            className="absolute right-2 bottom-1.5"
-          >
-            <Send className="size-4" />
-          </Button>
+
+          {/* Bottom toolbar */}
+          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+            <div className="flex gap-1">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.png,.jpg,.jpeg"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={disabled}
+                title={t("attachFile")}
+                className="rounded-full text-muted-foreground hover:text-foreground"
+              >
+                <Paperclip className="size-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={isRecording ? stopRecording : startRecording}
+                disabled={disabled}
+                className={cn(
+                  "rounded-full text-muted-foreground hover:text-foreground",
+                  isRecording && "text-red-500 hover:text-red-600"
+                )}
+                title={isRecording ? t("stopRecording") : t("recordAudio")}
+              >
+                {isRecording ? (
+                  <MicOff className="size-4" />
+                ) : (
+                  <Mic className="size-4" />
+                )}
+              </Button>
+            </div>
+
+            <Button
+              size="icon-sm"
+              onClick={handleSend}
+              disabled={!canSend}
+              className="rounded-full"
+            >
+              <ArrowUp className="size-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
