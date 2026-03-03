@@ -3,6 +3,7 @@
 import * as React from "react";
 import { CreditCard, Home, Settings, Shield, Gift, FileSearch, BrainCircuit } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
+import { useSubscription } from "@/hooks/use-subscription";
 import { useTranslations } from "next-intl";
 
 import { NavMain } from "@/components/nav-main";
@@ -22,6 +23,7 @@ import { ROLES } from "@/types/roles";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { fullName, email, role } = useUser();
+  const { isPro } = useSubscription();
   const t = useTranslations("common");
 
   const userData = {
@@ -53,11 +55,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "/billing",
       icon: CreditCard,
     },
-    {
-      title: t("referrals"),
-      url: "/referrals",
-      icon: Gift,
-    },
+    ...(isPro
+      ? [
+          {
+            title: t("referrals"),
+            url: "/referrals",
+            icon: Gift,
+          },
+        ]
+      : []),
   ];
 
   const adminNavItems = [
