@@ -18,7 +18,27 @@ export async function GET() {
 
     if (error) throw error;
 
-    return NextResponse.json({ plans });
+    // Fetch plan-agent mappings
+    const { data: planAgents } = await supabase
+      .from("plan_agents")
+      .select("plan_id, agent_id");
+
+    // Group agent_ids by plan_id
+    const agentsByPlan: Record<string, string[]> = {};
+    for (const pa of planAgents ?? []) {
+      if (!agentsByPlan[pa.plan_id]) {
+        agentsByPlan[pa.plan_id] = [];
+      }
+      agentsByPlan[pa.plan_id].push(pa.agent_id);
+    }
+
+    // Merge agent_ids into each plan
+    const plansWithAgents = (plans ?? []).map((plan) => ({
+      ...plan,
+      agent_ids: agentsByPlan[plan.id] ?? [],
+    }));
+
+    return NextResponse.json({ plans: plansWithAgents });
   } catch (error) {
     console.error("Error fetching plans:", error);
     return NextResponse.json(
@@ -58,7 +78,22 @@ export async function POST(request: Request) {
 
     if (error) throw error;
 
-    return NextResponse.json({ plan }, { status: 201 });
+    // Insert plan-agent mappings
+    const agentIds: string[] = body.agent_ids ?? [];
+    if (agentIds.length > 0) {
+      const { error: paError } = await supabase
+        .from("plan_agents")
+        .insert(agentIds.map((agent_id) => ({ plan_id: plan.id, agent_id })));
+
+      if (paError) {
+        console.error("Error inserting plan_agents:", paError);
+      }
+    }
+
+    return NextResponse.json(
+      { plan: { ...plan, agent_ids: agentIds } },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error creating plan:", error);
     return NextResponse.json(

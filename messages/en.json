@@ -211,7 +211,10 @@
 			"featurePlaceholder": "e.g. Up to 3 projects",
 			"addLimit": "Add",
 			"limitKeyPlaceholder": "e.g. projects",
-			"limitValuePlaceholder": "Value"
+			"limitValuePlaceholder": "Value",
+			"agents": "Agents",
+			"selectAgents": "Select which agents are available for this plan",
+			"noAgentsAvailable": "No agents available"
 		}
 	},
 	"referral": {

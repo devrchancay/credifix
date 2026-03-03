@@ -40,7 +40,39 @@ export async function PATCH(
 
     if (error) throw error;
 
-    return NextResponse.json({ plan });
+    // Update plan-agent mappings if provided
+    let agentIds: string[] | undefined;
+    if (body.agent_ids !== undefined) {
+      agentIds = body.agent_ids as string[];
+
+      // Delete existing mappings
+      await supabase
+        .from("plan_agents")
+        .delete()
+        .eq("plan_id", planId);
+
+      // Insert new mappings
+      if (agentIds.length > 0) {
+        const { error: paError } = await supabase
+          .from("plan_agents")
+          .insert(agentIds.map((agent_id) => ({ plan_id: planId, agent_id })));
+
+        if (paError) {
+          console.error("Error updating plan_agents:", paError);
+        }
+      }
+    }
+
+    // Fetch current agent_ids if not provided in body
+    if (agentIds === undefined) {
+      const { data: pa } = await supabase
+        .from("plan_agents")
+        .select("agent_id")
+        .eq("plan_id", planId);
+      agentIds = (pa ?? []).map((r) => r.agent_id);
+    }
+
+    return NextResponse.json({ plan: { ...plan, agent_ids: agentIds } });
   } catch (error) {
     console.error("Error updating plan:", error);
     return NextResponse.json(

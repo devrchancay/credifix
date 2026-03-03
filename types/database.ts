@@ -614,6 +614,36 @@ export type Database = {
           }
         ];
       };
+      plan_agents: {
+        Row: {
+          plan_id: string;
+          agent_id: string;
+        };
+        Insert: {
+          plan_id: string;
+          agent_id: string;
+        };
+        Update: {
+          plan_id?: string;
+          agent_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "plan_agents_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "plans";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "plan_agents_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "agents";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       subscriptions: {
         Row: {
           id: string;

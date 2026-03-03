@@ -89,22 +89,45 @@ export async function POST(request: Request) {
       );
     }
 
-    // Block premium agents for users without active subscription
-    if (agent.tier === "premium") {
+    // Verify the agent is allowed for the user's plan
+    {
       const { data: sub } = await supabase
         .from("subscriptions")
-        .select("id, status")
+        .select("plan_id")
         .eq("user_id", userId)
         .in("status", ["active", "trialing"])
         .limit(1)
         .maybeSingle();
 
-      if (!sub) {
-        return createErrorResponse(
-          "Premium agent requires an active subscription",
-          403,
-          ErrorCodes.FORBIDDEN
-        );
+      let planId = sub?.plan_id ?? null;
+
+      if (!planId) {
+        const { data: freePlan } = await supabase
+          .from("plans")
+          .select("id")
+          .eq("slug", "free")
+          .single();
+        planId = freePlan?.id ?? null;
+      }
+
+      if (planId) {
+        // Check if plan has any agent mappings
+        const { data: planAgents } = await supabase
+          .from("plan_agents")
+          .select("agent_id")
+          .eq("plan_id", planId);
+
+        // Only enforce if plan_agents has entries (backward compat)
+        if (planAgents && planAgents.length > 0) {
+          const allowed = planAgents.some((pa) => pa.agent_id === agent.id);
+          if (!allowed) {
+            return createErrorResponse(
+              "This agent is not available for your plan",
+              403,
+              ErrorCodes.FORBIDDEN
+            );
+          }
+        }
       }
     }
 
