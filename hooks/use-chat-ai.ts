@@ -23,12 +23,18 @@ interface ProcessedFileResult {
 export function useChatAI() {
   const { userId, isLoaded } = useAuth();
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const conversationIdRef = useRef<string | null>(null);
   const [agentId, setAgentId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const pendingAttachmentsRef = useRef<Attachment[]>([]);
   const pendingDisplayAttachmentsRef = useRef<Attachment[] | null>(null);
   const lastUserMessageIdRef = useRef<string | null>(null);
+
+  // Keep ref in sync so the transport always reads the latest conversationId
+  useEffect(() => {
+    conversationIdRef.current = conversationId;
+  }, [conversationId]);
   const [messageAttachments, setMessageAttachments] = useState<
     Record<string, Attachment[]>
   >({});
@@ -38,7 +44,9 @@ export function useChatAI() {
       new DefaultChatTransport({
         api: "/api/v1/chat",
         body: {
-          conversationId,
+          get conversationId() {
+            return conversationIdRef.current;
+          },
           agentId,
           get attachments() {
             return pendingAttachmentsRef.current.length > 0
@@ -47,14 +55,14 @@ export function useChatAI() {
           },
         },
       }),
-    [conversationId, agentId]
+    [agentId]
   );
 
-  // Force useChat to recreate its internal Chat instance when transport changes
-  // (AI SDK v6 stores Chat in a ref and only recreates when `id` changes)
+  // Only recreate the Chat instance when agent changes.
+  // conversationId is read via ref so it doesn't need to trigger a reset.
   const chatId = useMemo(
-    () => `${agentId ?? "default"}-${conversationId ?? "new"}`,
-    [agentId, conversationId]
+    () => `${agentId ?? "default"}`,
+    [agentId]
   );
 
   const {
@@ -196,6 +204,7 @@ export function useChatAI() {
   const startNewConversation = useCallback(() => {
     setMessages([]);
     setConversationId(null);
+    conversationIdRef.current = null;
     setMessageAttachments({});
   }, [setMessages]);
 
@@ -213,6 +222,7 @@ export function useChatAI() {
         if (conversationId === id) {
           setMessages([]);
           setConversationId(null);
+          conversationIdRef.current = null;
           setMessageAttachments({});
         }
       }
