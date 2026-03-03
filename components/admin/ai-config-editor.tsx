@@ -40,8 +40,20 @@ interface AgentData {
 }
 
 const MODELS = [
+  // GPT-5
+  { value: "gpt-5", label: "GPT-5" },
+  // GPT-4.1 family
+  { value: "gpt-4.1", label: "GPT-4.1" },
+  { value: "gpt-4.1-mini", label: "GPT-4.1 Mini" },
+  { value: "gpt-4.1-nano", label: "GPT-4.1 Nano" },
+  // GPT-4o family
   { value: "gpt-4o", label: "GPT-4o" },
   { value: "gpt-4o-mini", label: "GPT-4o Mini" },
+  // Reasoning models (o-series)
+  { value: "o3", label: "o3" },
+  { value: "o3-mini", label: "o3 Mini" },
+  { value: "o4-mini", label: "o4 Mini" },
+  // Legacy
   { value: "gpt-4-turbo", label: "GPT-4 Turbo" },
 ];
 
@@ -270,7 +282,7 @@ export function AIConfigEditor({ agentId }: AIConfigEditorProps) {
               <Input
                 type="number"
                 min={256}
-                max={16384}
+                max={32768}
                 value={maxTokens}
                 onChange={(e) => setMaxTokens(Number(e.target.value))}
               />
