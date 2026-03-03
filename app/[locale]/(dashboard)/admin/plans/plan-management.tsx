@@ -32,10 +32,18 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { ExternalLink, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Bot, Crown, ExternalLink, Pencil, Plus, Trash2, X } from "lucide-react";
 import type { Tables } from "@/types/database";
 
-type Plan = Tables<"plans">;
+type Plan = Tables<"plans"> & { agent_ids?: string[] };
+
+interface AgentOption {
+  id: string;
+  name: string;
+  slug: string;
+  tier: "basic" | "premium";
+  is_active: boolean;
+}
 
 interface StripePrice {
   id: string;
@@ -59,6 +67,7 @@ interface PlanFormData {
   stripe_yearly_price_id: string;
   features: string[];
   limits: LimitEntry[];
+  agent_ids: string[];
   is_active: boolean;
   is_popular: boolean;
   sort_order: number;
@@ -74,6 +83,7 @@ const emptyForm: PlanFormData = {
   stripe_yearly_price_id: "",
   features: [""],
   limits: [],
+  agent_ids: [],
   is_active: true,
   is_popular: false,
   sort_order: 0,
@@ -100,6 +110,7 @@ function planToForm(plan: Plan): PlanFormData {
     stripe_yearly_price_id: plan.stripe_yearly_price_id ?? "",
     features: features.length > 0 ? features : [""],
     limits,
+    agent_ids: plan.agent_ids ?? [],
     is_active: plan.is_active,
     is_popular: plan.is_popular,
     sort_order: plan.sort_order,
@@ -133,6 +144,7 @@ function groupByProduct(prices: StripePrice[]) {
 
 export function PlanManagement() {
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [agents, setAgents] = useState<AgentOption[]>([]);
   const [stripePrices, setStripePrices] = useState<StripePrice[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -144,6 +156,7 @@ export function PlanManagement() {
   useEffect(() => {
     fetchPlans();
     fetchStripePrices();
+    fetchAgents();
   }, []);
 
   async function fetchPlans() {
@@ -173,6 +186,19 @@ export function PlanManagement() {
       }
     } catch {
       // Stripe prices are optional, don't block the UI
+    }
+  }
+
+  async function fetchAgents() {
+    try {
+      const res = await fetch("/api/admin/agents");
+      const data = await res.json();
+
+      if (res.ok) {
+        setAgents(data.agents);
+      }
+    } catch {
+      // Agents are optional, don't block the UI
     }
   }
 
@@ -209,6 +235,7 @@ export function PlanManagement() {
         stripe_yearly_price_id: form.stripe_yearly_price_id || null,
         features,
         limits,
+        agent_ids: form.agent_ids,
         is_active: form.is_active,
         is_popular: form.is_popular,
         sort_order: Number(form.sort_order),
@@ -286,6 +313,25 @@ export function PlanManagement() {
     }
   }
 
+  function toggleAgent(agentId: string) {
+    setForm((prev) => {
+      const has = prev.agent_ids.includes(agentId);
+      return {
+        ...prev,
+        agent_ids: has
+          ? prev.agent_ids.filter((id) => id !== agentId)
+          : [...prev.agent_ids, agentId],
+      };
+    });
+  }
+
+  function getAgentNames(agentIds: string[]): string {
+    return agentIds
+      .map((id) => agents.find((a) => a.id === id)?.name)
+      .filter(Boolean)
+      .join(", ");
+  }
+
   const priceGroups = groupByProduct(stripePrices);
 
   if (loading) {
@@ -328,6 +374,7 @@ export function PlanManagement() {
               <TableRow>
                 <TableHead>{t("name")}</TableHead>
                 <TableHead>{t("slug")}</TableHead>
+                <TableHead>{t("agents")}</TableHead>
                 <TableHead>{t("status")}</TableHead>
                 <TableHead>{t("popular")}</TableHead>
                 <TableHead>{t("sortOrder")}</TableHead>
@@ -340,6 +387,11 @@ export function PlanManagement() {
                   <TableCell className="font-medium">{plan.name}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {plan.slug}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate">
+                    {plan.agent_ids && plan.agent_ids.length > 0
+                      ? getAgentNames(plan.agent_ids)
+                      : "—"}
                   </TableCell>
                   <TableCell>
                     <Badge
@@ -502,6 +554,54 @@ export function PlanManagement() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            {/* Agents multi-select */}
+            <div className="space-y-2">
+              <Label>{t("agents")}</Label>
+              <p className="text-xs text-muted-foreground">
+                {t("selectAgents")}
+              </p>
+              {agents.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-2">
+                  {t("noAgentsAvailable")}
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 gap-2 rounded-md border p-3">
+                  {agents.map((agent) => {
+                    const isChecked = form.agent_ids.includes(agent.id);
+                    return (
+                      <label
+                        key={agent.id}
+                        className="flex items-center gap-3 rounded-md px-2 py-1.5 hover:bg-muted/50 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleAgent(agent.id)}
+                          className="h-4 w-4 rounded"
+                        />
+                        <div className="flex items-center gap-2 min-w-0">
+                          {agent.tier === "premium" ? (
+                            <Crown className="h-4 w-4 text-amber-500 shrink-0" />
+                          ) : (
+                            <Bot className="h-4 w-4 text-muted-foreground shrink-0" />
+                          )}
+                          <span className="text-sm font-medium truncate">
+                            {agent.name}
+                          </span>
+                          <Badge
+                            variant={agent.tier === "premium" ? "default" : "secondary"}
+                            className="text-xs shrink-0"
+                          >
+                            {agent.tier}
+                          </Badge>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
