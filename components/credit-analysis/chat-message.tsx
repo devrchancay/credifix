@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bot, User, FileText, Mic } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -41,7 +40,7 @@ function formatDuration(seconds: number): string {
 function AttachmentPreview({ attachment }: { attachment: Attachment }) {
   if (attachment.type === "audio") {
     return (
-      <div className="flex items-center gap-2 rounded-lg border bg-muted/50 px-3 py-2 text-sm">
+      <div className="flex items-center gap-2 rounded-xl border bg-muted/50 px-3 py-2 text-sm">
         <Mic className="size-4 text-muted-foreground" />
         <span className="truncate max-w-[200px]">{attachment.name}</span>
         {attachment.duration && (
@@ -59,7 +58,7 @@ function AttachmentPreview({ attachment }: { attachment: Attachment }) {
   }
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border bg-muted/50 px-3 py-2 text-sm">
+    <div className="flex items-center gap-2 rounded-xl border bg-muted/50 px-3 py-2 text-sm">
       <FileText className="size-4 text-muted-foreground" />
       <span className="truncate max-w-[200px]">{attachment.name}</span>
       <span className="text-muted-foreground text-xs">
@@ -94,25 +93,26 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
   return (
     <div
       className={cn(
-        "flex gap-3 px-4 py-3",
+        "flex gap-4 px-4 py-5",
         isUser ? "flex-row-reverse" : "flex-row"
       )}
     >
-      <Avatar className="mt-0.5 shrink-0">
-        <AvatarFallback
-          className={cn(
-            isUser
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-muted-foreground"
-          )}
-        >
-          {isUser ? <User className="size-4" /> : <Bot className="size-4" />}
-        </AvatarFallback>
-      </Avatar>
-
+      {/* Avatar */}
       <div
         className={cn(
-          "flex max-w-[75%] flex-col gap-2",
+          "mt-1 flex size-8 shrink-0 items-center justify-center rounded-full",
+          isUser
+            ? "bg-primary text-primary-foreground"
+            : "bg-foreground/5 text-foreground dark:bg-foreground/10"
+        )}
+      >
+        {isUser ? <User className="size-4" /> : <Bot className="size-4" />}
+      </div>
+
+      {/* Content */}
+      <div
+        className={cn(
+          "flex min-w-0 max-w-[85%] flex-col gap-2",
           isUser ? "items-end" : "items-start"
         )}
       >
@@ -128,26 +128,25 @@ export function ChatMessageBubble({ message }: { message: ChatMessage }) {
           const displayContent = isUser
             ? cleanUserContent(message.content)
             : message.content;
-          return displayContent ? (
-            <div
-              className={cn(
-                "rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
-                isUser
-                  ? "bg-primary text-primary-foreground rounded-tr-sm"
-                  : "bg-muted text-foreground rounded-tl-sm"
-              )}
-            >
-              {isUser ? (
+          if (!displayContent) return null;
+
+          if (isUser) {
+            return (
+              <div className="rounded-2xl rounded-tr-md bg-primary/10 px-4 py-3 text-base leading-relaxed text-foreground dark:bg-primary/15">
                 <p className="whitespace-pre-wrap">{displayContent}</p>
-              ) : (
-                <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-2 prose-pre:my-2 prose-pre:bg-background/50 prose-pre:rounded-lg prose-code:text-xs prose-code:before:content-none prose-code:after:content-none">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {displayContent}
-                  </ReactMarkdown>
-                </div>
-              )}
+              </div>
+            );
+          }
+
+          return (
+            <div className="text-base leading-7 text-foreground">
+              <div className="prose prose-neutral dark:prose-invert max-w-none prose-p:my-2 prose-p:leading-7 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-headings:my-3 prose-headings:font-semibold prose-pre:my-3 prose-pre:bg-foreground/5 prose-pre:rounded-xl prose-code:text-sm prose-code:before:content-none prose-code:after:content-none prose-strong:font-semibold">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {displayContent}
+                </ReactMarkdown>
+              </div>
             </div>
-          ) : null;
+          );
         })()}
       </div>
     </div>
