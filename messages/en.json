@@ -22,6 +22,7 @@
 		"users": "Users",
 		"plans": "Plans",
 		"aiSettings": "AI Settings",
+		"creditConfig": "Credits",
 		"continueWithGoogle": "Continue with Google",
 		"orContinueWith": "or continue with email"
 	},
@@ -215,6 +216,19 @@
 			"agents": "Agents",
 			"selectAgents": "Select which agents are available for this plan",
 			"noAgentsAvailable": "No agents available"
+		},
+		"credits": {
+			"title": "Credit Configuration",
+			"subtitle": "Configure credit redemption settings.",
+			"creditValue": "Credit Value (cents)",
+			"creditValueHelp": "How many cents each credit is worth. e.g., 25 = $0.25 per credit",
+			"maxDiscount": "Max Discount (%)",
+			"maxDiscountHelp": "Maximum percentage of subscription price that can be discounted per redemption.",
+			"redemptionActive": "Redemption Active",
+			"redemptionActiveHelp": "Allow users to redeem their credits for subscription discounts.",
+			"save": "Save Configuration",
+			"saved": "Credit configuration saved successfully.",
+			"error": "Failed to save credit configuration."
 		}
 	},
 	"referral": {
@@ -244,6 +258,23 @@
 		"expired": "Expired",
 		"cancelled": "Cancelled",
 		"programInactive": "The referral program is currently inactive.",
+		"redemption": {
+			"title": "Redeem Credits",
+			"subtitle": "Apply your credits as a discount on your next invoice.",
+			"yourBalance": "Your credit balance",
+			"credits": "credits",
+			"rate": "1 credit = ${value}",
+			"creditsToRedeem": "Credits to redeem",
+			"discount": "discount",
+			"maxInfo": "Max redeemable: {max} credits ({percentage}% of subscription price)",
+			"applyButton": "Apply to Subscription",
+			"processing": "Processing...",
+			"success": "Successfully redeemed {credits} credits for ${value} discount!",
+			"error": "Failed to redeem credits. Please try again.",
+			"noSubscription": "You need an active subscription to redeem credits.",
+			"disabled": "Credit redemption is currently disabled.",
+			"noCredits": "You don't have any credits to redeem."
+		},
 		"invitePage": {
 			"title": "You've been invited!",
 			"subtitle": "{name} has invited you to join {appName}",

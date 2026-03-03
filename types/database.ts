@@ -614,6 +614,33 @@ export type Database = {
           }
         ];
       };
+      credit_config: {
+        Row: {
+          id: string;
+          credit_value_cents: number;
+          max_discount_percentage: number;
+          is_redemption_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          credit_value_cents?: number;
+          max_discount_percentage?: number;
+          is_redemption_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          credit_value_cents?: number;
+          max_discount_percentage?: number;
+          is_redemption_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       plan_agents: {
         Row: {
           plan_id: string;
@@ -746,6 +773,13 @@ export type Database = {
           p_amount: number;
         };
         Returns: undefined;
+      };
+      spend_user_credits: {
+        Args: {
+          p_user_id: string;
+          p_amount: number;
+        };
+        Returns: boolean;
       };
     };
     Enums: {

@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -13,7 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Copy, Check, Gift, UserPlus, Link2, Coins } from "lucide-react";
+import { Copy, Check, Gift, UserPlus, Link2, Coins, ArrowRightLeft } from "lucide-react";
+import type { RedemptionPreview } from "@/lib/credits/service";
 
 interface ReferralStats {
   code: string | null;
@@ -44,11 +48,16 @@ interface Props {
   inviteUrl: string;
   stats: ReferralStats;
   config: ReferralConfig;
+  redemption: RedemptionPreview;
 }
 
-export function ReferralDashboard({ code, inviteUrl, stats, config }: Props) {
+export function ReferralDashboard({ inviteUrl, stats, config, redemption }: Props) {
   const t = useTranslations("referral");
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const [creditsToRedeem, setCreditsToRedeem] = useState(0);
+  const [isRedeeming, setIsRedeeming] = useState(false);
+  const [redeemMessage, setRedeemMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(inviteUrl);
@@ -82,6 +91,48 @@ export function ReferralDashboard({ code, inviteUrl, stats, config }: Props) {
         return t("cancelled");
       default:
         return status;
+    }
+  };
+
+  const formatCents = (cents: number) => (cents / 100).toFixed(2);
+
+  const discountPreview = creditsToRedeem * redemption.creditValueCents;
+
+  const handleRedeem = async () => {
+    if (creditsToRedeem <= 0 || creditsToRedeem > redemption.maxRedeemableCredits) return;
+
+    setIsRedeeming(true);
+    setRedeemMessage(null);
+
+    try {
+      const res = await fetch("/api/v1/credits/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credits: creditsToRedeem }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setRedeemMessage({
+          type: "success",
+          text: t("redemption.success", {
+            credits: data.creditsRedeemed,
+            value: formatCents(data.discountCents),
+          }),
+        });
+        setCreditsToRedeem(0);
+        router.refresh();
+      } else {
+        setRedeemMessage({
+          type: "error",
+          text: data.error || t("redemption.error"),
+        });
+      }
+    } catch {
+      setRedeemMessage({ type: "error", text: t("redemption.error") });
+    } finally {
+      setIsRedeeming(false);
     }
   };
 
@@ -154,6 +205,9 @@ export function ReferralDashboard({ code, inviteUrl, stats, config }: Props) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.credits.balance}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              = ${formatCents(redemption.balanceValueCents)}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -179,6 +233,86 @@ export function ReferralDashboard({ code, inviteUrl, stats, config }: Props) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Redeem Credits */}
+      {redemption.isRedemptionActive && redemption.hasActiveSubscription && stats.credits.balance > 0 && (
+        <Card className="overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white">
+            <div className="flex items-center gap-2">
+              <ArrowRightLeft className="h-6 w-6" />
+              <h2 className="text-2xl font-bold">{t("redemption.title")}</h2>
+            </div>
+            <p className="text-emerald-100 mt-1">{t("redemption.subtitle")}</p>
+          </div>
+          <CardContent className="p-6 space-y-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Coins className="h-4 w-4" />
+              <span>
+                {t("redemption.rate", { value: formatCents(redemption.creditValueCents) })}
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="credits-redeem">{t("redemption.creditsToRedeem")}</Label>
+              <div className="flex items-center gap-4">
+                <Input
+                  id="credits-redeem"
+                  type="number"
+                  min={0}
+                  max={redemption.maxRedeemableCredits}
+                  value={creditsToRedeem}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value) || 0;
+                    setCreditsToRedeem(Math.min(val, redemption.maxRedeemableCredits));
+                  }}
+                  className="w-32"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCreditsToRedeem(redemption.maxRedeemableCredits)}
+                >
+                  Max ({redemption.maxRedeemableCredits})
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t("redemption.maxInfo", {
+                  max: redemption.maxRedeemableCredits,
+                  percentage: Math.round(
+                    (redemption.maxDiscountCents / redemption.subscriptionPriceCents) * 100
+                  ) || 0,
+                })}
+              </p>
+            </div>
+
+            {creditsToRedeem > 0 && (
+              <div className="rounded-lg border bg-muted/50 p-4">
+                <p className="text-lg font-semibold">
+                  ${formatCents(discountPreview)} {t("redemption.discount")}
+                </p>
+              </div>
+            )}
+
+            <Button
+              onClick={handleRedeem}
+              disabled={isRedeeming || creditsToRedeem <= 0}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              {isRedeeming ? t("redemption.processing") : t("redemption.applyButton")}
+            </Button>
+
+            {redeemMessage && (
+              <p
+                className={`text-sm ${
+                  redeemMessage.type === "success" ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {redeemMessage.text}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Referral History */}
       <Card>

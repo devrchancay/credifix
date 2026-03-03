@@ -22,6 +22,7 @@
 		"users": "Usuarios",
 		"plans": "Planes",
 		"aiSettings": "Config. IA",
+		"creditConfig": "Creditos",
 		"continueWithGoogle": "Continuar con Google",
 		"orContinueWith": "o continuar con correo"
 	},
@@ -215,6 +216,19 @@
 			"agents": "Agentes",
 			"selectAgents": "Selecciona los agentes disponibles para este plan",
 			"noAgentsAvailable": "No hay agentes disponibles"
+		},
+		"credits": {
+			"title": "Configuracion de Creditos",
+			"subtitle": "Configura los ajustes de canje de creditos.",
+			"creditValue": "Valor del Credito (centavos)",
+			"creditValueHelp": "Cuantos centavos vale cada credito. ej., 25 = $0.25 por credito",
+			"maxDiscount": "Descuento Maximo (%)",
+			"maxDiscountHelp": "Porcentaje maximo del precio de suscripcion que se puede descontar por canje.",
+			"redemptionActive": "Canje Activo",
+			"redemptionActiveHelp": "Permitir a los usuarios canjear sus creditos por descuentos en suscripcion.",
+			"save": "Guardar Configuracion",
+			"saved": "Configuracion de creditos guardada exitosamente.",
+			"error": "Error al guardar la configuracion de creditos."
 		}
 	},
 	"referral": {
@@ -244,6 +258,23 @@
 		"expired": "Expirado",
 		"cancelled": "Cancelado",
 		"programInactive": "El programa de referidos no esta activo actualmente.",
+		"redemption": {
+			"title": "Canjear Creditos",
+			"subtitle": "Aplica tus creditos como descuento en tu proxima factura.",
+			"yourBalance": "Tu saldo de creditos",
+			"credits": "creditos",
+			"rate": "1 credito = ${value}",
+			"creditsToRedeem": "Creditos a canjear",
+			"discount": "de descuento",
+			"maxInfo": "Maximo canjeable: {max} creditos ({percentage}% del precio de suscripcion)",
+			"applyButton": "Aplicar a Suscripcion",
+			"processing": "Procesando...",
+			"success": "Se canjearon {credits} creditos por ${value} de descuento exitosamente!",
+			"error": "Error al canjear creditos. Intenta de nuevo.",
+			"noSubscription": "Necesitas una suscripcion activa para canjear creditos.",
+			"disabled": "El canje de creditos no esta disponible actualmente.",
+			"noCredits": "No tienes creditos para canjear."
+		},
 		"invitePage": {
 			"title": "Has sido invitado!",
 			"subtitle": "{name} te ha invitado a unirte a {appName}",
