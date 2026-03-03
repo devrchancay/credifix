@@ -29,7 +29,7 @@ function getTextFromParts(parts: Array<{ type: string; text?: string }>): string
 export function ChatContainer() {
   const tChat = useTranslations("creditAnalysis.chat");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 
   const {
