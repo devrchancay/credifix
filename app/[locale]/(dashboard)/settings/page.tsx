@@ -95,10 +95,10 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-2xl space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
+        <p className="mt-1 text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <Card>
@@ -124,7 +124,7 @@ export default function SettingsPage() {
               </p>
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="border-t pt-6">
             <Button type="submit" disabled={isSavingProfile}>
               {isSavingProfile && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -155,7 +155,7 @@ export default function SettingsPage() {
               />
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="border-t pt-6">
             <Button type="submit" disabled={isSavingPassword}>
               {isSavingPassword && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -210,14 +210,23 @@ export async function POST(request: Request) {
     const modelMessages = await convertToModelMessages(uiMessages);
 
     // 8. Stream the response
+    // GPT-5 and o-series models don't support temperature/topP/maxOutputTokens
+    const isReasoningModel =
+      aiConfig.model.startsWith("o") ||
+      aiConfig.model.startsWith("gpt-5");
+
     const finalConversationId = activeConversationId;
     const streamResult = streamText({
       model: openaiProvider(aiConfig.model),
       system: aiConfig.systemPrompt + attachmentContext,
       messages: modelMessages,
-      temperature: aiConfig.temperature,
-      topP: aiConfig.topP,
-      maxOutputTokens: aiConfig.maxTokens,
+      ...(isReasoningModel
+        ? {}
+        : {
+            temperature: aiConfig.temperature,
+            topP: aiConfig.topP,
+            maxOutputTokens: aiConfig.maxTokens,
+          }),
       tools: aiConfig.vectorStoreId
         ? {
             file_search: openaiProvider.tools.fileSearch({
