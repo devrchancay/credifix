@@ -1,5 +1,4 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { stripe } from "@/lib/stripe/client";
 import { generateReferralCode } from "./generate-code";
 import { REFERRAL_DEFAULTS } from "./config";
 import type { Tables } from "@/types/database";
@@ -257,51 +256,12 @@ export async function completeReferralOnSubscription(
 }
 
 /**
- * Finds or creates a Stripe customer for a user.
- */
-async function getOrCreateStripeCustomer(userId: string): Promise<string> {
-  const supabase = createAdminClient();
-
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("stripe_customer_id")
-    .eq("user_id", userId)
-    .limit(1)
-    .single();
-
-  if (subscription?.stripe_customer_id) {
-    return subscription.stripe_customer_id;
-  }
-
-  const existingCustomers = await stripe.customers.search({
-    query: `metadata["user_id"]:"${userId}"`,
-    limit: 1,
-  });
-
-  if (existingCustomers.data.length > 0) {
-    return existingCustomers.data[0].id;
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("email, full_name")
-    .eq("id", userId)
-    .single();
-
-  const customer = await stripe.customers.create({
-    email: profile?.email ?? undefined,
-    name: profile?.full_name ?? undefined,
-    metadata: { user_id: userId },
-  });
-
-  return customer.id;
-}
-
-/**
  * Awards credits to a user:
- * 1. Records transaction in Supabase (always)
- * 2. Updates user_credits balance (always)
- * 3. Adds credit to Stripe Customer Balance (best-effort)
+ * 1. Records transaction in Supabase
+ * 2. Updates user_credits balance
+ *
+ * Credits stay in DB until the user explicitly redeems them
+ * for subscription discounts via the credits redemption flow.
  */
 async function awardCredits(
   userId: string,
@@ -312,7 +272,6 @@ async function awardCredits(
 ) {
   const supabase = createAdminClient();
 
-  // 1. Record in DB first — this must always succeed
   await supabase.from("credit_transactions").insert({
     user_id: userId,
     amount,
@@ -325,35 +284,6 @@ async function awardCredits(
     p_user_id: userId,
     p_amount: amount,
   });
-
-  // 2. Stripe balance — best-effort, don't block credit award if this fails
-  try {
-    const stripeCustomerId = await getOrCreateStripeCustomer(userId);
-    const balanceTransaction = await stripe.customers.createBalanceTransaction(
-      stripeCustomerId,
-      {
-        amount: -amount * 100, // cents, negative = credit
-        currency: "usd",
-        description,
-        metadata: {
-          type,
-          referral_id: referralId,
-          user_id: userId,
-        },
-      }
-    );
-
-    // Update transaction with Stripe reference
-    await supabase
-      .from("credit_transactions")
-      .update({ stripe_payment_intent_id: balanceTransaction.id })
-      .eq("user_id", userId)
-      .eq("referral_id", referralId)
-      .eq("type", type)
-      .is("stripe_payment_intent_id", null);
-  } catch (err) {
-    console.error("Stripe balance transaction failed (credits still awarded in DB):", err);
-  }
 }
 
 export async function validateReferralCode(

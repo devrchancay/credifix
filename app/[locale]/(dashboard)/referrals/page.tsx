@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getReferralStats, getOrCreateReferralCode, getReferralConfig } from "@/lib/referral/service";
+import { getRedemptionPreview } from "@/lib/credits/service";
 import { ReferralDashboard } from "./referral-dashboard";
 
 async function hasActiveSubscription(userId: string): Promise<boolean> {
@@ -37,10 +38,11 @@ export default async function ReferralsPage() {
 
   const t = await getTranslations("referral");
 
-  const [code, stats, config] = await Promise.all([
+  const [code, stats, config, redemptionPreview] = await Promise.all([
     getOrCreateReferralCode(userId),
     getReferralStats(userId),
     getReferralConfig(),
+    getRedemptionPreview(userId),
   ]);
 
   const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${code}`;
@@ -63,6 +65,7 @@ export default async function ReferralsPage() {
             creditsPerReferral: config.credits_per_referral,
             creditsForReferred: config.credits_for_referred,
           }}
+          redemption={redemptionPreview}
         />
       )}
     </div>
