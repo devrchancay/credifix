@@ -316,6 +316,8 @@
 			"assistant": "Credit Assistant",
 			"assistantDescription": "AI specialized in credit analysis",
 			"emptyState": "Start a conversation to analyze your credit",
+			"greetingWithName": "Hey, {name}. Ready to dive in?",
+			"greetingDefault": "Hey! Ready to dive in?",
 			"attachFile": "Attach file",
 			"recordAudio": "Record audio",
 			"stopRecording": "Stop",
