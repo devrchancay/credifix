@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { InsertTables, UpdateTables } from "@/types/database";
 import { completeReferralOnSubscription } from "@/lib/referral/service";
 import { getPlanByPriceId } from "@/lib/plans/service";
+import { autoRedeemCreditsForInvoice } from "@/lib/credits/service";
 
 type SubscriptionStatus = InsertTables<"subscriptions">["status"];
 
@@ -276,6 +277,33 @@ export async function POST(req: Request) {
           .eq("id", deletedSub.id);
 
         console.log("Subscription canceled:", deletedSub.id);
+        break;
+      }
+
+      case "invoice.created": {
+        const invoice = event.data.object as { customer?: string; subscription?: string };
+        const customerId = typeof invoice.customer === "string" ? invoice.customer : undefined;
+
+        if (customerId && invoice.subscription) {
+          // Look up user by stripe_customer_id
+          const { data: sub } = await supabase
+            .from("subscriptions")
+            .select("user_id")
+            .eq("stripe_customer_id", customerId)
+            .in("status", ["active", "trialing"])
+            .single();
+
+          if (sub?.user_id) {
+            try {
+              const result = await autoRedeemCreditsForInvoice(sub.user_id);
+              if (result.success) {
+                console.log(`Auto-redeemed ${result.creditsRedeemed} credits for user ${sub.user_id}`);
+              }
+            } catch (err) {
+              console.error("Auto-redeem failed:", err);
+            }
+          }
+        }
         break;
       }
 

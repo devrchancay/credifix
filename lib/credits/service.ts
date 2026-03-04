@@ -72,6 +72,7 @@ export interface RedemptionPreview {
   maxRedeemableValueCents: number; // dollar value of max redeemable
   isRedemptionActive: boolean;
   hasActiveSubscription: boolean;
+  autoRedeem: boolean;
 }
 
 export async function getRedemptionPreview(userId: string): Promise<RedemptionPreview> {
@@ -89,6 +90,7 @@ export async function getRedemptionPreview(userId: string): Promise<RedemptionPr
   ]);
 
   const balance = credits.data?.balance ?? 0;
+  const autoRedeem = credits.data?.auto_redeem ?? false;
   const hasActiveSubscription = !!subscription.data;
 
   // Get subscription price from Stripe for accuracy
@@ -129,6 +131,7 @@ export async function getRedemptionPreview(userId: string): Promise<RedemptionPr
     maxRedeemableValueCents,
     isRedemptionActive: config.is_redemption_active,
     hasActiveSubscription,
+    autoRedeem,
   };
 }
 
@@ -230,4 +233,24 @@ export async function redeemCredits(
     remainingBalance,
     message: `Successfully redeemed ${credits} credits for $${(discountCents / 100).toFixed(2)} discount`,
   };
+}
+
+// ─── Auto-Redeem for Invoices ───────────────────────────────────────
+
+export async function autoRedeemCreditsForInvoice(userId: string): Promise<RedemptionResult> {
+  const preview = await getRedemptionPreview(userId);
+
+  if (!preview.autoRedeem) {
+    return { success: false, creditsRedeemed: 0, discountCents: 0, remainingBalance: preview.balance, message: "Auto-redeem is not enabled" };
+  }
+
+  if (!preview.isRedemptionActive || !preview.hasActiveSubscription || preview.balance <= 0) {
+    return { success: false, creditsRedeemed: 0, discountCents: 0, remainingBalance: preview.balance, message: "Cannot auto-redeem: no active subscription, redemption disabled, or zero balance" };
+  }
+
+  if (preview.maxRedeemableCredits <= 0) {
+    return { success: false, creditsRedeemed: 0, discountCents: 0, remainingBalance: preview.balance, message: "No credits can be redeemed at this time" };
+  }
+
+  return redeemCredits(userId, preview.maxRedeemableCredits);
 }

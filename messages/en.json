@@ -93,7 +93,24 @@
 		"upgradeToPro": "Upgrade to Pro",
 		"billingHistory": "Billing History",
 		"billingHistoryDescription": "View your past invoices and payment history.",
-		"noBillingHistory": "No billing history available. Upgrade to a paid plan to see your invoices here."
+		"noBillingHistory": "No billing history available. Upgrade to a paid plan to see your invoices here.",
+		"credits": {
+			"title": "Your Credits",
+			"subtitle": "Use your earned credits for subscription discounts.",
+			"balance": "Balance",
+			"creditsLabel": "credits",
+			"value": "Value",
+			"autoRedeemLabel": "Auto-apply credits on next charge",
+			"autoRedeemDescription": "Automatically use your maximum available credits as a discount on each billing cycle.",
+			"autoRedeemPreview": "On your next invoice, {credits} credits will be applied for a ${value} discount.",
+			"manualRedeem": "Manual Redemption",
+			"creditsPlaceholder": "Credits to redeem",
+			"apply": "Apply",
+			"rate": "1 credit = ${value}",
+			"maxInfo": "Max: {max} credits ({percentage}% of subscription)",
+			"redeemSuccess": "Redeemed {credits} credits for ${value} discount!",
+			"redeemError": "Failed to redeem credits. Please try again."
+		}
 	},
 	"settings": {
 		"title": "Settings",

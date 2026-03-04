@@ -93,7 +93,24 @@
 		"upgradeToPro": "Actualizar a Pro",
 		"billingHistory": "Historial de Facturacion",
 		"billingHistoryDescription": "Ve tus facturas pasadas e historial de pagos.",
-		"noBillingHistory": "No hay historial de facturacion disponible. Actualiza a un plan de pago para ver tus facturas aqui."
+		"noBillingHistory": "No hay historial de facturacion disponible. Actualiza a un plan de pago para ver tus facturas aqui.",
+		"credits": {
+			"title": "Tus Creditos",
+			"subtitle": "Usa tus creditos ganados para descuentos en tu suscripcion.",
+			"balance": "Saldo",
+			"creditsLabel": "creditos",
+			"value": "Valor",
+			"autoRedeemLabel": "Aplicar creditos automaticamente en el proximo cobro",
+			"autoRedeemDescription": "Usar automaticamente el maximo de creditos disponibles como descuento en cada ciclo de facturacion.",
+			"autoRedeemPreview": "En tu proxima factura, se aplicaran {credits} creditos para un descuento de ${value}.",
+			"manualRedeem": "Canje Manual",
+			"creditsPlaceholder": "Creditos a canjear",
+			"apply": "Aplicar",
+			"rate": "1 credito = ${value}",
+			"maxInfo": "Max: {max} creditos ({percentage}% de suscripcion)",
+			"redeemSuccess": "Se canjearon {credits} creditos por ${value} de descuento!",
+			"redeemError": "Error al canjear creditos. Intenta de nuevo."
+		}
 	},
 	"settings": {
 		"title": "Configuracion",
