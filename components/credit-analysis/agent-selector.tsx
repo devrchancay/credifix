@@ -3,8 +3,15 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Bot, Crown, Lock, Loader2 } from "lucide-react";
+import { Bot, Crown, Lock, Loader2, ChevronDown, Check } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface AgentOption {
@@ -55,66 +62,83 @@ export function AgentSelector({
     loadAgents();
   }, [loadAgents]);
 
+  const selectedAgent = agents.find((a) => a.id === selectedAgentId);
+  const selectedName = selectedAgent?.name ?? tAgents("selectAgent");
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-2.5">
-        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-      </div>
+      <Button variant="ghost" size="sm" disabled className="gap-1.5">
+        <Loader2 className="size-4 animate-spin" />
+      </Button>
     );
   }
 
-  if (agents.length <= 1) {
-    return null;
-  }
-
   return (
-    <div className="flex gap-1.5 border-b px-4 py-2.5">
-      {agents.map((agent) => {
-        const isSelected = selectedAgentId === agent.id;
-        const isPremium = agent.tier === "premium";
-        const isLocked = isPremium && !isPro;
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={disabled}
+          className="gap-1.5 text-base font-semibold"
+        >
+          {selectedAgent?.tier === "premium" ? (
+            <Crown className="size-4" />
+          ) : (
+            <Bot className="size-4" />
+          )}
+          {selectedName}
+          <ChevronDown className="size-3.5 text-muted-foreground" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64">
+        {agents.map((agent) => {
+          const isSelected = selectedAgentId === agent.id;
+          const isPremium = agent.tier === "premium";
+          const isLocked = isPremium && !isPro;
 
-        const handleClick = () => {
-          if (isLocked) {
-            router.push(`/${locale}/billing`);
-            return;
-          }
-          onSelectAgent(agent.id);
-        };
-
-        return (
-          <button
-            key={agent.id}
-            onClick={handleClick}
-            disabled={disabled && !isLocked}
-            className={cn(
-              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
-              isLocked
-                ? "cursor-pointer text-muted-foreground/60 hover:text-muted-foreground"
-                : isSelected
-                  ? isPremium
-                    ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
-                    : "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-muted/50",
-              disabled && !isLocked && "cursor-not-allowed opacity-50"
-            )}
-          >
-            {isLocked ? (
-              <Lock className="size-3.5" />
-            ) : isPremium ? (
-              <Crown className="size-3.5" />
-            ) : (
-              <Bot className="size-3.5" />
-            )}
-            <span>{agent.name}</span>
-            {isLocked && (
-              <span className="text-xs">
-                {tAgents("locked")}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
+          return (
+            <DropdownMenuItem
+              key={agent.id}
+              onClick={() => {
+                if (isLocked) {
+                  router.push(`/${locale}/billing`);
+                  return;
+                }
+                onSelectAgent(agent.id);
+              }}
+              className={cn(
+                "flex items-start gap-3 py-2.5",
+                isLocked && "opacity-60"
+              )}
+            >
+              <div className="mt-0.5">
+                {isLocked ? (
+                  <Lock className="size-4" />
+                ) : isPremium ? (
+                  <Crown className="size-4" />
+                ) : (
+                  <Bot className="size-4" />
+                )}
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">{agent.name}</div>
+                {agent.description && (
+                  <div className="text-xs text-muted-foreground">
+                    {agent.description}
+                  </div>
+                )}
+                {isLocked && (
+                  <div className="text-xs text-muted-foreground">
+                    {tAgents("locked")}
+                  </div>
+                )}
+              </div>
+              {isSelected && <Check className="mt-0.5 size-4 shrink-0" />}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

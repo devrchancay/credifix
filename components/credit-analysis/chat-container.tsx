@@ -7,7 +7,7 @@ import { ChatInput } from "./chat-input";
 import { TypingIndicator } from "./typing-indicator";
 import { AgentSelector } from "./agent-selector";
 import { ChatHistory } from "./chat-history";
-import { AlertCircle, Bot, History, Plus, PanelLeftClose, PanelLeft, X } from "lucide-react";
+import { AlertCircle, History, Plus, PanelLeftClose, PanelLeft, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -16,6 +16,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useChatAI } from "@/hooks/use-chat-ai";
+import { useUser } from "@/hooks/use-user";
 import { cn } from "@/lib/utils";
 
 /** Extract text content from a UIMessage's parts */
@@ -29,8 +30,9 @@ function getTextFromParts(parts: Array<{ type: string; text?: string }>): string
 export function ChatContainer() {
   const tChat = useTranslations("creditAnalysis.chat");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
+  const { fullName } = useUser();
 
   const {
     messages: aiMessages,
@@ -97,6 +99,11 @@ export function ChatContainer() {
 
   // Disable agent switching once a conversation is active
   const canSwitchAgent = !conversationId && messages.length === 0;
+  const isEmpty = messages.length === 0 && !isLoading;
+
+  const greeting = fullName
+    ? tChat("greetingWithName", { name: fullName.split(" ")[0] })
+    : tChat("greetingDefault");
 
   const historyPanel = (
     <ChatHistory
@@ -110,7 +117,7 @@ export function ChatContainer() {
   );
 
   return (
-    <div className="flex h-[calc(100vh-10rem)] gap-0 overflow-hidden rounded-xl border bg-background shadow-sm">
+    <div className="flex h-[calc(100vh-5rem)] gap-0 overflow-hidden">
       {/* Desktop sidebar */}
       <div
         className={cn(
@@ -134,7 +141,7 @@ export function ChatContainer() {
       {/* Main chat area */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Minimal header */}
-        <div className="flex items-center gap-2 border-b px-4 py-2.5">
+        <div className="flex items-center gap-2 px-4 py-2.5">
           {/* History toggle - desktop */}
           <Button
             variant="ghost"
@@ -162,7 +169,11 @@ export function ChatContainer() {
           </Button>
 
           <div className="min-w-0 flex-1">
-            <h2 className="text-base font-semibold">{tChat("assistant")}</h2>
+            <AgentSelector
+              selectedAgentId={agentId}
+              onSelectAgent={selectAgent}
+              disabled={!canSwitchAgent}
+            />
           </div>
 
           {/* New chat button */}
@@ -177,67 +188,68 @@ export function ChatContainer() {
           </Button>
         </div>
 
-        {/* Agent Selector */}
-        <AgentSelector
-          selectedAgentId={agentId}
-          onSelectAgent={selectAgent}
-          disabled={!canSwitchAgent}
-        />
-
-        {/* Messages area */}
-        <div className="flex-1 overflow-y-auto">
-          {messages.length === 0 && !isLoading ? (
-            <div className="flex h-full flex-col items-center justify-center gap-4 text-muted-foreground">
-              <Bot className="size-16 opacity-20" />
-              <p className="text-base">{tChat("emptyState")}</p>
+        {isEmpty ? (
+          /* ChatGPT-style empty state: centered greeting + input */
+          <div className="flex flex-1 flex-col items-center justify-center px-4">
+            <Sparkles className="mb-4 size-10 text-primary" />
+            <h1 className="mb-8 text-3xl font-semibold text-foreground">
+              {greeting}
+            </h1>
+            <div className="w-full max-w-3xl">
+              <ChatInput onSend={handleSend} disabled={isLoading} centered />
             </div>
-          ) : (
-            <div className="mx-auto max-w-3xl py-2">
-              {messages.map((message) => (
-                <ChatMessageBubble key={message.id} message={message} />
-              ))}
-              {showTyping && <TypingIndicator />}
-              <div ref={messagesEndRef} />
+          </div>
+        ) : (
+          <>
+            {/* Messages area */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="mx-auto max-w-3xl py-2">
+                {messages.map((message) => (
+                  <ChatMessageBubble key={message.id} message={message} />
+                ))}
+                {showTyping && <TypingIndicator />}
+                <div ref={messagesEndRef} />
+              </div>
             </div>
-          )}
-        </div>
 
-        {/* Processing indicators */}
-        {isProcessingFiles && (
-          <div className="border-t px-4 py-2 text-sm text-muted-foreground animate-pulse">
-            {tChat("processingFiles")}
-          </div>
-        )}
-        {isTranscribing && (
-          <div className="border-t px-4 py-2 text-sm text-muted-foreground animate-pulse">
-            {tChat("transcribing")}
-          </div>
-        )}
+            {/* Processing indicators */}
+            {isProcessingFiles && (
+              <div className="px-4 py-2 text-center text-sm text-muted-foreground animate-pulse">
+                {tChat("processingFiles")}
+              </div>
+            )}
+            {isTranscribing && (
+              <div className="px-4 py-2 text-center text-sm text-muted-foreground animate-pulse">
+                {tChat("transcribing")}
+              </div>
+            )}
 
-        {/* Error display */}
-        {error && (
-          <div className="border-t px-4 py-2 text-sm text-destructive">
-            {tChat("errorGeneric")}
-          </div>
-        )}
+            {/* Error display */}
+            {error && (
+              <div className="px-4 py-2 text-center text-sm text-destructive">
+                {tChat("errorGeneric")}
+              </div>
+            )}
 
-        {/* File error display */}
-        {fileError && (
-          <div className="flex items-center gap-2 border-t px-4 py-2 text-sm text-destructive">
-            <AlertCircle className="size-4 shrink-0" />
-            <span className="flex-1">{fileError}</span>
-            <button
-              type="button"
-              onClick={clearFileError}
-              className="shrink-0 rounded-full p-0.5 hover:bg-destructive/20"
-            >
-              <X className="size-3.5" />
-            </button>
-          </div>
-        )}
+            {/* File error display */}
+            {fileError && (
+              <div className="flex items-center justify-center gap-2 px-4 py-2 text-sm text-destructive">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{fileError}</span>
+                <button
+                  type="button"
+                  onClick={clearFileError}
+                  className="shrink-0 rounded-full p-0.5 hover:bg-destructive/20"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </div>
+            )}
 
-        {/* Input */}
-        <ChatInput onSend={handleSend} disabled={isLoading} />
+            {/* Input */}
+            <ChatInput onSend={handleSend} disabled={isLoading} />
+          </>
+        )}
       </div>
     </div>
   );

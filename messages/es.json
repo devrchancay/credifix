@@ -316,6 +316,8 @@
 			"assistant": "Asistente de Credito",
 			"assistantDescription": "IA especializada en analisis crediticio",
 			"emptyState": "Inicia una conversacion para analizar tu credito",
+			"greetingWithName": "Hola, {name}. Listo para comenzar?",
+			"greetingDefault": "Hola! Listo para comenzar?",
 			"attachFile": "Adjuntar archivo",
 			"recordAudio": "Grabar audio",
 			"stopRecording": "Detener",

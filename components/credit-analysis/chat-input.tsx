@@ -21,9 +21,10 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 type ChatInputProps = {
   onSend: (message: string, attachments: Attachment[]) => void;
   disabled?: boolean;
+  centered?: boolean;
 };
 
-export function ChatInput({ onSend, disabled }: ChatInputProps) {
+export function ChatInput({ onSend, disabled, centered }: ChatInputProps) {
   const t = useTranslations("creditAnalysis.chat");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -169,7 +170,10 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const canSend = (text.trim().length > 0 || attachments.length > 0) && !disabled;
 
   return (
-    <div className="border-t bg-background/80 px-4 py-4 backdrop-blur-sm">
+    <div className={cn(
+      "px-4 py-4",
+      !centered && "border-t bg-background/80 backdrop-blur-sm"
+    )}>
       <div className="mx-auto max-w-3xl">
         {fileError && (
           <div className="mb-3 flex items-center gap-2 rounded-xl border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
