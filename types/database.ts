@@ -282,6 +282,7 @@ export type Database = {
           balance: number;
           total_earned: number;
           total_spent: number;
+          auto_redeem: boolean;
           updated_at: string;
         };
         Insert: {
@@ -289,6 +290,7 @@ export type Database = {
           balance?: number;
           total_earned?: number;
           total_spent?: number;
+          auto_redeem?: boolean;
           updated_at?: string;
         };
         Update: {
@@ -296,6 +298,7 @@ export type Database = {
           balance?: number;
           total_earned?: number;
           total_spent?: number;
+          auto_redeem?: boolean;
           updated_at?: string;
         };
         Relationships: [

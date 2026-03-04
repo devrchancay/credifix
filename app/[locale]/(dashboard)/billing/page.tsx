@@ -17,6 +17,7 @@ import { useSubscription } from "@/hooks/use-subscription";
 import { createApiClient } from "@/lib/api/client";
 import { capitalize } from "../../../../lib/utils";
 import type { PlanData } from "@/lib/api/types";
+import BillingCredits from "./billing-credits";
 
 const apiClient = createApiClient();
 
@@ -127,6 +128,8 @@ function SubscribedView({
 						</Button>
 					</CardContent>
 				</Card>
+
+				<BillingCredits />
 			</div>
 		</div>
 	);
