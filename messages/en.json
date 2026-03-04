@@ -24,7 +24,8 @@
 		"aiSettings": "AI Settings",
 		"creditConfig": "Credits",
 		"continueWithGoogle": "Continue with Google",
-		"orContinueWith": "or continue with email"
+		"orContinueWith": "or continue with email",
+		"forgotPassword": "Forgot password?"
 	},
 	"nav": {
 		"home": "Home",
@@ -337,6 +338,19 @@
 			"fileReceived": "I've received your file. I'm reviewing the document to extract the relevant credit information. Give me a moment to analyze it and I'll provide you with a detailed summary and personalized recommendations.",
 			"audioReceived": "I've received your voice message. Let me process what you mentioned and prepare a detailed response about your credit situation."
 		}
+	},
+	"auth": {
+		"forgotPassword": "Forgot Password?",
+		"forgotPasswordDescription": "Enter your email and we'll send you a link to reset your password.",
+		"sendResetLink": "Send Reset Link",
+		"checkYourEmail": "Check your email! We've sent you a link to reset your password. If you don't see it, check your spam folder.",
+		"backToSignIn": "Back to Sign In",
+		"resetPassword": "Reset Password",
+		"resetPasswordDescription": "Enter your new password below.",
+		"newPassword": "New Password",
+		"confirmPassword": "Confirm Password",
+		"passwordsDoNotMatch": "Passwords do not match.",
+		"passwordResetSuccess": "Password reset successfully."
 	},
 	"about": {
 		"title": "About",

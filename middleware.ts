@@ -10,6 +10,8 @@ const publicPaths = [
   "/sign-in",
   "/sign-up",
   "/invite",
+  "/forgot-password",
+  "/reset-password",
 ];
 
 function isPublicRoute(pathname: string): boolean {
