@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateReferralCode } from "@/lib/referral/service";
+import { checkRateLimit, getClientIp } from "@/lib/api/rate-limit";
 
 export async function GET(request: NextRequest) {
+  // Rate limit by IP (public endpoint)
+  const rateLimited = await checkRateLimit("public", getClientIp(request));
+  if (rateLimited) return rateLimited;
+
   const code = request.nextUrl.searchParams.get("code");
   const locale = request.nextUrl.searchParams.get("locale") || "en";
 

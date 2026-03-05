@@ -5,6 +5,7 @@ import {
   handleApiError,
   ErrorCodes,
 } from "@/lib/api/errors";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { createCheckoutSchema } from "@/lib/api/validation";
 import { stripe } from "@/lib/stripe/client";
 import { getPlanBySlug } from "@/lib/plans/service";
@@ -19,6 +20,9 @@ export async function POST(request: NextRequest) {
       return createErrorResponse("Unauthorized", 401, ErrorCodes.UNAUTHORIZED);
     }
     const { userId } = authResult;
+
+    const rateLimited = await checkRateLimit("billing", userId);
+    if (rateLimited) return rateLimited;
 
     // Get user profile for email
     const supabase = createAdminClient();

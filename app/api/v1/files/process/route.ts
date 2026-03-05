@@ -5,6 +5,7 @@ import {
   handleApiError,
   ErrorCodes,
 } from "@/lib/api/errors";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { processFile, MAX_FILE_SIZE } from "@/lib/ai/file-processing";
 import type { ProcessedFile } from "@/lib/ai/file-processing";
 
@@ -16,6 +17,9 @@ export async function POST(request: Request) {
     if (!authResult) {
       return createErrorResponse("Unauthorized", 401, ErrorCodes.UNAUTHORIZED);
     }
+
+    const rateLimited = await checkRateLimit("upload", authResult.userId);
+    if (rateLimited) return rateLimited;
 
     const formData = await request.formData();
     const files = formData.getAll("files") as File[];

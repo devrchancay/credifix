@@ -12,6 +12,7 @@ import {
   handleApiError,
   ErrorCodes,
 } from "@/lib/api/errors";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /** Extract text content from a UIMessage's parts */
@@ -30,6 +31,10 @@ export async function POST(request: Request) {
       return createErrorResponse("Unauthorized", 401, ErrorCodes.UNAUTHORIZED);
     }
     const { userId } = authResult;
+
+    // Rate limit by userId
+    const rateLimited = await checkRateLimit("chat", userId);
+    if (rateLimited) return rateLimited;
 
     // 2. Parse body
     const body = await request.json();

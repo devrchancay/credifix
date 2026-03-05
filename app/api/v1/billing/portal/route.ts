@@ -5,6 +5,7 @@ import {
   handleApiError,
   ErrorCodes,
 } from "@/lib/api/errors";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { createPortalSchema } from "@/lib/api/validation";
 import { stripe } from "@/lib/stripe/client";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -18,6 +19,9 @@ export async function POST(request: NextRequest) {
       return createErrorResponse("Unauthorized", 401, ErrorCodes.UNAUTHORIZED);
     }
     const { userId } = authResult;
+
+    const rateLimited = await checkRateLimit("billing", userId);
+    if (rateLimited) return rateLimited;
 
     // Parse and validate request (body may be empty)
     const body = await request.json().catch(() => ({}));

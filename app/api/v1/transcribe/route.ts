@@ -5,6 +5,7 @@ import {
   handleApiError,
   ErrorCodes,
 } from "@/lib/api/errors";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 
 const ALLOWED_AUDIO_TYPES = [
   "audio/webm",
@@ -25,6 +26,9 @@ export async function POST(request: Request) {
     if (!authResult) {
       return createErrorResponse("Unauthorized", 401, ErrorCodes.UNAUTHORIZED);
     }
+
+    const rateLimited = await checkRateLimit("upload", authResult.userId);
+    if (rateLimited) return rateLimited;
 
     const formData = await request.formData();
     const file = formData.get("file");

@@ -15,7 +15,6 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 - [x] `signOut` limpia estado y refresca correctamente
 - [x] **Contraseña mínima de 8 caracteres** en sign-up y reset-password *(corregido: era 6)*
 - [x] **Open redirect corregido** - `redirect_url` y `next` param validados contra paths internos *(corregido en `middleware.ts`, `auth/callback/route.ts`, `sign-in/page.tsx`)*
-- [ ] Sin rate limiting en login - Vulnerable a fuerza bruta *(pendiente: requiere infraestructura Redis/Upstash)*
 - [ ] Sin bloqueo de cuenta por intentos fallidos *(verificar config en dashboard de Supabase)*
 
 ---
@@ -44,6 +43,19 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 
 ---
 
+## Rate Limiting
+
+- [x] **Upstash Redis integrado** con sliding window algorithm *(corregido)*
+- [x] **Chat API**: 30 req/min por usuario (`lib/api/rate-limit.ts`)
+- [x] **File upload / transcribe**: 20 req/min por usuario
+- [x] **Billing (checkout/portal)**: 10 req/min por usuario
+- [x] **Endpoints públicos (referral validate/track)**: 15 req/min por IP
+- [x] **Fail-open**: Si Redis no está disponible, se permite el request
+- [x] **Headers estándar**: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `Retry-After`
+- [ ] Rate limiting en login *(delegado a Supabase Auth built-in rate limiting)*
+
+---
+
 ## API Routes
 
 - [x] Todas las rutas protegidas requieren autenticación
@@ -53,7 +65,6 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 - [x] Body size limit de 10MB configurado en `next.config.ts`
 - [x] **Chat API limita historial a 100 mensajes** para prevenir abuso de costos *(corregido)*
 - [x] **Referral validate valida formato de código** con regex antes de consultar DB *(corregido)*
-- [ ] Sin rate limiting en endpoints públicos *(pendiente: requiere infraestructura)*
 - [ ] Sin CORS explícito - Headers custom no expuestos cross-origin
 - [ ] Validación Zod faltante en algunos admin routes (PATCH plans, PUT credit-config)
 
@@ -66,6 +77,7 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 - [x] Planes gestionados en DB con tabla `plans`
 - [x] API endpoints devuelven URLs en vez de redirigir (seguro para mobile)
 - [x] Verificación de suscripción activa antes de redimir créditos
+- [x] **Rate limiting en checkout y portal** *(corregido)*
 - [ ] Cadena de fallback de userId en webhook compleja - Debería fallar rápido
 - [ ] Race condition en redención de créditos - Si Stripe falla después de debitar DB
 - [ ] Sin concurrency control en endpoint de sync admin
@@ -78,7 +90,7 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 - [x] Incremento atómico de créditos con `increment_user_credits()`
 - [x] Configuración de máximo de referidos por usuario
 - [x] **Validación de formato de código** - Solo alfanumérico 3-50 chars *(corregido)*
-- [ ] Endpoint de validación público sin rate limiting *(pendiente)*
+- [x] **Rate limiting en validate y track** - 15 req/min por IP *(corregido)*
 - [ ] Race condition en completar referido - Doble award posible
 - [ ] TOCTOU en max_referrals - Dos signups simultáneos pueden superar el límite
 
@@ -105,8 +117,8 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 - [x] Soporte de PDF, DOCX, XLSX, CSV, TXT con extracción de texto
 - [x] Soporte de imágenes removido (no se usa vision)
 - [x] **Validación de magic bytes** - Archivos binarios verificados contra su firma real *(corregido)*
+- [x] **Rate limiting**: 20 req/min por usuario *(corregido)*
 - [ ] Sin escaneo de malware/virus
-- [ ] Sin rate limiting por usuario en uploads
 
 ---
 
@@ -115,6 +127,7 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 - [x] Límite de 25MB para archivos de audio (máximo de Whisper)
 - [x] Validación de MIME type para audio
 - [x] Autenticación requerida
+- [x] **Rate limiting**: 20 req/min por usuario *(corregido)*
 
 ---
 
@@ -150,15 +163,15 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 | 4 | Chat sin límite de mensajes | Alto | Corregido (100) | `api/v1/chat/route.ts` |
 | 5 | Referral code sin validación de formato | Alto | Corregido | `api/v1/referral/validate/route.ts` |
 | 6 | Archivos validados solo por extensión | Alto | Corregido | `lib/ai/file-processing.ts` |
+| 7 | Rate limiting en endpoints | Alto | Corregido | `lib/api/rate-limit.ts` + 8 rutas |
 
-## Pendientes (requieren infraestructura adicional)
+## Pendientes
 
 | # | Issue | Severidad | Notas |
 |---|-------|-----------|-------|
-| 1 | Rate limiting en endpoints | Alto | Requiere Redis/Upstash |
-| 2 | Race conditions en referidos/créditos | Alto | Requiere transacciones DB o locks |
-| 3 | CSP completo | Medio | Requiere auditar scripts inline y third-party |
-| 4 | Audit logging para admins | Medio | Requiere tabla de audit logs |
-| 5 | Pre-commit hook para secretos | Medio | Configurar `gitleaks` o similar |
-| 6 | `npm audit fix` | Medio | Ejecutar y verificar compatibilidad |
-| 7 | Restringir `ai_config` a admins | Bajo | Cambiar RLS policy en Supabase |
+| 1 | Race conditions en referidos/créditos | Alto | Requiere transacciones DB o locks |
+| 2 | CSP completo | Medio | Requiere auditar scripts inline y third-party |
+| 3 | Audit logging para admins | Medio | Requiere tabla de audit logs |
+| 4 | Pre-commit hook para secretos | Medio | Configurar `gitleaks` o similar |
+| 5 | `npm audit fix` | Medio | Ejecutar y verificar compatibilidad |
+| 6 | Restringir `ai_config` a admins | Bajo | Cambiar RLS policy en Supabase |
