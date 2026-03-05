@@ -343,7 +343,10 @@
 			"deleteChatTitle": "Eliminar conversacion",
 			"deleteChatConfirm": "Esto eliminara permanentemente esta conversacion y todos sus mensajes. Esta accion no se puede deshacer.",
 			"cancel": "Cancelar",
-			"fileSizeError": "Los siguientes archivos exceden el limite de {limit}: {files}"
+			"fileSizeError": "Los siguientes archivos exceden el limite de {limit}: {files}",
+			"thinking": "Pensando...",
+			"thinkingLong": "Aun trabajando en ello...",
+			"thinkingVeryLong": "Ya casi, un momento..."
 		},
 		"responses": {
 			"greeting": "Hola! Soy tu asistente de analisis de credito. Puedo ayudarte a revisar tu historial crediticio, analizar reportes de credito y darte recomendaciones para mejorar tu puntaje. Puedes enviarme archivos como reportes de credito en PDF o grabar mensajes de voz. Como puedo ayudarte hoy?",
