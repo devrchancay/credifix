@@ -787,6 +787,22 @@ export type Database = {
         };
         Returns: boolean;
       };
+      complete_referral_and_award_credits: {
+        Args: {
+          p_referred_id: string;
+          p_credits_per_referral: number;
+          p_credits_for_referred: number;
+        };
+        Returns: string | null;
+      };
+      create_referral_signup: {
+        Args: {
+          p_referred_id: string;
+          p_referral_code: string;
+          p_max_referrals: number | null;
+        };
+        Returns: string;
+      };
     };
     Enums: {
       [_ in never]: never;

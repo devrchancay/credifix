@@ -91,8 +91,8 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 - [x] Configuración de máximo de referidos por usuario
 - [x] **Validación de formato de código** - Solo alfanumérico 3-50 chars *(corregido)*
 - [x] **Rate limiting en validate y track** - 15 req/min por IP *(corregido)*
-- [ ] Race condition en completar referido - Doble award posible
-- [ ] TOCTOU en max_referrals - Dos signups simultáneos pueden superar el límite
+- [x] **Race condition en completar referido corregido** - `complete_referral_and_award_credits()` usa `FOR UPDATE SKIP LOCKED` *(corregido)*
+- [x] **TOCTOU en max_referrals corregido** - `create_referral_signup()` usa advisory lock atómico *(corregido)*
 
 ---
 
@@ -164,13 +164,14 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 | 5 | Referral code sin validación de formato | Alto | Corregido | `api/v1/referral/validate/route.ts` |
 | 6 | Archivos validados solo por extensión | Alto | Corregido | `lib/ai/file-processing.ts` |
 | 7 | Rate limiting en endpoints | Alto | Corregido | `lib/api/rate-limit.ts` + 8 rutas |
+| 8 | Race condition en completar referido | Alto | Corregido | `018_atomic_referral_functions.sql`, `lib/referral/service.ts` |
+| 9 | TOCTOU en max_referrals | Alto | Corregido | `018_atomic_referral_functions.sql`, `lib/referral/service.ts` |
 
 ## Pendientes
 
 | # | Issue | Severidad | Notas |
 |---|-------|-----------|-------|
-| 1 | Race conditions en referidos/créditos | Alto | Requiere transacciones DB o locks |
-| 2 | CSP completo | Medio | Requiere auditar scripts inline y third-party |
+| 1 | CSP completo | Medio | Requiere auditar scripts inline y third-party |
 | 3 | Audit logging para admins | Medio | Requiere tabla de audit logs |
 | 4 | Pre-commit hook para secretos | Medio | Configurar `gitleaks` o similar |
 | 5 | `npm audit fix` | Medio | Ejecutar y verificar compatibilidad |

@@ -127,7 +127,8 @@ export async function getReferralStats(userId: string) {
 
 /**
  * Called during user signup (via referral register endpoint).
- * Creates a PENDING referral record. No credits yet.
+ * Creates a PENDING referral record atomically via DB function.
+ * Prevents TOCTOU on max_referrals and duplicate referrals.
  */
 export async function processReferralSignup(
   referredUserId: string,
@@ -140,150 +141,59 @@ export async function processReferralSignup(
     return { success: false, message: "Referral program is not active" };
   }
 
-  const { data: codeData } = await supabase
-    .from("referral_codes")
-    .select("*")
-    .eq("code", referralCode)
-    .eq("is_active", true)
-    .single();
+  const { data: result, error } = await supabase.rpc("create_referral_signup", {
+    p_referred_id: referredUserId,
+    p_referral_code: referralCode,
+    p_max_referrals: config.max_referrals_per_user ?? null,
+  });
 
-  if (!codeData) {
-    return { success: false, message: "Invalid referral code" };
-  }
-
-  if (codeData.user_id === referredUserId) {
-    return { success: false, message: "Cannot use your own referral code" };
-  }
-
-  const { data: existingReferral } = await supabase
-    .from("referrals")
-    .select("id")
-    .eq("referred_id", referredUserId)
-    .single();
-
-  if (existingReferral) {
-    return { success: false, message: "User already has a referral" };
-  }
-
-  if (config.max_referrals_per_user) {
-    const { count } = await supabase
-      .from("referrals")
-      .select("id", { count: "exact", head: true })
-      .eq("referrer_id", codeData.user_id);
-
-    if (count !== null && count >= config.max_referrals_per_user) {
-      return { success: false, message: "Referrer has reached maximum referrals" };
-    }
-  }
-
-  // Create referral as PENDING — credits awarded when referred user subscribes
-  const { error: referralError } = await supabase
-    .from("referrals")
-    .insert({
-      referrer_id: codeData.user_id,
-      referred_id: referredUserId,
-      referral_code_id: codeData.id,
-      status: "pending",
-    });
-
-  if (referralError) {
+  if (error) {
     return { success: false, message: "Failed to create referral" };
   }
 
-  return { success: true, message: "Referral registered, pending subscription" };
+  const messages: Record<string, string> = {
+    ok: "Referral registered, pending subscription",
+    invalid_code: "Invalid referral code",
+    self_referral: "Cannot use your own referral code",
+    already_referred: "User already has a referral",
+    max_reached: "Referrer has reached maximum referrals",
+    insert_failed: "Failed to create referral",
+  };
+
+  const status = result as string;
+  return {
+    success: status === "ok",
+    message: messages[status] || "Failed to create referral",
+  };
 }
 
 /**
  * Called from Stripe webhook on checkout.session.completed.
- * Completes a pending referral and awards credits to both users.
+ * Completes a pending referral and awards credits to both users
+ * in a single atomic DB transaction to prevent double-award race conditions.
  */
 export async function completeReferralOnSubscription(
   referredUserId: string
 ): Promise<void> {
   const supabase = createAdminClient();
 
-  // Find pending referral for this user
-  const { data: referral } = await supabase
-    .from("referrals")
-    .select("*")
-    .eq("referred_id", referredUserId)
-    .eq("status", "pending")
-    .single();
-
-  if (!referral) {
-    return; // No pending referral, nothing to do
-  }
-
   const config = await getReferralConfig();
   if (!config.is_active) {
     return;
   }
 
-  // Mark referral as completed
-  await supabase
-    .from("referrals")
-    .update({
-      status: "completed",
-      credits_awarded_referrer: config.credits_per_referral,
-      credits_awarded_referred: config.credits_for_referred,
-      completed_at: new Date().toISOString(),
-    })
-    .eq("id", referral.id);
+  const { data: referralId } = await supabase.rpc(
+    "complete_referral_and_award_credits",
+    {
+      p_referred_id: referredUserId,
+      p_credits_per_referral: config.credits_per_referral,
+      p_credits_for_referred: config.credits_for_referred,
+    }
+  );
 
-  // Award credits to both users via Stripe + DB
-  await Promise.all([
-    awardCredits(
-      referral.referrer_id,
-      config.credits_per_referral,
-      "referral_bonus",
-      "Referral bonus — your invite purchased a subscription",
-      referral.id
-    ),
-    awardCredits(
-      referredUserId,
-      config.credits_for_referred,
-      "referred_bonus",
-      "Welcome bonus from referral",
-      referral.id
-    ),
-  ]);
-
-  console.log("Referral completed:", {
-    referralId: referral.id,
-    referrer: referral.referrer_id,
-    referred: referredUserId,
-  });
-}
-
-/**
- * Awards credits to a user:
- * 1. Records transaction in Supabase
- * 2. Updates user_credits balance
- *
- * Credits stay in DB until the user explicitly redeems them
- * for subscription discounts via the credits redemption flow.
- */
-async function awardCredits(
-  userId: string,
-  amount: number,
-  type: "referral_bonus" | "referred_bonus",
-  description: string,
-  referralId: string
-) {
-  const supabase = createAdminClient();
-
-  await supabase.from("credit_transactions").insert({
-    user_id: userId,
-    amount,
-    type,
-    description,
-    referral_id: referralId,
-  });
-
-  await supabase.rpc("increment_user_credits", {
-    p_user_id: userId,
-    p_amount: amount,
-  });
+  if (!referralId) {
+    return; // No pending referral found (or already completed)
+  }
 }
 
 export async function validateReferralCode(
