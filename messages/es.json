@@ -366,6 +366,12 @@
 		"passwordsDoNotMatch": "Las contrasenas no coinciden.",
 		"passwordResetSuccess": "Contrasena restablecida exitosamente."
 	},
+	"upgrade": {
+		"title": "Mejora a Pro",
+		"description": "Desbloquea agentes premium, conversaciones ilimitadas y mas.",
+		"cta": "Ver Planes",
+		"badge": "Plan Gratis"
+	},
 	"about": {
 		"title": "Acerca de",
 		"subtitle": "Una plantilla SaaS lista para produccion construida con tecnologias modernas.",
