@@ -207,10 +207,17 @@ export async function POST(request: Request) {
       }
     }
 
-    // 7. Convert UIMessages to model messages
+    // 7. Inject knowledge base instruction when vector store is available
+    let knowledgeContext = "";
+    if (aiConfig.vectorStoreId) {
+      knowledgeContext =
+        "\n\nIMPORTANT: You have access to a knowledge base via the file_search tool. ALWAYS use it to search for relevant information before answering user questions. Base your responses on the knowledge base content and cite sources when possible.";
+    }
+
+    // 8. Convert UIMessages to model messages
     const modelMessages = await convertToModelMessages(uiMessages);
 
-    // 8. Stream the response
+    // 9. Stream the response
     // GPT-5 and o-series models don't support temperature/topP/maxOutputTokens
     const isReasoningModel =
       aiConfig.model.startsWith("o") ||
@@ -219,7 +226,7 @@ export async function POST(request: Request) {
     const finalConversationId = activeConversationId;
     const streamResult = streamText({
       model: openaiProvider(aiConfig.model),
-      system: aiConfig.systemPrompt + attachmentContext,
+      system: aiConfig.systemPrompt + knowledgeContext + attachmentContext,
       messages: modelMessages,
       ...(isReasoningModel
         ? {}
@@ -235,6 +242,7 @@ export async function POST(request: Request) {
             }),
           }
         : undefined,
+      maxSteps: aiConfig.vectorStoreId ? 3 : 1,
       async onFinish({ text, usage }) {
         await supabase.from("messages").insert({
           conversation_id: finalConversationId,
@@ -250,7 +258,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // 9. Return streaming response with conversationId header
+    // 10. Return streaming response with conversationId header
     const response = streamResult.toUIMessageStreamResponse();
     response.headers.set("X-Conversation-Id", activeConversationId);
     response.headers.set("X-Agent-Id", agent.id);
