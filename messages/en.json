@@ -25,7 +25,13 @@
 		"creditConfig": "Credits",
 		"continueWithGoogle": "Continue with Google",
 		"orContinueWith": "or continue with email",
-		"forgotPassword": "Forgot password?"
+		"forgotPassword": "Forgot password?",
+		"newChat": "New Chat",
+		"backToChat": "Back to Chat",
+		"theme": "Theme",
+		"themeLight": "Light",
+		"themeDark": "Dark",
+		"themeSystem": "System"
 	},
 	"nav": {
 		"home": "Home",
@@ -140,6 +146,9 @@
 		"joined": "Joined",
 		"roleUser": "User",
 		"roleAdmin": "Admin",
+		"searchUsers": "Search by name or email…",
+		"noUsersFound": "No users found.",
+		"showingUsers": "Showing {from}–{to} of {total}",
 		"agents": {
 			"title": "AI Agents",
 			"subtitle": "Manage your AI agents and their configurations.",
@@ -330,7 +339,10 @@
 			"history": "Chat History",
 			"noHistory": "No conversations yet. Start a new chat!",
 			"untitledChat": "New conversation",
-			"deleteChat": "Delete conversation",
+			"deleteChat": "Delete",
+			"deleteChatTitle": "Delete conversation",
+			"deleteChatConfirm": "This will permanently delete this conversation and all its messages. This action cannot be undone.",
+			"cancel": "Cancel",
 			"fileSizeError": "The following files exceed the {limit} limit: {files}"
 		},
 		"responses": {

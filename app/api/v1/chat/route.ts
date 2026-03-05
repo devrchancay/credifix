@@ -162,6 +162,7 @@ export async function POST(request: Request) {
         .select("id")
         .eq("id", activeConversationId)
         .eq("user_id", userId)
+        .is("deleted_at", null)
         .single();
 
       if (!existing) {

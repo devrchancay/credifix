@@ -78,7 +78,7 @@ export async function middleware(request: NextRequest) {
   if (strippedPath === "/") {
     const locale = pathname.match(/^\/(en|es)/)?.[1] || "en";
     if (user) {
-      return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+      return NextResponse.redirect(new URL(`/${locale}/credit-analysis`, request.url));
     } else {
       return NextResponse.redirect(new URL(`/${locale}/sign-in`, request.url));
     }
