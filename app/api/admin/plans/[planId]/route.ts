@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/roles";
+import { requireAdmin } from "@/lib/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { logAdminAction } from "@/lib/api/audit";
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ planId: string }> }
 ) {
-  const hasAccess = await isAdmin();
-
-  if (!hasAccess) {
+  const adminId = await requireAdmin();
+  if (!adminId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
@@ -72,6 +72,8 @@ export async function PATCH(
       agentIds = (pa ?? []).map((r) => r.agent_id);
     }
 
+    logAdminAction({ userId: adminId, action: "update", resourceType: "plan", resourceId: planId, details: { fields: Object.keys(body) } });
+
     return NextResponse.json({ plan: { ...plan, agent_ids: agentIds } });
   } catch (error) {
     console.error("Error updating plan:", error);
@@ -86,9 +88,8 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ planId: string }> }
 ) {
-  const hasAccess = await isAdmin();
-
-  if (!hasAccess) {
+  const adminId = await requireAdmin();
+  if (!adminId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
@@ -102,6 +103,8 @@ export async function DELETE(
       .eq("id", planId);
 
     if (error) throw error;
+
+    logAdminAction({ userId: adminId, action: "delete", resourceType: "plan", resourceId: planId });
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -23,6 +23,26 @@ export async function isAdmin(): Promise<boolean> {
   return role === ROLES.ADMIN;
 }
 
+/** Returns the admin user's ID, or null if not admin. */
+export async function requireAdmin(): Promise<string | null> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if ((profile?.role as Role) !== ROLES.ADMIN) return null;
+
+  return user.id;
+}
+
 export async function hasRole(requiredRole: Role): Promise<boolean> {
   const role = await getUserRole();
 

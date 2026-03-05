@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/roles";
+import { requireAdmin } from "@/lib/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/stripe/client";
 import { getPlanByPriceId } from "@/lib/plans/service";
+import { logAdminAction } from "@/lib/api/audit";
 import type Stripe from "stripe";
 
 export async function POST() {
-  const hasAccess = await isAdmin();
-  if (!hasAccess) {
+  const adminId = await requireAdmin();
+  if (!adminId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
@@ -42,6 +43,8 @@ export async function POST() {
       await syncSubscription(sub, supabase, { errors });
       synced++;
     }
+
+    logAdminAction({ userId: adminId, action: "sync", resourceType: "billing_sync", details: { synced: synced - errors.length, failed: errors.length } });
 
     return NextResponse.json({
       message: `Sync complete: ${synced - errors.length} synced, ${errors.length} failed`,

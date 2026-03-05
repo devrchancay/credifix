@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdmin } from "@/lib/roles";
+import { isAdmin, requireAdmin } from "@/lib/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { logAdminAction } from "@/lib/api/audit";
 import { z } from "zod";
 
 export async function GET(
@@ -61,8 +62,8 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ agentId: string }> }
 ) {
-  const hasAccess = await isAdmin();
-  if (!hasAccess) {
+  const adminId = await requireAdmin();
+  if (!adminId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
@@ -108,6 +109,8 @@ export async function PUT(
       return NextResponse.json({ error: "Agent not found" }, { status: 404 });
     }
 
+    logAdminAction({ userId: adminId, action: "update", resourceType: "agent", resourceId: agentId, details: { fields: Object.keys(result.data) } });
+
     return NextResponse.json({ agent: data });
   } catch (error) {
     console.error("Error updating agent:", error);
@@ -122,8 +125,8 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ agentId: string }> }
 ) {
-  const hasAccess = await isAdmin();
-  if (!hasAccess) {
+  const adminId = await requireAdmin();
+  if (!adminId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
@@ -137,6 +140,8 @@ export async function DELETE(
       .eq("id", agentId);
 
     if (error) throw error;
+
+    logAdminAction({ userId: adminId, action: "delete", resourceType: "agent", resourceId: agentId });
 
     return NextResponse.json({ success: true });
   } catch (error) {

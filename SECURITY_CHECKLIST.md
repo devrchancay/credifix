@@ -27,8 +27,8 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 - [x] `getAuthenticatedUser()` usado en todas las rutas protegidas
 - [x] userId siempre viene del auth, no del cliente
 - [ ] Rol no cacheado - Se consulta DB en cada verificación *(bajo impacto)*
-- [ ] Sin logging de acciones admin - No hay audit trail
-- [ ] `ai_config` legible por cualquier usuario autenticado - Expone system prompts
+- [x] **Audit logging de acciones admin** - `audit_logs` tabla + `logAdminAction()` fire-and-forget *(corregido)*
+- [x] **`ai_config` restringido a admins** - RLS policy actualizada *(corregido)*
 
 ---
 
@@ -138,8 +138,8 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 - [x] `NEXT_PUBLIC_SUPABASE_ANON_KEY` intencionalmente público (RLS es la defensa)
 - [x] Sin secretos hardcodeados en código fuente
 - [x] Stripe webhook secret validado
-- [ ] Sin pre-commit hook para detección de secretos
-- [ ] Dependencias con vulnerabilidades conocidas - Ejecutar `npm audit fix`
+- [x] **Pre-commit hook con gitleaks** - Detección de secretos en staged files *(corregido)*
+- [x] **`npm audit fix` ejecutado** - Vulnerabilidades en axios/ajv corregidas; restantes en swagger-ui-react (dev) sin fix disponible *(corregido)*
 
 ---
 
@@ -167,12 +167,17 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 | 8 | Race condition en completar referido | Alto | Corregido | `018_atomic_referral_functions.sql`, `lib/referral/service.ts` |
 | 9 | TOCTOU en max_referrals | Alto | Corregido | `018_atomic_referral_functions.sql`, `lib/referral/service.ts` |
 | 10 | Content-Security-Policy faltante | Medio | Corregido | `next.config.ts` |
+| 11 | Audit logging para admins | Medio | Corregido | `019_audit_logs.sql`, `lib/api/audit.ts`, 7 admin routes |
+| 12 | `ai_config` legible por usuarios | Bajo | Corregido | `020_restrict_ai_config_rls.sql` |
+| 13 | Pre-commit hook para secretos | Medio | Corregido | `.husky/pre-commit` (gitleaks) |
+| 14 | `npm audit fix` | Medio | Corregido | Vulnerabilidades parcheadas |
 
 ## Pendientes
 
 | # | Issue | Severidad | Notas |
 |---|-------|-----------|-------|
-| 1 | Audit logging para admins | Medio | Requiere tabla de audit logs |
-| 4 | Pre-commit hook para secretos | Medio | Configurar `gitleaks` o similar |
-| 5 | `npm audit fix` | Medio | Ejecutar y verificar compatibilidad |
-| 6 | Restringir `ai_config` a admins | Bajo | Cambiar RLS policy en Supabase |
+| 1 | Bloqueo de cuenta por intentos fallidos | Bajo | Verificar config en dashboard de Supabase |
+| 2 | CORS explícito | Bajo | Headers custom no expuestos cross-origin |
+| 3 | Tokens CSRF explícitos | Bajo | SameSite: lax provee protección parcial |
+| 4 | Escaneo de malware en uploads | Bajo | Requiere servicio externo (ClamAV, etc.) |
+| 5 | Validación Zod en algunos admin routes | Bajo | PATCH plans, PUT credit-config |

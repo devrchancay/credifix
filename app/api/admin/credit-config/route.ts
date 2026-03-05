@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/roles";
+import { isAdmin, requireAdmin } from "@/lib/roles";
 import { getCreditConfig, updateCreditConfig } from "@/lib/credits/service";
+import { logAdminAction } from "@/lib/api/audit";
 
 export async function GET() {
   const hasAccess = await isAdmin();
@@ -18,8 +19,8 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const hasAccess = await isAdmin();
-  if (!hasAccess) {
+  const adminId = await requireAdmin();
+  if (!adminId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
@@ -38,6 +39,9 @@ export async function PUT(request: Request) {
     }
 
     const config = await updateCreditConfig(updates);
+
+    logAdminAction({ userId: adminId, action: "config_change", resourceType: "credit_config", details: updates });
+
     return NextResponse.json({ config });
   } catch (error) {
     console.error("Error updating credit config:", error);

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdmin } from "@/lib/roles";
+import { isAdmin, requireAdmin } from "@/lib/roles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { logAdminAction } from "@/lib/api/audit";
 import { z } from "zod";
 
 export async function GET() {
@@ -48,8 +49,8 @@ const createAgentSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const hasAccess = await isAdmin();
-  if (!hasAccess) {
+  const adminId = await requireAdmin();
+  if (!adminId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
@@ -87,6 +88,8 @@ export async function POST(request: NextRequest) {
       }
       throw error;
     }
+
+    logAdminAction({ userId: adminId, action: "create", resourceType: "agent", resourceId: data.id, details: { slug: result.data.slug } });
 
     return NextResponse.json({ agent: data }, { status: 201 });
   } catch (error) {
