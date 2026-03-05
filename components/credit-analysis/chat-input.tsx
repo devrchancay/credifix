@@ -171,7 +171,7 @@ export function ChatInput({ onSend, disabled, centered }: ChatInputProps) {
 
   return (
     <div className={cn(
-      "px-4 py-4",
+      "px-4 pb-2 pt-3",
       !centered && "border-t bg-background/80 backdrop-blur-sm"
     )}>
       <div className="mx-auto max-w-3xl">
