@@ -133,7 +133,7 @@ export function ChatContainer({
     : tChat("greetingDefault");
 
   return (
-    <div className="flex h-[calc(100vh-5rem)] flex-col overflow-hidden">
+    <div className="flex h-[calc(100dvh-5rem)] flex-col overflow-hidden">
       {/* Minimal header */}
       <div className="flex items-center gap-2 px-4 py-2.5">
         <div className="min-w-0 flex-1">
