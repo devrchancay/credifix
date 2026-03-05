@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     const finalSuccessUrl =
       platform === "mobile" && successUrl
         ? successUrl
-        : `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`;
+        : `${process.env.NEXT_PUBLIC_APP_URL}/user/credit-analysis?success=true`;
 
     const finalCancelUrl =
       platform === "mobile" && cancelUrl
