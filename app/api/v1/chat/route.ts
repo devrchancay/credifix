@@ -242,7 +242,6 @@ export async function POST(request: Request) {
             }),
           }
         : undefined,
-      maxSteps: aiConfig.vectorStoreId ? 3 : 1,
       async onFinish({ text, usage }) {
         await supabase.from("messages").insert({
           conversation_id: finalConversationId,
