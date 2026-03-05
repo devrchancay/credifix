@@ -9,6 +9,7 @@ import { AgentSelector } from "./agent-selector";
 import { AlertCircle, Plus, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useChatAI } from "@/hooks/use-chat-ai";
+import { UpgradeBanner } from "@/components/upgrade-banner";
 import { useUser } from "@/hooks/use-user";
 import { useHaptics } from "@/hooks/use-haptics";
 import { useSearchParams } from "next/navigation";
@@ -159,9 +160,12 @@ export function ChatContainer({
         /* ChatGPT-style empty state: centered greeting + input */
         <div className="flex flex-1 flex-col items-center justify-center px-4">
           <Sparkles className="mb-4 size-10 text-primary" />
-          <h1 className="mb-8 text-3xl font-semibold text-foreground">
+          <h1 className="mb-4 text-3xl font-semibold text-foreground">
             {greeting}
           </h1>
+          <div className="mb-8 w-full max-w-3xl">
+            <UpgradeBanner variant="inline" />
+          </div>
           <div className="w-full max-w-3xl">
             <ChatInput onSend={handleSend} disabled={isLoading} centered />
           </div>

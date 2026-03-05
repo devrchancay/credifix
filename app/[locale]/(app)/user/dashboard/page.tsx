@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanByPriceId } from "@/lib/plans/service";
+import { UpgradeBanner } from "@/components/upgrade-banner";
 
 async function getUserSubscription(userId: string) {
   const supabase = createAdminClient();
@@ -57,6 +58,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {plan === "free" && <UpgradeBanner />}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground">

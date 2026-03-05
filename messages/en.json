@@ -366,6 +366,12 @@
 		"passwordsDoNotMatch": "Passwords do not match.",
 		"passwordResetSuccess": "Password reset successfully."
 	},
+	"upgrade": {
+		"title": "Upgrade to Pro",
+		"description": "Unlock premium agents, unlimited conversations, and more.",
+		"cta": "View Plans",
+		"badge": "Free Plan"
+	},
 	"about": {
 		"title": "About",
 		"subtitle": "A production-ready SaaS boilerplate built with modern technologies.",
