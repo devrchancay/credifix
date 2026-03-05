@@ -18,6 +18,22 @@ const TEXT_MIME_TYPES = new Set([
   "application/csv",
 ]);
 
+/** Magic byte signatures for supported file types */
+const MAGIC_BYTES: Array<{ bytes: number[]; mime: string }> = [
+  { bytes: [0x25, 0x50, 0x44, 0x46], mime: "application/pdf" }, // %PDF
+  { bytes: [0x50, 0x4b, 0x03, 0x04], mime: "application/zip" }, // PK (DOCX/XLSX are ZIP)
+  { bytes: [0xd0, 0xcf, 0x11, 0xe0], mime: "application/msword" }, // OLE2 (DOC/XLS)
+];
+
+function detectMimeByMagicBytes(buffer: Buffer): string | null {
+  for (const sig of MAGIC_BYTES) {
+    if (sig.bytes.every((b, i) => buffer[i] === b)) {
+      return sig.mime;
+    }
+  }
+  return null;
+}
+
 function truncateText(text: string): string {
   if (text.length <= MAX_TEXT_LENGTH) return text;
   return (
@@ -89,8 +105,29 @@ export async function processFile(
     );
   }
 
-  const mimeType = getMimeType(fileName, providedMimeType);
+  const extensionMime = getMimeType(fileName, providedMimeType);
+  const detectedMime = detectMimeByMagicBytes(buffer);
 
+  // For binary formats, verify magic bytes match the claimed type
+  const binaryMimes = [
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-excel",
+    "application/msword",
+  ];
+  if (binaryMimes.includes(extensionMime) && detectedMime) {
+    // PDF must match PDF signature; DOCX/XLSX must match ZIP signature; DOC/XLS must match OLE2
+    const expectedMagic =
+      extensionMime === "application/pdf" ? "application/pdf"
+      : extensionMime === "application/msword" || extensionMime === "application/vnd.ms-excel" ? "application/msword"
+      : "application/zip";
+    if (detectedMime !== expectedMagic) {
+      throw new Error(`File "${fileName}" content does not match its extension`);
+    }
+  }
+
+  const mimeType = extensionMime;
   let content: string;
 
   if (

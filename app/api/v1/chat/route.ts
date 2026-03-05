@@ -59,6 +59,16 @@ export async function POST(request: Request) {
       );
     }
 
+    // Limit message history to prevent token overflow and cost abuse
+    const MAX_MESSAGES = 100;
+    if (uiMessages.length > MAX_MESSAGES) {
+      return createErrorResponse(
+        `Too many messages (max ${MAX_MESSAGES})`,
+        400,
+        ErrorCodes.VALIDATION_ERROR
+      );
+    }
+
     // 3. Resolve agent: use provided agentId, or look up from conversation, or use default
     const supabase = createAdminClient();
     let resolvedAgentId = agentId;

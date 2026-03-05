@@ -24,6 +24,12 @@ function isPublicRoute(pathname: string): boolean {
   });
 }
 
+/** Validate that a redirect path is internal (relative, same-origin) */
+function isSafeRedirectPath(path: string): boolean {
+  // Must start with / and not contain protocol or double slashes
+  return /^\/[^/\\]/.test(path) && !path.includes("://");
+}
+
 function isIgnoredByIntl(pathname: string): boolean {
   return (
     pathname.startsWith("/api/") ||
@@ -88,7 +94,9 @@ export async function middleware(request: NextRequest) {
   if (!isPublicRoute(pathname) && !user) {
     const locale = pathname.match(/^\/(en|es)/)?.[1] || "en";
     const signInUrl = new URL(`/${locale}/sign-in`, request.url);
-    signInUrl.searchParams.set("redirect_url", pathname);
+    if (isSafeRedirectPath(pathname)) {
+      signInUrl.searchParams.set("redirect_url", pathname);
+    }
     return NextResponse.redirect(signInUrl);
   }
 
