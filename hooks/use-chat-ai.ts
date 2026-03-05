@@ -27,6 +27,8 @@ export function useChatAI() {
   const [agentId, setAgentId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
+  const pendingLoadRef = useRef<{ messages: UIMessage[]; attachments: Record<string, Attachment[]> } | null>(null);
+  const [loadTrigger, setLoadTrigger] = useState(0);
   const pendingAttachmentsRef = useRef<Attachment[]>([]);
   const pendingDisplayAttachmentsRef = useRef<Attachment[] | null>(null);
   const lastUserMessageIdRef = useRef<string | null>(null);
@@ -82,6 +84,16 @@ export function useChatAI() {
     },
   });
 
+  // Flush pending conversation load after chatId (and setMessages) has settled
+  useEffect(() => {
+    if (pendingLoadRef.current) {
+      const { messages: pendingMsgs, attachments } = pendingLoadRef.current;
+      pendingLoadRef.current = null;
+      setMessageAttachments(attachments);
+      setMessages(pendingMsgs);
+    }
+  }, [chatId, setMessages, loadTrigger]);
+
   // Associate pending attachments with new user messages for display
   useEffect(() => {
     if (messages.length === 0) return;
@@ -117,6 +129,7 @@ export function useChatAI() {
     supabase
       .from("conversations")
       .select("id")
+      .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(1)
       .then(({ data }) => {
@@ -134,6 +147,7 @@ export function useChatAI() {
     const { data } = await supabase
       .from("conversations")
       .select("id, title, updated_at")
+      .is("deleted_at", null)
       .order("updated_at", { ascending: false })
       .limit(50);
 
@@ -158,11 +172,23 @@ export function useChatAI() {
   const loadConversation = useCallback(
     async (id: string) => {
       const supabase = createClient();
-      const { data } = await supabase
-        .from("messages")
-        .select("id, role, content, attachments, created_at")
-        .eq("conversation_id", id)
-        .order("created_at", { ascending: true });
+
+      // Fetch conversation metadata and messages in parallel
+      const [convResult, msgResult] = await Promise.all([
+        supabase
+          .from("conversations")
+          .select("agent_id")
+          .eq("id", id)
+          .single(),
+        supabase
+          .from("messages")
+          .select("id, role, content, attachments, created_at")
+          .eq("conversation_id", id)
+          .order("created_at", { ascending: true }),
+      ]);
+
+      const newAgentId = convResult.data?.agent_id ?? null;
+      const data = msgResult.data;
 
       if (data) {
         const attachmentsMap: Record<string, Attachment[]> = {};
@@ -182,23 +208,21 @@ export function useChatAI() {
               parts: [{ type: "text" as const, text: m.content }],
             };
           });
-        setMessageAttachments(attachmentsMap);
-        setMessages(loadedMessages);
+
         setConversationId(id);
-      }
 
-      // Also load the agent_id for this conversation
-      const { data: convData } = await supabase
-        .from("conversations")
-        .select("agent_id")
-        .eq("id", id)
-        .single();
-
-      if (convData?.agent_id) {
-        setAgentId(convData.agent_id);
+        // Store in pendingLoadRef and trigger flush effect.
+        // This handles both agent changes (chatId changes → new setMessages)
+        // and same-agent loads.
+        pendingLoadRef.current = { messages: loadedMessages, attachments: attachmentsMap };
+        if (newAgentId !== agentId) {
+          setAgentId(newAgentId);
+        }
+        // Always bump trigger so flush effect fires even if chatId didn't change
+        setLoadTrigger((n) => n + 1);
       }
     },
-    [setMessages]
+    [agentId]
   );
 
   const startNewConversation = useCallback(() => {
@@ -213,7 +237,7 @@ export function useChatAI() {
       const supabase = createClient();
       const { error } = await supabase
         .from("conversations")
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq("id", id);
 
       if (!error) {
@@ -418,5 +442,6 @@ export function useChatAI() {
     startNewConversation,
     deleteConversation,
     isLoadingConversations,
+    isAuthLoaded: isLoaded,
   };
 }

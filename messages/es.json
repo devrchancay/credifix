@@ -25,7 +25,13 @@
 		"creditConfig": "Creditos",
 		"continueWithGoogle": "Continuar con Google",
 		"orContinueWith": "o continuar con correo",
-		"forgotPassword": "Olvidaste tu contrasena?"
+		"forgotPassword": "Olvidaste tu contrasena?",
+		"newChat": "Nuevo Chat",
+		"backToChat": "Volver al Chat",
+		"theme": "Tema",
+		"themeLight": "Claro",
+		"themeDark": "Oscuro",
+		"themeSystem": "Sistema"
 	},
 	"nav": {
 		"home": "Inicio",
@@ -140,6 +146,9 @@
 		"joined": "Registro",
 		"roleUser": "Usuario",
 		"roleAdmin": "Admin",
+		"searchUsers": "Buscar por nombre o correo…",
+		"noUsersFound": "No se encontraron usuarios.",
+		"showingUsers": "Mostrando {from}–{to} de {total}",
 		"agents": {
 			"title": "Agentes de IA",
 			"subtitle": "Administra tus agentes de IA y sus configuraciones.",
@@ -330,7 +339,10 @@
 			"history": "Historial de Chats",
 			"noHistory": "Aun no hay conversaciones. Inicia un nuevo chat!",
 			"untitledChat": "Nueva conversacion",
-			"deleteChat": "Eliminar conversacion",
+			"deleteChat": "Eliminar",
+			"deleteChatTitle": "Eliminar conversacion",
+			"deleteChatConfirm": "Esto eliminara permanentemente esta conversacion y todos sus mensajes. Esta accion no se puede deshacer.",
+			"cancel": "Cancelar",
 			"fileSizeError": "Los siguientes archivos exceden el limite de {limit}: {files}"
 		},
 		"responses": {
