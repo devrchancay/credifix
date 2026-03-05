@@ -252,7 +252,7 @@ export function ChatInput({ onSend, disabled, centered }: ChatInputProps) {
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.png,.jpg,.jpeg"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
                 onChange={handleFileSelect}
                 className="hidden"
               />

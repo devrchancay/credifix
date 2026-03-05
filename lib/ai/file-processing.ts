@@ -8,23 +8,14 @@ const MAX_TEXT_LENGTH = 50_000; // ~50k chars to avoid token overflows
 export type ProcessedFile = {
   name: string;
   mimeType: string;
-} & (
-  | { kind: "text"; content: string }
-  | { kind: "image"; base64: string; mediaType: string }
-);
+  kind: "text";
+  content: string;
+};
 
 const TEXT_MIME_TYPES = new Set([
   "text/plain",
   "text/csv",
   "application/csv",
-]);
-
-const IMAGE_MIME_TYPES = new Set([
-  "image/png",
-  "image/jpeg",
-  "image/jpg",
-  "image/webp",
-  "image/gif",
 ]);
 
 function truncateText(text: string): string {
@@ -82,11 +73,6 @@ function getMimeType(fileName: string, providedMime?: string): string {
     xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     csv: "text/csv",
     txt: "text/plain",
-    png: "image/png",
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    webp: "image/webp",
-    gif: "image/gif",
   };
 
   return mimeMap[ext || ""] || "application/octet-stream";
@@ -105,19 +91,6 @@ export async function processFile(
 
   const mimeType = getMimeType(fileName, providedMimeType);
 
-  // Images → base64 for vision
-  if (IMAGE_MIME_TYPES.has(mimeType)) {
-    const base64 = buffer.toString("base64");
-    return {
-      name: fileName,
-      mimeType,
-      kind: "image",
-      base64,
-      mediaType: mimeType,
-    };
-  }
-
-  // Text extraction based on type
   let content: string;
 
   if (

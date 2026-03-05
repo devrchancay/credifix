@@ -14,7 +14,7 @@ export interface ConversationSummary {
 }
 
 interface ProcessedFileResult {
-  kind: "text" | "image";
+  kind: "text";
   name: string;
   mimeType: string;
   content?: string;
@@ -354,13 +354,9 @@ export function useChatAI() {
           const fileSections: string[] = [];
 
           for (const f of processedFiles) {
-            if (f.kind === "text" && f.content) {
+            if (f.content) {
               fileSections.push(
                 `[File: ${f.name}]\n${f.content}\n[End of ${f.name}]`
-              );
-            } else if (f.kind === "image") {
-              fileSections.push(
-                `[Image attached: ${f.name} (${f.mimeType})]`
               );
             }
           }
