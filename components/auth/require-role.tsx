@@ -11,7 +11,7 @@ interface RequireRoleProps {
 export async function RequireRole({
   role,
   children,
-  fallbackUrl = "/dashboard",
+  fallbackUrl = "/user/credit-analysis",
 }: RequireRoleProps) {
   const hasAccess = await hasRole(role);
 

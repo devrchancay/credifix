@@ -22,7 +22,7 @@ export default function SignInPage() {
   const t = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get("redirect_url") || "/dashboard";
+  const redirectUrl = searchParams.get("redirect_url") || "/user/credit-analysis";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

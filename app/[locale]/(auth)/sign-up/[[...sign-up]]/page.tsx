@@ -37,7 +37,7 @@ export default function SignUpPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/user/credit-analysis")}`,
       },
     });
 
@@ -69,7 +69,7 @@ export default function SignUpPage() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push("/user/credit-analysis");
     router.refresh();
   };
 
