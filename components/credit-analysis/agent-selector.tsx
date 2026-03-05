@@ -102,7 +102,7 @@ export function AgentSelector({
               key={agent.id}
               onClick={() => {
                 if (isLocked) {
-                  router.push(`/${locale}/billing`);
+                  router.push(`/${locale}/user/billing`);
                   return;
                 }
                 onSelectAgent(agent.id);
