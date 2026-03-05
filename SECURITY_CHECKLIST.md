@@ -104,7 +104,7 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 - [x] **Strict-Transport-Security (HSTS)** con max-age 2 años *(corregido)*
 - [x] **Referrer-Policy: strict-origin-when-cross-origin** *(corregido)*
 - [x] **Permissions-Policy** - Cámara deshabilitada, micrófono solo self *(corregido)*
-- [ ] Content-Security-Policy (CSP) completo *(pendiente: requiere auditar scripts inline)*
+- [x] **Content-Security-Policy (CSP)** - `default-src 'self'`, scripts/styles inline permitidos para Next.js, connect-src limitado a Supabase/Stripe/OpenAI *(corregido)*
 
 ---
 
@@ -166,13 +166,13 @@ Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 | 7 | Rate limiting en endpoints | Alto | Corregido | `lib/api/rate-limit.ts` + 8 rutas |
 | 8 | Race condition en completar referido | Alto | Corregido | `018_atomic_referral_functions.sql`, `lib/referral/service.ts` |
 | 9 | TOCTOU en max_referrals | Alto | Corregido | `018_atomic_referral_functions.sql`, `lib/referral/service.ts` |
+| 10 | Content-Security-Policy faltante | Medio | Corregido | `next.config.ts` |
 
 ## Pendientes
 
 | # | Issue | Severidad | Notas |
 |---|-------|-----------|-------|
-| 1 | CSP completo | Medio | Requiere auditar scripts inline y third-party |
-| 3 | Audit logging para admins | Medio | Requiere tabla de audit logs |
+| 1 | Audit logging para admins | Medio | Requiere tabla de audit logs |
 | 4 | Pre-commit hook para secretos | Medio | Configurar `gitleaks` o similar |
 | 5 | `npm audit fix` | Medio | Ejecutar y verificar compatibilidad |
 | 6 | Restringir `ai_config` a admins | Bajo | Cambiar RLS policy en Supabase |
