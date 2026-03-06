@@ -105,39 +105,39 @@
 }
 
 .dark {
-  --background: 220 30% 8%;
-  --foreground: 210 20% 92%;
-  --card: 220 25% 11%;
-  --card-foreground: 210 20% 92%;
-  --popover: 220 25% 13%;
-  --popover-foreground: 210 20% 92%;
-  --primary: 209 93% 56%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 220 20% 16%;
-  --secondary-foreground: 210 20% 92%;
-  --muted: 220 20% 16%;
-  --muted-foreground: 210 15% 55%;
-  --accent: 175 75% 40%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 63% 45%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 220 20% 20%;
-  --input: 220 20% 20%;
-  --ring: 209 93% 56%;
-  --chart-1: 209 93% 56%;
-  --chart-2: 175 75% 40%;
-  --chart-3: 120 56% 50%;
-  --chart-4: 30 90% 60%;
-  --chart-5: 280 65% 60%;
-  --sidebar-background: 220 35% 6%;
-  --sidebar-foreground: 210 20% 85%;
-  --sidebar-primary: 175 75% 40%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 220 25% 18%;
-  --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-border: 220 20% 15%;
-  --sidebar-ring: 209 93% 56%;
-  --sidebar: hsl(220 35% 6%);
+  --background: 0 0% 13%;
+  --foreground: 0 0% 93%;
+  --card: 0 0% 13%;
+  --card-foreground: 0 0% 93%;
+  --popover: 0 0% 18%;
+  --popover-foreground: 0 0% 93%;
+  --primary: 0 0% 93%;
+  --primary-foreground: 0 0% 13%;
+  --secondary: 0 0% 18%;
+  --secondary-foreground: 0 0% 93%;
+  --muted: 0 0% 18%;
+  --muted-foreground: 0 0% 64%;
+  --accent: 0 0% 18%;
+  --accent-foreground: 0 0% 93%;
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 0 0% 93%;
+  --border: 0 0% 22%;
+  --input: 0 0% 22%;
+  --ring: 0 0% 64%;
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+  --sidebar-background: 0 0% 9%;
+  --sidebar-foreground: 0 0% 93%;
+  --sidebar-primary: 0 0% 93%;
+  --sidebar-primary-foreground: 0 0% 9%;
+  --sidebar-accent: 0 0% 15%;
+  --sidebar-accent-foreground: 0 0% 93%;
+  --sidebar-border: 0 0% 18%;
+  --sidebar-ring: 0 0% 64%;
+  --sidebar: hsl(0 0% 9%);
 }
 
 @utility container {
