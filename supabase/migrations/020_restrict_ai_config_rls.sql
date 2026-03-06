@@ -5,5 +5,5 @@ DROP POLICY IF EXISTS "Authenticated users can read ai_config" ON ai_config;
 CREATE POLICY "Admins can read ai_config"
   ON ai_config FOR SELECT
   USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid()::text AND role = 'admin')
   );
