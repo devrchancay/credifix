@@ -1,4 +1,4 @@
-import { PDFParse } from "pdf-parse";
+import { extractText as extractPDFText } from "unpdf";
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
 
@@ -43,10 +43,8 @@ function truncateText(text: string): string {
 }
 
 async function extractPDF(buffer: Buffer): Promise<string> {
-  const parser = new PDFParse({ data: buffer });
-  const result = await parser.getText();
-  await parser.destroy();
-  return result.text;
+  const { text } = await extractPDFText(new Uint8Array(buffer));
+  return text.join("\n");
 }
 
 async function extractDOCX(buffer: Buffer): Promise<string> {
