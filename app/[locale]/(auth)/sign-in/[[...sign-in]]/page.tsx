@@ -22,11 +22,11 @@ export default function SignInPage() {
   const t = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const rawRedirect = searchParams.get("redirect_url") || "/user/credit-analysis";
+  const rawRedirect = searchParams.get("redirect_url") || "/credit-analysis";
   // Prevent open redirect: only allow relative paths
   const redirectUrl = /^\/[^/\\]/.test(rawRedirect) && !rawRedirect.includes("://")
     ? rawRedirect
-    : "/user/credit-analysis";
+    : "/credit-analysis";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

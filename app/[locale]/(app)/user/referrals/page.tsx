@@ -33,7 +33,7 @@ export default async function ReferralsPage() {
 
   const isSubscribed = await hasActiveSubscription(userId);
   if (!isSubscribed) {
-    redirect("/user/credit-analysis");
+    redirect("/credit-analysis");
   }
 
   const t = await getTranslations("referral");

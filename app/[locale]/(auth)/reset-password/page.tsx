@@ -45,7 +45,7 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    router.push("/user/credit-analysis");
+    router.push("/credit-analysis");
     router.refresh();
   };
 
