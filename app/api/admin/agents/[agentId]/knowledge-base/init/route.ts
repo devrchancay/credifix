@@ -38,7 +38,7 @@ export async function POST(
     }
 
     const vectorStoreId = await createVectorStore(
-      `Credifix - ${agent.name}`
+      `Credit Helper - ${agent.name}`
     );
 
     const { error: updateError } = await supabase

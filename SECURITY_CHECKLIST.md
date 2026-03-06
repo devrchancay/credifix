@@ -1,4 +1,4 @@
-# Security Checklist - Credifix
+# Security Checklist - Credit Helper
 
 Auditoría de seguridad del proyecto. Última actualización: 2026-03-05
 

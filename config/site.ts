@@ -1,13 +1,13 @@
 export const siteConfig = {
-  name: "Credifix",
-  description: "Credifix is a platform for monitoring and managing your credit score",
+  name: "Credit Helper",
+  description:
+    "Credit Helper by Florida Hitech Services — AI-powered credit analysis and repair assistant. Monitor your credit score, get personalized recommendations, and improve your credit profile.",
   url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   ogImage: "/og.png",
   links: {
-    twitter: "https://twitter.com/credifix",
-    github: "https://github.com/credifix",
+    website: "https://floridahitech.com",
   },
-  creator: "Credifix",
+  creator: "Florida Hitech Services INC",
 };
 
 export type SiteConfig = typeof siteConfig;

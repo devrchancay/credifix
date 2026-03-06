@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAgent } from "./agents";
 
-export const DEFAULT_SYSTEM_PROMPT = `You are a professional credit analysis assistant for Credifix. Your role is to help users understand and improve their credit profiles.
+export const DEFAULT_SYSTEM_PROMPT = `You are a professional credit analysis assistant for Credit Helper. Your role is to help users understand and improve their credit profiles.
 
 Your capabilities:
 - Analyze credit report information shared by users

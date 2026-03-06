@@ -34,7 +34,7 @@ export async function POST() {
     }
 
     // Create new vector store in OpenAI
-    const vectorStoreId = await createVectorStore("Credifix Knowledge Base");
+    const vectorStoreId = await createVectorStore("Credit Helper Knowledge Base");
 
     // Save to ai_config
     const { error: updateError } = await supabase

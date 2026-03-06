@@ -3,11 +3,11 @@ import type { OpenAPIV3 } from "openapi-types";
 export const openApiSpec: OpenAPIV3.Document = {
   openapi: "3.0.3",
   info: {
-    title: "Credifix API",
-    description: "REST API for Credifix",
+    title: "Credit Helper API",
+    description: "REST API for Credit Helper",
     version: "1.0.0",
     contact: {
-      name: "Credifix",
+      name: "Credit Helper",
     },
   },
   servers: [
