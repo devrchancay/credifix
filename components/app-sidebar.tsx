@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useTranslations } from "next-intl";
@@ -12,6 +12,7 @@ import { useHaptics } from "@/hooks/use-haptics";
 
 import { NavUser } from "@/components/nav-user";
 import { ChatHistory } from "@/components/credit-analysis/chat-history";
+import { ChatSearchModal } from "@/components/credit-analysis/chat-search-modal";
 import {
   Sidebar,
   SidebarContent,
@@ -49,6 +50,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Chat history state
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const fetchConversations = useCallback(async () => {
     if (!userId) return;
@@ -129,6 +131,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <span>{t("newChat")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="sm"
+              onClick={() => setSearchOpen(true)}
+              tooltip={t("searchChats")}
+            >
+              <Search className="size-4" />
+              <span>{t("searchChats")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
@@ -147,6 +159,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser user={userData} isPro={isPro} isAdmin={isAdmin} />
       </SidebarFooter>
       <SidebarRail />
+      <ChatSearchModal
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        onSelectConversation={handleSelectConversation}
+      />
     </Sidebar>
   );
 }
