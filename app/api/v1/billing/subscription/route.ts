@@ -40,13 +40,13 @@ export async function GET(request: NextRequest) {
 
       subscriptionData = {
         id: subscription.id,
-        status: subscription.status,
+        status: subscription.status as SubscriptionData["status"],
         plan: planSlug,
         stripePriceId: subscription.stripe_price_id,
         stripeCustomerId: subscription.stripe_customer_id,
         currentPeriodStart: subscription.current_period_start,
         currentPeriodEnd: subscription.current_period_end,
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end ?? false,
       };
     }
 

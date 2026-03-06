@@ -144,7 +144,7 @@ export async function processReferralSignup(
   const { data: result, error } = await supabase.rpc("create_referral_signup", {
     p_referred_id: referredUserId,
     p_referral_code: referralCode,
-    p_max_referrals: config.max_referrals_per_user ?? null,
+    p_max_referrals: (config.max_referrals_per_user ?? null) as number,
   });
 
   if (error) {

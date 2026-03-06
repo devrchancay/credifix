@@ -10,7 +10,7 @@ import type { Attachment } from "@/components/credit-analysis/chat-message";
 export interface ConversationSummary {
   id: string;
   title: string | null;
-  updatedAt: string;
+  updatedAt: string | null;
 }
 
 interface ProcessedFileResult {

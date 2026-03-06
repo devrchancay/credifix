@@ -2,12 +2,12 @@ import { headers } from "next/headers";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe/client";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { InsertTables, UpdateTables } from "@/types/database";
+import type { TablesInsert, TablesUpdate } from "@/types/database";
 import { completeReferralOnSubscription } from "@/lib/referral/service";
 import { getPlanByPriceId } from "@/lib/plans/service";
 import { autoRedeemCreditsForInvoice } from "@/lib/credits/service";
 
-type SubscriptionStatus = InsertTables<"subscriptions">["status"];
+type SubscriptionStatus = TablesInsert<"subscriptions">["status"];
 
 function mapStripeStatus(status: Stripe.Subscription["status"]): SubscriptionStatus {
   const statusMap: Record<string, SubscriptionStatus> = {
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
           const priceId = sub.items.data[0].price.id;
           const planId = await resolvePlanId(priceId, session.metadata as { planId?: string });
 
-          const subscriptionData: InsertTables<"subscriptions"> = {
+          const subscriptionData: TablesInsert<"subscriptions"> = {
             id: sub.id,
             user_id: userId,
             plan_id: planId,
@@ -165,7 +165,7 @@ export async function POST(req: Request) {
         const priceId = newSub.items.data[0].price.id;
         const planId = await resolvePlanId(priceId, newSub.metadata);
 
-        const subscriptionData: InsertTables<"subscriptions"> = {
+        const subscriptionData: TablesInsert<"subscriptions"> = {
           id: newSub.id,
           user_id: userId,
           plan_id: planId,
@@ -224,7 +224,7 @@ export async function POST(req: Request) {
           }
 
           if (userId) {
-            const subscriptionData: InsertTables<"subscriptions"> = {
+            const subscriptionData: TablesInsert<"subscriptions"> = {
               id: eventSub.id,
               user_id: userId,
               plan_id: planId,
@@ -246,7 +246,7 @@ export async function POST(req: Request) {
           }
         }
 
-        const updateData: UpdateTables<"subscriptions"> = {
+        const updateData: TablesUpdate<"subscriptions"> = {
           status: mapStripeStatus(eventSub.status),
           stripe_price_id: priceId,
           plan_id: planId,

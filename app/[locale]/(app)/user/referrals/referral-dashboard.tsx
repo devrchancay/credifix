@@ -27,7 +27,7 @@ interface ReferralStats {
   referrals: Array<{
     id: string;
     status: string;
-    credits_awarded_referrer: number;
+    credits_awarded_referrer: number | null;
     created_at: string;
     referred: { email: string; full_name: string | null } | null;
   }>;
@@ -344,7 +344,7 @@ export function ReferralDashboard({ inviteUrl, stats, config, redemption }: Prop
                         {statusLabel(referral.status)}
                       </Badge>
                     </TableCell>
-                    <TableCell>+{referral.credits_awarded_referrer}</TableCell>
+                    <TableCell>+{referral.credits_awarded_referrer ?? 0}</TableCell>
                     <TableCell>
                       {new Date(referral.created_at).toLocaleDateString()}
                     </TableCell>

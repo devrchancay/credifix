@@ -66,7 +66,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         data.map((c) => ({
           id: c.id,
           title: c.title,
-          updatedAt: c.updated_at,
+          updatedAt: c.updated_at ?? "",
         }))
       );
     }

@@ -86,7 +86,7 @@ export function ChatHistory({
                   {conv.title || tChat("untitledChat")}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {formatRelativeDate(conv.updatedAt)}
+                  {conv.updatedAt ? formatRelativeDate(conv.updatedAt) : ""}
                 </p>
               </div>
               <button
