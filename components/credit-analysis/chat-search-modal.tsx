@@ -148,7 +148,7 @@ export function ChatSearchModal({
             value={query}
             onChange={(e) => handleQueryChange(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="h-11 border-0 px-0 shadow-none focus-visible:ring-0"
+            className="h-11 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
           {isSearching && <Loader2 className="size-4 shrink-0 animate-spin text-muted-foreground" />}
         </div>
