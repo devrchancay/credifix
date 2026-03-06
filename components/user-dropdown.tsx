@@ -93,12 +93,14 @@ export function UserDropdown() {
               {t("creditAnalysis")}
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/user/dashboard">
-              <Home />
-              {t("dashboard")}
-            </Link>
-          </DropdownMenuItem>
+          {isAdmin && (
+            <DropdownMenuItem asChild>
+              <Link href="/user/dashboard">
+                <Home />
+                {t("dashboard")}
+              </Link>
+            </DropdownMenuItem>
+          )}
           {isPro && (
             <DropdownMenuItem asChild>
               <Link href="/user/referrals">
