@@ -222,26 +222,43 @@ export async function POST(request: Request) {
       }
     }
 
-    // 7. Inject knowledge base instruction when vector store is available
-    let knowledgeContext = "";
+    // 7. Inject current date/time context
+    const now = new Date();
+    const dateContext = `\n\nCurrent date and time: ${now.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })} ${now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZoneName: "short" })}. Use this information when the user asks about dates, times, schedules, or anything time-sensitive.`;
+
+    // 8. Inject tool instructions
+    let knowledgeContext =
+      "\n\nYou have access to web search. ONLY use it for topics directly related to credit improvement, credit repair, credit scores, credit bureaus, financial regulations (FCRA, FDCPA), debt management, and credit-related services in the United States. Do NOT use web search for unrelated topics. If the user asks something outside of credit improvement, answer from your own knowledge without searching.";
     if (aiConfig.vectorStoreId) {
-      knowledgeContext =
-        "\n\nIMPORTANT: You have access to a knowledge base via the file_search tool. ALWAYS use it to search for relevant information before answering user questions. Base your responses on the knowledge base content and cite sources when possible.";
+      knowledgeContext +=
+        "\n\nIMPORTANT: You also have access to a knowledge base via the file_search tool. ALWAYS use it to search for relevant information before answering user questions. Base your responses on the knowledge base content and cite sources when possible.";
     }
 
-    // 8. Convert UIMessages to model messages
+    // 9. Convert UIMessages to model messages
     const modelMessages = await convertToModelMessages(uiMessages);
 
-    // 9. Stream the response
+    // 10. Stream the response
     // GPT-5 and o-series models don't support temperature/topP/maxOutputTokens
     const isReasoningModel =
       aiConfig.model.startsWith("o") ||
       aiConfig.model.startsWith("gpt-5");
 
+    // Build tools: always include web_search, optionally file_search
+    const tools: Record<string, ReturnType<typeof openaiProvider.tools.webSearch> | ReturnType<typeof openaiProvider.tools.fileSearch>> = {
+      web_search: openaiProvider.tools.webSearch({
+        searchContextSize: "medium",
+      }),
+    };
+    if (aiConfig.vectorStoreId) {
+      tools.file_search = openaiProvider.tools.fileSearch({
+        vectorStoreIds: [aiConfig.vectorStoreId],
+      });
+    }
+
     const finalConversationId = activeConversationId;
     const streamResult = streamText({
       model: openaiProvider(aiConfig.model),
-      system: aiConfig.systemPrompt + knowledgeContext + attachmentContext,
+      system: aiConfig.systemPrompt + dateContext + knowledgeContext + attachmentContext,
       messages: modelMessages,
       ...(isReasoningModel
         ? {}
@@ -250,13 +267,7 @@ export async function POST(request: Request) {
             topP: aiConfig.topP,
             maxOutputTokens: aiConfig.maxTokens,
           }),
-      tools: aiConfig.vectorStoreId
-        ? {
-            file_search: openaiProvider.tools.fileSearch({
-              vectorStoreIds: [aiConfig.vectorStoreId],
-            }),
-          }
-        : undefined,
+      tools,
       async onFinish({ text, usage }) {
         await supabase.from("messages").insert({
           conversation_id: finalConversationId,
