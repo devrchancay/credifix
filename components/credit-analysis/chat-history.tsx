@@ -75,17 +75,28 @@ export function ChatHistory({
             <button
               onClick={() => onSelectConversation(conv.id)}
               className={cn(
-                "group flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors hover:bg-accent",
-                currentConversationId === conv.id &&
-                  "bg-accent text-accent-foreground"
+                "group flex w-full items-start gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                currentConversationId === conv.id
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground"
               )}
             >
-              <MessageSquare className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+              <MessageSquare className={cn(
+                "mt-0.5 size-3.5 shrink-0",
+                currentConversationId === conv.id
+                  ? "text-sidebar-accent-foreground/70"
+                  : "text-sidebar-foreground/50"
+              )} />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium leading-tight">
                   {conv.title || tChat("untitledChat")}
                 </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
+                <p className={cn(
+                  "mt-0.5 text-xs",
+                  currentConversationId === conv.id
+                    ? "text-sidebar-accent-foreground/70"
+                    : "text-sidebar-foreground/50"
+                )}>
                   {conv.updatedAt ? formatRelativeDate(conv.updatedAt) : ""}
                 </p>
               </div>
@@ -94,7 +105,7 @@ export function ChatHistory({
                   e.stopPropagation();
                   setDeleteId(conv.id);
                 }}
-                className="mt-0.5 shrink-0 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                className="mt-0.5 shrink-0 rounded p-0.5 text-sidebar-foreground/50 opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
                 title={tChat("deleteChat")}
               >
                 <Trash2 className="size-3.5" />
