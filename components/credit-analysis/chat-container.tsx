@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { ChatMessageBubble, type ChatMessage, type Attachment } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { TypingIndicator } from "./typing-indicator";
+import { ReasoningIndicator } from "./reasoning-indicator";
 import { AgentSelector } from "./agent-selector";
 import { AlertCircle, Plus, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,11 @@ function getTextFromParts(parts: Array<{ type: string; text?: string }>): string
     .filter((p): p is { type: "text"; text: string } => p.type === "text")
     .map((p) => p.text)
     .join("");
+}
+
+/** Check if a message has an active reasoning part (model is thinking) */
+function hasActiveReasoning(parts: Array<{ type: string; text?: string }>): boolean {
+  return parts.some((p) => p.type === "reasoning");
 }
 
 export function ChatContainer({
@@ -97,8 +103,17 @@ export function ChatContainer({
     }));
   }, [aiMessages, messageAttachments]);
 
+  // Detect reasoning state from the last assistant message
+  const lastAiMessage = aiMessages[aiMessages.length - 1];
+  const isReasoning =
+    isLoading &&
+    lastAiMessage?.role === "assistant" &&
+    hasActiveReasoning(lastAiMessage.parts as Array<{ type: string; text?: string }>) &&
+    !getTextFromParts(lastAiMessage.parts as Array<{ type: string; text?: string }>);
+
   // Show typing indicator when loading but assistant hasn't started streaming yet
   const showTyping =
+    !isReasoning &&
     isLoading &&
     (messages.length === 0 ||
       messages[messages.length - 1]?.role === "user");
@@ -179,6 +194,7 @@ export function ChatContainer({
                 <ChatMessageBubble key={message.id} message={message} />
               ))}
               {showTyping && <TypingIndicator />}
+              {isReasoning && <ReasoningIndicator />}
               <div ref={messagesEndRef} />
             </div>
           </div>

@@ -351,7 +351,10 @@
 			"fileSizeError": "The following files exceed the {limit} limit: {files}",
 			"thinking": "Thinking...",
 			"thinkingLong": "Still working on it...",
-			"thinkingVeryLong": "Almost there, hang tight..."
+			"thinkingVeryLong": "Almost there, hang tight...",
+			"reasoning": "Analyzing your question...",
+			"reasoningDeep": "Doing a deep analysis...",
+			"reasoningAlmost": "Wrapping up the analysis..."
 		},
 		"responses": {
 			"greeting": "Hello! I'm your credit analysis assistant. I can help you review your credit history, analyze credit reports, and give you recommendations to improve your score. You can send me files like PDF credit reports or record voice messages. How can I help you today?",
