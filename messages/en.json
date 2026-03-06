@@ -89,7 +89,23 @@
 		"plan": "Plan",
 		"active": "Active",
 		"inactive": "Inactive",
-		"upgrade": "Upgrade to Pro for more features"
+		"upgrade": "Upgrade to Pro for more features",
+		"stats": {
+			"title": "Platform Statistics",
+			"totalUsers": "Total Users",
+			"activeSubscriptions": "Active Subscriptions",
+			"totalConversations": "Total Conversations",
+			"totalMessages": "Total Messages",
+			"todayMessages": "Messages Today",
+			"todayFiles": "Files Today",
+			"tokensUsed": "Tokens Used Today",
+			"topUsers": "Most Active Users Today",
+			"user": "User",
+			"messages": "Messages",
+			"files": "Files",
+			"tokens": "Tokens",
+			"noActivity": "No activity today yet."
+		}
 	},
 	"billing": {
 		"title": "Billing",

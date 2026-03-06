@@ -89,7 +89,23 @@
 		"plan": "Plan",
 		"active": "Activo",
 		"inactive": "Inactivo",
-		"upgrade": "Actualiza a Pro para mas funciones"
+		"upgrade": "Actualiza a Pro para mas funciones",
+		"stats": {
+			"title": "Estadisticas de la Plataforma",
+			"totalUsers": "Usuarios Totales",
+			"activeSubscriptions": "Suscripciones Activas",
+			"totalConversations": "Conversaciones Totales",
+			"totalMessages": "Mensajes Totales",
+			"todayMessages": "Mensajes Hoy",
+			"todayFiles": "Archivos Hoy",
+			"tokensUsed": "Tokens Usados Hoy",
+			"topUsers": "Usuarios Mas Activos Hoy",
+			"user": "Usuario",
+			"messages": "Mensajes",
+			"files": "Archivos",
+			"tokens": "Tokens",
+			"noActivity": "No hay actividad hoy todavia."
+		}
 	},
 	"billing": {
 		"title": "Facturacion",
