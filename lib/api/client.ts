@@ -4,6 +4,7 @@ import type {
   CreatePortalRequest,
   CreatePortalResponse,
   GetSubscriptionResponse,
+  UsageResponse,
   ApiErrorResponse,
 } from "./types";
 
@@ -71,6 +72,14 @@ class ApiClient {
 
   async getSubscription(): Promise<GetSubscriptionResponse> {
     return this.fetch("/api/v1/billing/subscription");
+  }
+
+  // ============================================
+  // Usage Methods
+  // ============================================
+
+  async getUsage(): Promise<UsageResponse> {
+    return this.fetch("/api/v1/usage");
   }
 }
 

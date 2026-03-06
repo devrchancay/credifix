@@ -8,6 +8,7 @@ export const ErrorCodes = {
   VALIDATION_ERROR: "VALIDATION_ERROR",
   STRIPE_ERROR: "STRIPE_ERROR",
   INTERNAL_ERROR: "INTERNAL_ERROR",
+  DAILY_LIMIT_REACHED: "DAILY_LIMIT_REACHED",
 } as const;
 
 export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];

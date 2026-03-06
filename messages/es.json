@@ -356,6 +356,16 @@
 			"reasoningDeep": "Haciendo un analisis profundo...",
 			"reasoningAlmost": "Finalizando el analisis..."
 		},
+		"usage": {
+			"messagesCounter": "{used}/{limit} mensajes hoy",
+			"filesCounter": "{used}/{limit} archivos hoy",
+			"messages": "mensajes",
+			"files": "archivos",
+			"limitReached": "Limite diario de {type} alcanzado",
+			"limitReachedDescription": "Has usado los {limit} {type} de hoy. Tu limite se renueva a las {resetTime}.",
+			"upgradePrompt": "Mejora tu plan para limites mas altos",
+			"resetsAt": "Se renueva a las {time}"
+		},
 		"responses": {
 			"greeting": "Hola! Soy tu asistente de analisis de credito. Puedo ayudarte a revisar tu historial crediticio, analizar reportes de credito y darte recomendaciones para mejorar tu puntaje. Puedes enviarme archivos como reportes de credito en PDF o grabar mensajes de voz. Como puedo ayudarte hoy?",
 			"analyzing": "Gracias por la informacion. Estoy analizando tu perfil crediticio. Basado en lo que me compartes, te recomiendo revisar tus pagos recurrentes y asegurarte de mantener tu utilizacion de credito por debajo del 30%. Quieres que profundice en algun aspecto especifico?",

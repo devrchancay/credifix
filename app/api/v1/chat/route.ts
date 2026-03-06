@@ -13,6 +13,11 @@ import {
   ErrorCodes,
 } from "@/lib/api/errors";
 import { checkRateLimit } from "@/lib/api/rate-limit";
+import {
+  checkUsageLimit,
+  incrementUsage,
+  createUsageLimitResponse,
+} from "@/lib/api/usage-limits";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /** Extract text content from a UIMessage's parts */
@@ -35,6 +40,12 @@ export async function POST(request: Request) {
     // Rate limit by userId
     const rateLimited = await checkRateLimit("chat", userId);
     if (rateLimited) return rateLimited;
+
+    // Daily usage limit check
+    const usageCheck = await checkUsageLimit(userId, "messages");
+    if (!usageCheck.allowed) {
+      return createUsageLimitResponse(usageCheck, "messages");
+    }
 
     // 2. Parse body
     const body = await request.json();
@@ -198,6 +209,9 @@ export async function POST(request: Request) {
         content: getTextFromMessage(lastMsg),
         attachments: attachments || [],
       });
+
+      // Increment daily message usage
+      await incrementUsage(userId, "messages");
     }
 
     // 6. Build attachment context for all attachment types

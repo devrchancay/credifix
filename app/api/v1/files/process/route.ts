@@ -6,6 +6,11 @@ import {
   ErrorCodes,
 } from "@/lib/api/errors";
 import { checkRateLimit } from "@/lib/api/rate-limit";
+import {
+  checkUsageLimit,
+  incrementUsage,
+  createUsageLimitResponse,
+} from "@/lib/api/usage-limits";
 import { processFile, MAX_FILE_SIZE } from "@/lib/ai/file-processing";
 import type { ProcessedFile } from "@/lib/ai/file-processing";
 
@@ -20,6 +25,12 @@ export async function POST(request: Request) {
 
     const rateLimited = await checkRateLimit("upload", authResult.userId);
     if (rateLimited) return rateLimited;
+
+    // Daily usage limit check
+    const usageCheck = await checkUsageLimit(authResult.userId, "files");
+    if (!usageCheck.allowed) {
+      return createUsageLimitResponse(usageCheck, "files");
+    }
 
     const formData = await request.formData();
     const files = formData.getAll("files") as File[];
@@ -59,6 +70,9 @@ export async function POST(request: Request) {
       const processed = await processFile(buffer, file.name, file.type);
       results.push(processed);
     }
+
+    // Increment daily file usage
+    await incrementUsage(authResult.userId, "files", results.length);
 
     return NextResponse.json({ files: results });
   } catch (error) {

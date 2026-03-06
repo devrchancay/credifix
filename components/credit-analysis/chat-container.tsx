@@ -11,8 +11,10 @@ import { AlertCircle, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useChatAI } from "@/hooks/use-chat-ai";
 import { UpgradeBanner } from "@/components/upgrade-banner";
+import { UsageIndicator } from "./usage-indicator";
 import { useUser } from "@/hooks/use-user";
 import { useHaptics } from "@/hooks/use-haptics";
+import { useUsage } from "@/hooks/use-usage";
 import { useSearchParams } from "next/navigation";
 
 /** Extract text content from a UIMessage's parts */
@@ -57,6 +59,7 @@ export function ChatContainer({
   } = useChatAI();
 
   const haptics = useHaptics();
+  const usage = useUsage();
   const prevStatusRef = useRef(status);
 
   // React to URL ?c= param changes (sidebar clicks) and initial page load
@@ -78,6 +81,7 @@ export function ChatContainer({
     prevStatusRef.current = status;
     if (prev === "streaming" && status === "ready") {
       haptics.success();
+      usage.refetch();
     }
   }, [status, haptics]);
 
@@ -142,6 +146,7 @@ export function ChatContainer({
   // Disable agent switching once a conversation is active
   const canSwitchAgent = !conversationId && messages.length === 0;
   const isEmpty = messages.length === 0 && !isLoading;
+  const inputDisabled = isLoading || usage.isMessageLimitReached;
 
   const greeting = fullName
     ? tChat("greetingWithName", { name: fullName.split(" ")[0] })
@@ -181,7 +186,17 @@ export function ChatContainer({
             <UpgradeBanner variant="inline" />
           </div>
           <div className="w-full max-w-3xl">
-            <ChatInput onSend={handleSend} disabled={isLoading} centered />
+            {!usage.isLoading && (
+              <UsageIndicator
+                messages={usage.messages}
+                files={usage.files}
+                resetAt={usage.resetAt}
+                messagePercent={usage.messagePercent}
+                filePercent={usage.filePercent}
+                isMessageLimitReached={usage.isMessageLimitReached}
+              />
+            )}
+            <ChatInput onSend={handleSend} disabled={inputDisabled} centered />
           </div>
         </div>
       ) : (
@@ -232,8 +247,20 @@ export function ChatContainer({
             </div>
           )}
 
+          {/* Usage indicator */}
+          {!usage.isLoading && (
+            <UsageIndicator
+              messages={usage.messages}
+              files={usage.files}
+              resetAt={usage.resetAt}
+              messagePercent={usage.messagePercent}
+              filePercent={usage.filePercent}
+              isMessageLimitReached={usage.isMessageLimitReached}
+            />
+          )}
+
           {/* Input */}
-          <ChatInput onSend={handleSend} disabled={isLoading} />
+          <ChatInput onSend={handleSend} disabled={inputDisabled} />
         </>
       )}
     </div>

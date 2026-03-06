@@ -71,6 +71,21 @@ export interface GetSubscriptionResponse {
 export type PlanData = Tables<"plans">;
 
 // ============================================
+// Usage Limits
+// ============================================
+
+export interface UsageBucket {
+  used: number;
+  limit: number;
+}
+
+export interface UsageResponse {
+  messages: UsageBucket;
+  files: UsageBucket;
+  resetAt: string;
+}
+
+// ============================================
 // Error Response
 // ============================================
 
